@@ -36,4 +36,9 @@
     <PackageReference Include="System.Text.Json" Version="8.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Protos\" />
+	<Protobuf Include="Protos\KeyValue.proto" GrpcServices="Server" />
+  </ItemGroup>
+
 </Project>

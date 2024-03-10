@@ -15,6 +15,9 @@ COPY . .
 WORKDIR "/src/."
 RUN dotnet build "./StepNet.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+# Copy the SSL certificate into the Docker image
+COPY ./certs/localhost.pfx /https/
+
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./StepNet.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false

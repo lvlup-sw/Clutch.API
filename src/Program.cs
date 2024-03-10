@@ -1,5 +1,6 @@
 using CacheProvider.Providers;
 using CacheProvider.Providers.Interfaces;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using StackExchange.Redis;
 using System.Diagnostics;
 
@@ -14,11 +15,27 @@ namespace StepNet
         
         public static WebApplication CreateWebApp(string[] args)
         {
+            // Start Redis
             //ExecuteBashScript("../../../Start-Redis.sh");
+
+            // Create the application
             var builder = WebApplication.CreateBuilder(args);
+
+            // Configure Kestrel to listen on HTTP/2
+            /* Currently throws an SSL error, not sure why yet
+            builder.WebHost.ConfigureKestrel(options =>
+            {   //32768, 5001, 32770
+                options.ListenAnyIP(32768, listenOptions =>
+                {
+                    listenOptions.Protocols = HttpProtocols.Http2;
+                    listenOptions.UseHttps(Path.Combine(Directory.GetCurrentDirectory(), "certs", "localhost.pfx"), "stepbro");
+                });
+            });
+            */
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddGrpc();
             builder.Services.AddOptions();
             builder.Services.AddLogging();
             builder.Services.AddMemoryCache();
@@ -62,6 +79,7 @@ namespace StepNet
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+            app.MapGrpcService<KeyValueStoreService>();
             app.UseAuthorization();
             app.MapControllerRoute(
                 name: "default",
