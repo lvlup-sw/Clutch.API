@@ -1,0 +1,49 @@
+
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        default: 'main'
+        required: false
+        type: string
+  schedule:
+    - cron: '0 6 * * 1' # 6:00 AM every Monday
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout 
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: 'false'
+
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    
+    # Install NPM; fetch Git history; build locally
+    - run: npm ci
+    - run: node git_data_fetcher.mjs
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+        GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
+    - run: export NODE_OPTIONS=--openssl-legacy-provider && npm run build --if-present
+      env:
+        CI: false
+
+    - name: Push to gh pages repo
+      run: |
+        cd build/
+        git init
+        git config --global user.email "reedsalus@gmail.com"
+        git config --global user.name "Reed Salus"
+        git branch -m master main
+        git remote add origin https://rsalus:${{ secrets.PAT }}@github.com/rsalus/rsalus.github.io.git
+        git add --all
+        git commit -m "Deploy build ${{ github.run_number }}"
+        git push -u origin main --force
