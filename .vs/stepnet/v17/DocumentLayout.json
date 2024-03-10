@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\Reed\\Desktop\\gwu\\project-portfolio\\stepnet\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CF791275-A716-4127-97EF-EC1FB7799F21}|stepnet.csproj|c:\\users\\reed\\desktop\\gwu\\project-portfolio\\stepnet\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
-      "RelativeMoniker": "D:0:0:{CF791275-A716-4127-97EF-EC1FB7799F21}|stepnet.csproj|solutionrelative:readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+      "AbsoluteMoniker": "D:0:0:{CF791275-A716-4127-97EF-EC1FB7799F21}|StepNet.csproj|c:\\users\\reed\\desktop\\gwu\\project-portfolio\\stepnet\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{CF791275-A716-4127-97EF-EC1FB7799F21}|StepNet.csproj|solutionrelative:readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CF791275-A716-4127-97EF-EC1FB7799F21}|stepnet.csproj|c:\\users\\reed\\desktop\\gwu\\project-portfolio\\stepnet\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CF791275-A716-4127-97EF-EC1FB7799F21}|stepnet.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CF791275-A716-4127-97EF-EC1FB7799F21}|StepNet.csproj|c:\\users\\reed\\desktop\\gwu\\project-portfolio\\stepnet\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CF791275-A716-4127-97EF-EC1FB7799F21}|StepNet.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -31,8 +31,7 @@
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-03-10T06:31:38.121Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -42,7 +41,7 @@
               "RelativeDocumentMoniker": "README.md",
               "ToolTip": "C:\\Users\\Reed\\Desktop\\gwu\\project-portfolio\\stepnet\\README.md",
               "RelativeToolTip": "README.md",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAAoAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABAAAAAXAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
               "WhenOpened": "2024-03-10T06:32:52.933Z",
               "EditorCaption": ""
