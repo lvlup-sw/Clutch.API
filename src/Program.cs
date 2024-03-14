@@ -79,7 +79,7 @@ namespace StepNet
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-            app.MapGrpcService<KeyValueStoreService>();
+            //app.MapGrpcService<KeyValueStoreService>();
             app.UseAuthorization();
             app.MapControllerRoute(
                 name: "default",
