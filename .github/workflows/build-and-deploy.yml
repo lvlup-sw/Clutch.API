@@ -5,12 +5,14 @@ on:
   workflow_dispatch:
     inputs:
       branch_name:
+        description: 'Branch name to build and deploy'
         default: 'main'
         required: false
         type: string
-  schedule:
-    - cron: '0 6 * * 1' # 6:00 AM every Monday
+  #schedule:
+  #  - cron: '0 6 * * 1' # 6:00 AM every Monday
 
+# Copy-pasta from portfolio; non-functional
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
