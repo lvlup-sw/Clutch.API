@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using StepNet.API.Controllers.Configuration.Interfaces;
 using static StepNet.API.Models.Images.ContainerImageModel;
 
