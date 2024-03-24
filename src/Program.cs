@@ -1,8 +1,8 @@
 using CacheProvider.Providers;
 using CacheProvider.Providers.Interfaces;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using StackExchange.Redis;
 using System.Diagnostics;
+using Microsoft.OpenApi.Models;
 
 namespace StepNet
 {
@@ -15,25 +15,33 @@ namespace StepNet
         
         public static WebApplication CreateWebApp(string[] args)
         {
-            // Start Redis
+            // Start local Redis server
             //ExecuteBashScript("../../../Start-Redis.sh");
 
             // Create the application
             var builder = WebApplication.CreateBuilder(args);
 
-            // Configure Kestrel to listen on HTTP/2
-            /* Currently throws an SSL error, not sure why yet
-            builder.WebHost.ConfigureKestrel(options =>
-            {   //32768, 5001, 32770
-                options.ListenAnyIP(32768, listenOptions =>
-                {
-                    listenOptions.Protocols = HttpProtocols.Http2;
-                    listenOptions.UseHttps(Path.Combine(Directory.GetCurrentDirectory(), "certs", "localhost.pfx"), "stepbro");
-                });
-            });
-            */
-
             // Add services to the container.
+            ConfigureServices(builder);
+
+            // Configure Logging
+            ConfigureLogging(builder);
+
+            // Build the application.
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            ConfigureHTTP(app);
+
+            return app;
+        }
+
+        private static void ConfigureServices(WebApplicationBuilder builder)
+        {
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "StepNet API", Version = "v1" });
+            });
             builder.Services.AddControllersWithViews();
             builder.Services.AddGrpc();
             builder.Services.AddOptions();
@@ -57,17 +65,18 @@ namespace StepNet
                     serviceProvider.GetRequiredService<ILogger<CacheProvider<string>>>()
                 );
             });
+        }
 
-            // Configure Logging
+        private static void ConfigureLogging(WebApplicationBuilder builder)
+        {
             builder.Logging.AddConsole();
             builder.Logging.AddFilter("Microsoft", LogLevel.Information);
             builder.Logging.AddFilter("System", LogLevel.Information);
             builder.Logging.AddFilter("StepNet", LogLevel.Information);
+        }
 
-            // Build the application.
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
+        private static void ConfigureHTTP(WebApplication app)
+        {
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -75,7 +84,8 @@ namespace StepNet
                 app.UseHsts();
             }
 
-            // Configure the HTTP request pipeline.
+            app.UseSwagger();
+            app.UseSwaggerUI();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
@@ -84,11 +94,9 @@ namespace StepNet
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            return app;
         }
 
-        public static void ExecuteBashScript(string scriptPath)
+        protected static void ExecuteBashScript(string scriptPath)
         {
             var startInfo = new ProcessStartInfo
             {
