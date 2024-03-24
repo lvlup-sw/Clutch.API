@@ -9,20 +9,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["StepNet.csproj", "."]
-RUN dotnet restore "./StepNet.csproj"
+COPY ["StepNet.API.csproj", "."]
+RUN dotnet restore "./StepNet.API.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "./StepNet.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-# Copy the SSL certificate into the Docker image
-COPY ./certs/localhost.pfx /https/
+RUN dotnet build "./StepNet.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./StepNet.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./StepNet.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "StepNet.dll"]
+ENTRYPOINT ["dotnet", "StepNet.API.dll"]

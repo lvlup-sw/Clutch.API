@@ -4,7 +4,7 @@ using StackExchange.Redis;
 using System.Diagnostics;
 using Microsoft.OpenApi.Models;
 
-namespace StepNet
+namespace StepNet.API
 {
     public class Program
     {
@@ -12,7 +12,7 @@ namespace StepNet
         {
             CreateWebApp(args).Run();
         }
-        
+
         public static WebApplication CreateWebApp(string[] args)
         {
             // Start local Redis server
@@ -42,7 +42,8 @@ namespace StepNet
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "StepNet API", Version = "v1" });
             });
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddGrpc();
             builder.Services.AddOptions();
             builder.Services.AddLogging();
@@ -89,7 +90,7 @@ namespace StepNet
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-            app.MapGrpcService<KeyValueStoreService>();
+            //app.MapGrpcService<KeyValueStoreService>();
             app.UseAuthorization();
             app.MapControllerRoute(
                 name: "default",

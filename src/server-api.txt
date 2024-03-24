@@ -1,0 +1,79 @@
+Endpoint Behavior
+
+    Deploy (/deploy)
+        Method: POST
+        Input:
+            Deployment configuration (YAML or JSON representation)
+            Namespace (Optional, defaults to "default" if not provided)
+        Behavior:
+            Validate the input configuration.
+            Use the Kubernetes API to create a new Deployment (or apply an update if it exists).
+        Returns:
+            HTTP 201 Created on success, with details of the created Deployment.
+            HTTP 400 Bad Request on invalid input.
+            HTTP 500 Internal Server Error on other Kubernetes API errors.
+
+    Stop (/stop)
+        Method: POST or DELETE
+        Input:
+            Deployment name
+            Namespace (Optional)
+        Behavior:
+            Scale the Deployment down to 0 replicas using the Kubernetes API.
+        Returns:
+            HTTP 200 OK on success.
+            HTTP 404 Not Found if the Deployment doesn't exist.
+            HTTP 500 Internal Server Error on other Kubernetes API errors.
+
+    Monitor (/monitor)
+        Method: GET
+        Input:
+            Deployment name
+            Namespace (Optional)
+        Behavior:
+            Fetch the current status of the Deployment from the Kubernetes API.
+            Extract relevant information:
+                Number of ready replicas
+                Deployment conditions (e.g., "Available", "Progressing")
+                Any relevant events or pod status
+        Returns:
+            HTTP 200 OK with a JSON representation of the status information.
+            HTTP 404 Not Found if the Deployment doesn't exist.
+            HTTP 500 Internal Server Error on other Kubernetes API errors.
+
+
+Potential Solutions
+
+    Horizontal Pod Autoscaler (HPA):
+        How it works: The HPA is a Kubernetes controller that automatically adjusts the number of replicas in a Deployment based on metrics like CPU utilization or custom metrics.
+        Integration with /monitor: Your /monitor endpoint could expose the relevant metrics used by the HPA. The HPA would access these metrics directly and make scaling decisions independently.
+        Pros: Built into Kubernetes, efficient automatic scaling based on real-world usage.
+        Cons: Requires you to define and expose the proper metrics.
+
+    Custom Controller / Operator:
+        How it works: You'd write a custom program (often using a Kubernetes Operator framework) that continuously watches the output of your /monitor endpoint. Based on custom logic, this controller would make Kubernetes API calls to scale the Deployment up or down.
+        Pros: Maximum flexibility; you can define complex scaling rules not covered by HPA.
+        Cons: More development overhead, requires deeper Kubernetes knowledge.
+
+    Webhook-based Automation:
+        How it works: Configure your /monitor endpoint to trigger a webhook when certain conditions are met. This webhook could call an external function (e.g., an AWS Lambda, a script) to execute scaling logic against the Kubernetes API.
+        Pros: Good if you already have a webhook infrastructure or need to integrate with external systems.
+        Cons: Can introduce additional complexity with external dependencies.
+
+Considerations
+
+    Complexity vs. Flexibility: HPA is ideal for straightforward scaling based on standard metrics. A custom controller offers the most flexibility for complex logic.
+    Scaling Rules: Carefully define what conditions in your /monitor output should trigger scaling actions (e.g., high response latency, low available replicas, custom application-specific metrics).
+    Cooldown Periods: Prevent rapid scaling up and down by implementing cooldown timers between scaling actions.
+
+Example (Conceptual):
+
+Suppose your /monitor endpoint shows that the response time of your pods has exceeded a certain threshold:
+
+    HPA: If you've configured the HPA to scale on response time, it will automatically add more pods.
+    Custom Controller: Your controller would detect the condition, determine the number of pods needed, and call the Kubernetes API to scale up the Deployment.
+    Webhook: The webhook triggers an external function that performs the scaling logic.
+	
+
+
+Assuming we are hosting the K8s service on AWS as EKS, the optimal way would be to have the controller publish events to AWS (such as an SNS topic) depending on certain criteria/conditions. If we wanted to, we could also have a listener hitting the /MONITOR endpoint as well. We could then have a lambda trigger remediation by sending a request to the /UPDATE (?) or other endpoints.
