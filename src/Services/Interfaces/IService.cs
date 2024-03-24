@@ -1,4 +1,4 @@
-﻿namespace StepNet.Services.Interfaces
+﻿namespace StepNet.API.Services.Interfaces
 {
     public interface IService
     {

@@ -1,4 +1,4 @@
-﻿namespace StepNet.Providers.Interfaces
+﻿namespace StepNet.API.Providers.Interfaces
 {
     public interface IRealProvider
     {
