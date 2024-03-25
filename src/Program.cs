@@ -3,6 +3,10 @@ using CacheProvider.Providers.Interfaces;
 using StackExchange.Redis;
 using System.Diagnostics;
 using Microsoft.OpenApi.Models;
+using StepNet.API.Repositories.Image;
+using StepNet.API.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using StepNet.API.Models.Image;
 
 namespace StepNet.API
 {
@@ -66,6 +70,14 @@ namespace StepNet.API
                     serviceProvider.GetRequiredService<ILogger<CacheProvider<string>>>()
                 );
             });
+            builder.Services.AddDbContext<ContainerImageContext>(options =>
+                options.UseInMemoryDatabase("StepNet")
+                /*  MariaDB
+                options.UseMySql(builder.Configuration.GetConnectionString("StepNet"),
+                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("StepNet")))
+                */
+            );
+            builder.Services.AddScoped<IContainerImageRepository, ContainerImageRepository>();
         }
 
         private static void ConfigureLogging(WebApplicationBuilder builder)
