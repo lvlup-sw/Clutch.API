@@ -1,43 +1,45 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using StepNet.API.Utilities;
+using System.ComponentModel.DataAnnotations;
 
-namespace StepNet.API.Models.Images
+namespace StepNet.API.Models.Image
 {
-    public class ContainerImageMetadata
+    public class ContainerImageModel
     {
-        public int Id { get; set; }
+        [Key]
+        public int ImageID { get; set; }
 
         [Required]
+        [StringLength(100)]
         public string ImageName { get; set; }
 
         [Required]
-        public string ImageTag { get; set; }
+        [StringLength(20)]
+        public string GameVersion { get; set; }
 
+        [Required]
         public DateTime BuildDate { get; set; }
 
-        public string SourceCodeRepository { get; set; }
+        [Required]
+        [StringLength(255)]
+        public string ManifestDigest { get; set; }
 
-        public string CommitHash { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string RegistryURL { get; set; }
 
-        public string BuildPipeline { get; set; }
+        [StringLength(40)]
+        public string? CommitHash { get; set; }
 
-        public string Description { get; set; }
+        public int? Layers { get; set; } // Nullable for potential flexibility
 
-        public string Maintainer { get; set; }
+        public long? Size { get; set; } // Nullable for the same reason
 
-        public string DocumentationURL { get; set; }
+        // This is stored in the DB as a JSON string with metadata associated with each plugin
+        // We create a class to represent the JSON object to make it easier to work with
+        public List<Plugin>? Plugins { get; set; }
 
-        public string Dependencies { get; set; }
+        public string? ServerConfig { get; set; }
 
-        // ... Add fields for Vulnerability Scan Results, License Info, etc.
-
-        public int MemoryRequirement { get; set; }
-
-        public int CPURequirement { get; set; }
-
-        public string EnvironmentVariables { get; set; }
-
-        public string ExposedPorts { get; set; }
-
-        public string HealthChecks { get; set; }
+        public string? Notes { get; set; }
     }
 }

@@ -1,0 +1,10 @@
+ContainerImageController:
+	- Requirements:
+		+ ContainerImageModel
+		+ ContainerImageContext
+		+ ContainerImageProvider
+	- Steps:
+		+ Add controller to directory
+		+ Select template "API Controller with actions, using Entity Framework"
+		+ Select the above classes for the fields
+		+ Implement controller
