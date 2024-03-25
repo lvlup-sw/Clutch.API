@@ -42,6 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Database\Tables\" />
     <Folder Include="Middleware\" />
     <Folder Include="Utilities\Scripts\" />
   </ItemGroup>
