@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StepNet.API", "StepNet.API\StepNet.API.csproj", "{A6C08F0C-B416-4112-9833-1DCFBE363CB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API", "StepNet.API\Clutch.API.csproj", "{A6C08F0C-B416-4112-9833-1DCFBE363CB7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0D515825-4066-4A5D-A9E3-2EAB003B7EB2} = {0D515825-4066-4A5D-A9E3-2EAB003B7EB2}
 	EndProjectSection

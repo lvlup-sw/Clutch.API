@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 
-namespace StepNet.API.Controllers.Filters
+namespace Clutch.API.Controllers.Filters
 {
     public partial class ValidateImageReference : ActionFilterAttribute
     {

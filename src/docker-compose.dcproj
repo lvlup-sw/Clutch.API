@@ -7,7 +7,7 @@
     <ProjectGuid>55ce4882-a8d9-4e17-88d8-13c6b5c5d60e</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
-    <DockerServiceName>stepnet.api</DockerServiceName>
+    <DockerServiceName>Clutch.api</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">

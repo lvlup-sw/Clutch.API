@@ -1,4 +1,4 @@
-﻿namespace StepNet.API.Properties
+﻿namespace Clutch.API.Properties
 {
     public class AppSettings
     {

@@ -1,6 +1,6 @@
 ﻿using static System.Net.Mime.MediaTypeNames;
 
-namespace StepNet.API.Models.Image
+namespace Clutch.API.Models.Image
 {
     public class RegistryProperties
     {

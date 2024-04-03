@@ -1,6 +1,6 @@
-﻿using StepNet.API.Models.Image;
+﻿using Clutch.API.Models.Image;
 
-namespace StepNet.API.Repositories.Interfaces
+namespace Clutch.API.Repositories.Interfaces
 {
     public interface IContainerImageRepository
     {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using StepNet.API.Models.Image;
-using StepNet.API.Utilities;
+using Clutch.API.Models.Image;
+using Clutch.API.Utilities;
 
-namespace StepNet.API.Database.Context
+namespace Clutch.API.Database.Context
 {
     public class ContainerImageContext(DbContextOptions<ContainerImageContext> options) : DbContext(options)
     {

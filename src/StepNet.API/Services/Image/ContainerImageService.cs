@@ -1,14 +1,14 @@
 ﻿using CacheProvider.Providers.Interfaces;
 using Microsoft.Extensions.Options;
-using StepNet.API.Models.Image;
-using StepNet.API.Properties;
-using StepNet.API.Providers.Interfaces;
-using StepNet.API.Services.Interfaces;
+using Clutch.API.Models.Image;
+using Clutch.API.Properties;
+using Clutch.API.Providers.Interfaces;
+using Clutch.API.Services.Interfaces;
 
 // Service Responsibilities:
 // - "Business logic" for image management.
 // - CacheProvider interaction for Redis caching.
-namespace StepNet.API.Services.Image
+namespace Clutch.API.Services.Image
 {
     public class ContainerImageService(ICacheProvider<ContainerImageModel> cacheProvider, IContainerImageProvider imageProvider, ILogger logger, IOptions<AppSettings> settings) : IContainerImageService
     {

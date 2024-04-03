@@ -3,19 +3,19 @@ using CacheProvider.Providers.Interfaces;
 using StackExchange.Redis;
 using System.Diagnostics;
 using Microsoft.OpenApi.Models;
-using StepNet.API.Repositories.Image;
-using StepNet.API.Repositories.Interfaces;
+using Clutch.API.Repositories.Image;
+using Clutch.API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using StepNet.API.Database.Context;
-using StepNet.API.Properties;
-using StepNet.API.Services.Interfaces;
-using StepNet.API.Services.Image;
-using StepNet.API.Providers.Interfaces;
-using StepNet.API.Providers.Image;
-using StepNet.API.Models.Image;
+using Clutch.API.Database.Context;
+using Clutch.API.Properties;
+using Clutch.API.Services.Interfaces;
+using Clutch.API.Services.Image;
+using Clutch.API.Providers.Interfaces;
+using Clutch.API.Providers.Image;
+using Clutch.API.Models.Image;
 
-namespace StepNet.API
+namespace Clutch.API
 {
     public class Program
     {
@@ -58,8 +58,8 @@ namespace StepNet.API
                     ?? "localhost:6379,abortConnect=false,ssl=false,allowAdmin=true");
             });
             builder.Services.AddDbContext<ContainerImageContext>(options =>
-                options.UseMySql(builder.Configuration.GetConnectionString("StepNet"),
-                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("StepNet")))
+                options.UseMySql(builder.Configuration.GetConnectionString("Clutch"),
+                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("Clutch")))
             );
             builder.Services.AddTransient<IContainerImageRepository, ContainerImageRepository>(serviceProvier =>
             {
@@ -97,7 +97,7 @@ namespace StepNet.API
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "StepNet API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Clutch API", Version = "v1" });
             });
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -112,7 +112,7 @@ namespace StepNet.API
             builder.Logging.AddConsole();
             builder.Logging.AddFilter("Microsoft", LogLevel.Information);
             builder.Logging.AddFilter("System", LogLevel.Information);
-            builder.Logging.AddFilter("StepNet", LogLevel.Information);
+            builder.Logging.AddFilter("Clutch", LogLevel.Information);
         }
 
         private static void ConfigureHTTP(WebApplication app)

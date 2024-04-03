@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace StepNet.API.Utilities
+namespace Clutch.API.Utilities
 {
     public class PluginValueComparer : ValueComparer<List<Plugin>>
     {

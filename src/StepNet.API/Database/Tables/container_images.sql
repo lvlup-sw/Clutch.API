@@ -1,4 +1,4 @@
-USE StepNet;
+USE Clutch;
 CREATE TABLE container_images (
     ImageID INT AUTO_INCREMENT PRIMARY KEY,
     ImageReference VARCHAR(255) NOT NULL, 

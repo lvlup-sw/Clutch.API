@@ -8,10 +8,10 @@ services:
     networks:
       - backend-network
 
-  stepnet.api:  # Keep your existing service name 
-    image: ${DOCKER_REGISTRY-}stepnetapi
+  Clutch.api:  # Keep your existing service name 
+    image: ${DOCKER_REGISTRY-}Clutchapi
     build:
-      context: StepNet.API # Keep your existing build context
+      context: Clutch.API # Keep your existing build context
       dockerfile: Dockerfile 
     ports:
       - 8080:80 # Expose the API's port

@@ -1,17 +1,17 @@
 ﻿using Polly;
 using Polly.Wrap;
 using Microsoft.Extensions.Options;
-using StepNet.API.Models.Image;
-using StepNet.API.Properties;
-using StepNet.API.Providers.Interfaces;
-using StepNet.API.Repositories.Interfaces;
+using Clutch.API.Models.Image;
+using Clutch.API.Properties;
+using Clutch.API.Providers.Interfaces;
+using Clutch.API.Repositories.Interfaces;
 
 // Provider Responsibilities:
 // - Interacting with the Repositories to perform operations against the database.
 // - Triggering our CI/CD pipeline to build a new image.
 // - Interacting with any other external services for the purpose of getting data.
 // - DOES NOT directly manipulate the database; that is the repository's job.
-namespace StepNet.API.Providers.Image
+namespace Clutch.API.Providers.Image
 {
     // In the future, we will add other Repository interfaces to this class.
     // For now, we only have the ContainerImageRepository class so this acts

@@ -1,4 +1,4 @@
-﻿namespace StepNet.API.Models.Image
+﻿namespace Clutch.API.Models.Image
 {
     public class ContainerImageResponseData(bool success, RegistryProperties properties, ContainerImageModel image)
     {

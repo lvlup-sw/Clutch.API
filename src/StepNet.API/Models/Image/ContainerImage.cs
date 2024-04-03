@@ -1,8 +1,8 @@
-﻿using StepNet.API.Utilities;
+﻿using Clutch.API.Utilities;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace StepNet.API.Models.Image
+namespace Clutch.API.Models.Image
 {
     // This is a DTO (Data Transfer Object) for the ContainerImageModel
     // We use this to protect against overposting and to provide a more

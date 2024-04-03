@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using StepNet.API.Models.Image;
+using Clutch.API.Models.Image;
 
-namespace StepNet.API.Controllers.Filters
+namespace Clutch.API.Controllers.Filters
 {
     public class ValidateContainerImage : ActionFilterAttribute
     {

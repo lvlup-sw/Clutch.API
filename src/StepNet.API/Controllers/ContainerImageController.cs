@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using StepNet.API.Controllers.Filters;
-using StepNet.API.Models.Image;
-using StepNet.API.Services.Interfaces;
+using Clutch.API.Controllers.Filters;
+using Clutch.API.Models.Image;
+using Clutch.API.Services.Interfaces;
 
 // TODO:
 // - Batch requests for images
 // - Authorization with JWT
-namespace StepNet.API.Controllers
+namespace Clutch.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]

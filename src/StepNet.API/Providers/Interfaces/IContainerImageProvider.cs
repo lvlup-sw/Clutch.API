@@ -1,7 +1,7 @@
 ﻿using CacheProvider.Providers.Interfaces;
-using StepNet.API.Models.Image;
+using Clutch.API.Models.Image;
 
-namespace StepNet.API.Providers.Interfaces
+namespace Clutch.API.Providers.Interfaces
 {
     public interface IContainerImageProvider : IRealProvider<ContainerImageModel>
     {

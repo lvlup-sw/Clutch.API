@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using StepNet.API.Database.Context;
-using StepNet.API.Models.Image;
-using StepNet.API.Repositories.Interfaces;
+using Clutch.API.Database.Context;
+using Clutch.API.Models.Image;
+using Clutch.API.Repositories.Interfaces;
 
 // Repository Responsibilities:
 // - Directly manipulate the database.
 // - Specifically, the container_images table.
-namespace StepNet.API.Repositories.Image
+namespace Clutch.API.Repositories.Image
 {
     public class ContainerImageRepository(ContainerImageContext context, ILogger logger) : IContainerImageRepository
     {

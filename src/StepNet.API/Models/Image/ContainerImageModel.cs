@@ -1,9 +1,9 @@
 ﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 using Microsoft.EntityFrameworkCore;
-using StepNet.API.Utilities;
+using Clutch.API.Utilities;
 using System.ComponentModel.DataAnnotations;
 
-namespace StepNet.API.Models.Image
+namespace Clutch.API.Models.Image
 {
     [Index(nameof(ImageReference), IsUnique = true)]
     public class ContainerImageModel

@@ -9,17 +9,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["StepNet.API.csproj", "."]
-RUN dotnet restore "./StepNet.API.csproj"
+COPY ["Clutch.API.csproj", "."]
+RUN dotnet restore "./Clutch.API.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "./StepNet.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Clutch.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./StepNet.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Clutch.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "StepNet.API.dll"]
+ENTRYPOINT ["dotnet", "Clutch.API.dll"]
