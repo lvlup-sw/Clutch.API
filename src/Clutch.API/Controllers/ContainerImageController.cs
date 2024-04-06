@@ -34,8 +34,8 @@ namespace Clutch.API.Controllers
                 ? NotFound()
                 : Ok(new ContainerImageResponse(
                     containerImageResponseData.Success,
-                    containerImageResponseData.RegistryManifest,
-                    _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel)
+                    _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel),
+                    containerImageResponseData.RegistryManifest
                 ));
         }
 
