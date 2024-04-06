@@ -5,7 +5,8 @@ using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
 using Clutch.API.Services.Interfaces;
 using Newtonsoft.Json;
-using System.Net.Http.Headers;
+using RestSharp;
+using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 using System.Text;
 
 // Service Responsibilities:
@@ -21,6 +22,10 @@ namespace Clutch.API.Services.Image
         private readonly IContainerImageProvider _imageProvider = imageProvider;
         private readonly ILogger _logger = logger;
         private readonly AppSettings _settings = settings.Value;
+        private readonly RestClient _restClient = new("https://ghcr.io");
+        private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(settings.Value.GithubPAT!));
+        private const string org = "lvlup-sw";
+        private const string repository = "clutchapi";
 
         public async Task<ContainerImageResponseData> GetImageAsync(string imageReference)
         {
@@ -29,18 +34,19 @@ namespace Clutch.API.Services.Image
             if (image is null || !image.HasValue)
             {
                 _logger.LogError("Image not found in database.");
-                return new ContainerImageResponseData(false, new RegistryProperties(), ContainerImageModel.Null);
+                return new ContainerImageResponseData(false, RegistryManifest.Null, ContainerImageModel.Null);
             }
 
-            // Check the registry and construct the RegistryProperties
-            RegistryProperties registryProperties = await GetImagePropertiesFromRegistry(image.ImageReference);
-            if (registryProperties is null || !registryProperties.HasValue)
+            // Check the registry and construct the RegistryManifest
+            // imageReference
+            RegistryManifest manifest = await GetImagePropertiesFromRegistry("lvlup-sw/clutchapi:dev");
+            if (manifest is null || !manifest.HasValue)
             {
                 _logger.LogError("Image not found in registry.");
-                return new ContainerImageResponseData(false, new RegistryProperties(), ContainerImageModel.Null);
+                return new ContainerImageResponseData(false, RegistryManifest.Null, ContainerImageModel.Null);
             }
             
-            return new ContainerImageResponseData(true, registryProperties, image);
+            return new ContainerImageResponseData(true, manifest, image);
         }
 
         public async Task<bool> SetImageAsync(ContainerImageModel containerImageModel)
@@ -75,18 +81,38 @@ namespace Clutch.API.Services.Image
             // We need to introduce logic to construct the following properties:
             // - BuildDate
             // - Status
-            // - Layers
-            // - Size
-            // - CommitHash
             // - ServerConfig
 
             return true;
         }
 
         // Registry interactions
-        private async Task<RegistryProperties> GetImagePropertiesFromRegistry(string imageReference)
+        private async Task<RegistryManifest> GetImagePropertiesFromRegistry(string imageReference)
         {
-            throw new NotImplementedException();
+            // Construct the request
+            string tag = imageReference.Split(":")[1];
+            RestRequest request = new($"/v2/{org}/{repository}/manifests/{tag}");
+            request.AddHeader("Accept", "application/vnd.github+json");
+            request.AddHeader("Authorization", $"Bearer {pat}");
+
+            // Send the request
+            RestResponse response = await _restClient.ExecuteAsync(request);
+
+            if (!response.IsSuccessful)
+            {
+                _logger.LogError("Failed to retrieve image manifest from registry. StatusCode: {StatusCode}. ErrorMessage: {ErrorMessage}", response.StatusCode, response.ErrorMessage);
+                return RegistryManifest.Null;
+            }
+
+            try
+            {
+                return JsonConvert.DeserializeObject<RegistryManifest>(response.Content!) ?? RegistryManifest.Null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to deserialize image manifest. Exception: {ex}", ex.GetBaseException());
+                return RegistryManifest.Null;
+            }
         }
 
         private async Task<bool> SetImageInRegistry(ContainerImageModel image)

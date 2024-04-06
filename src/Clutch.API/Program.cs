@@ -49,6 +49,8 @@ namespace Clutch.API
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            builder.Configuration.AddEnvironmentVariables();
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
             builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
             builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
@@ -58,8 +60,8 @@ namespace Clutch.API
                     ?? "localhost:6379,abortConnect=false,ssl=false,allowAdmin=true");
             });
             builder.Services.AddDbContext<ContainerImageContext>(options =>
-                options.UseMySql(builder.Configuration.GetConnectionString("Clutch"),
-                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("Clutch")))
+                options.UseMySql(builder.Configuration.GetConnectionString("ClutchAPI"),
+                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("ClutchAPI")))
             );
             builder.Services.AddTransient<IContainerImageRepository, ContainerImageRepository>(serviceProvier =>
             {

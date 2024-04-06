@@ -34,7 +34,7 @@ namespace Clutch.API.Controllers
                 ? NotFound()
                 : Ok(new ContainerImageResponse(
                     containerImageResponseData.Success,
-                    containerImageResponseData.RegistryProperties,
+                    containerImageResponseData.RegistryManifest,
                     _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel)
                 ));
         }
@@ -92,7 +92,7 @@ namespace Clutch.API.Controllers
             return containerImageResponseData is not null
                 && containerImageResponseData.Success
                 && containerImageResponseData.ContainerImageModel.HasValue
-                && containerImageResponseData.RegistryProperties.HasValue;
+                && containerImageResponseData.RegistryManifest.HasValue;
         }
     }
 }

@@ -33,17 +33,11 @@ namespace Clutch.API.Models.Image
         [StringLength(40)]
         public string? CommitHash { get; set; }
 
-        public int? Layers { get; set; } // Nullable for potential flexibility
-
-        public long? Size { get; set; } // Nullable for the same reason
-
         // This is stored in the DB as a JSON string with metadata associated with each plugin
         // We create a class to represent the JSON object to make it easier to work with
         public List<Plugin>? Plugins { get; set; }
 
         public string? ServerConfig { get; set; }
-
-        public string? Notes { get; set; }
 
         public bool HasValue => !IsNullOrEmpty;
 
@@ -51,6 +45,7 @@ namespace Clutch.API.Models.Image
         {
             get
             {
+                // Indexed items
                 if (ImageID == -1) return true;
                 if (string.IsNullOrEmpty(ImageReference)) return true;
                 return false;
