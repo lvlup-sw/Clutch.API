@@ -7,6 +7,7 @@ services:
       - 6379:6379
     networks:
       - backend-network
+    container_name: redis-cache
 
   Clutch.api:
     image: ${DOCKER_REGISTRY-}clutchapi

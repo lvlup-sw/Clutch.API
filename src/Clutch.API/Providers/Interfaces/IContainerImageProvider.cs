@@ -11,8 +11,5 @@ namespace Clutch.API.Providers.Interfaces
         Task<bool> SetImageAsync(ContainerImageModel image);
         Task<bool> DeleteFromDatabaseAsync(int imageId);
         Task<bool> DeleteFromDatabaseAsync(string imageReference);
-        Task<bool> DeleteFromRegistryAsync(string imageReference);
-        Task<ContainerImageBuildResult> TriggerBuildAsync(BuildParameters parameters);
-        // Add interactions with other DB tables or services here
     }
 }

@@ -8,8 +8,6 @@ using Clutch.API.Repositories.Interfaces;
 
 // Provider Responsibilities:
 // - Interacting with the Repositories to perform operations against the database.
-// - Triggering our CI/CD pipeline to build a new image.
-// - Interacting with any other external services for the purpose of getting data.
 // - DOES NOT directly manipulate the database; that is the repository's job.
 namespace Clutch.API.Providers.Image
 {
@@ -115,51 +113,6 @@ namespace Clutch.API.Providers.Image
             return result is bool success
                 ? success
                 : default;
-        }
-
-        public async Task<ContainerImageBuildResult> TriggerBuildAsync(BuildParameters parameters)
-        {
-            // We need to call our GHA workflow to trigger a new build.
-            // This should output to the GH container registry.
-
-            // First, we need to construct the ContainerImageModel from the BuildParameters.
-            // Then, we need to call the SetImageAsync method to store the new image in the database.
-            // Finally, we need to trigger the build pipeline.
-
-            // Construct the image model
-            ContainerImageModel imageModel = new()
-            {
-                ImageID = 0,
-                ImageReference = parameters.ImageReference,
-                GameVersion = parameters.GameVersion,
-                BuildDate = parameters.BuildDate,
-                RegistryURL = parameters.RegistryURL,
-                Status = StatusEnum.Building,
-            };
-
-            // Set the image in the database
-            bool imageWasSet = await SetImageAsync(imageModel);
-            if (!imageWasSet)
-            {
-                _logger.LogError("Failed to set image in the database.");
-                return new ContainerImageBuildResult
-                {
-                    Success = false,
-                    ContainerImageModel = ContainerImageModel.Null,
-                };
-            }
-
-            // Trigger the build pipeline
-            // We do this by sending a POST request to the GitHub API
-            return null;
-        }
-
-        public async Task<bool> DeleteFromRegistryAsync(string imageReference)
-        {
-            // We need to call the GitHub API to delete the image from the registry.
-            // We will need to authenticate with a token.
-
-            return true;
         }
 
         // CacheProvider method
