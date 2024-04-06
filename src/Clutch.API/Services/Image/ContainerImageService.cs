@@ -38,8 +38,8 @@ namespace Clutch.API.Services.Image
             }
 
             // Check the registry and construct the RegistryManifest
-            // imageReference
-            RegistryManifest manifest = await GetImagePropertiesFromRegistry("lvlup-sw/clutchapi:dev");
+            // lvlup-sw/clutchapi:dev
+            RegistryManifest manifest = await GetImagePropertiesFromRegistry(image.ImageReference);
             if (manifest is null || !manifest.HasValue)
             {
                 _logger.LogError("Image not found in registry.");
