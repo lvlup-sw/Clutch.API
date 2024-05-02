@@ -6,7 +6,6 @@ using Clutch.API.Providers.Interfaces;
 using Clutch.API.Services.Interfaces;
 using Newtonsoft.Json;
 using RestSharp;
-using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 using System.Text;
 
 // Service Responsibilities:
@@ -38,7 +37,6 @@ namespace Clutch.API.Services.Image
             }
 
             // Check the registry and construct the RegistryManifest
-            // lvlup-sw/clutchapi:dev
             RegistryManifest manifest = await GetImagePropertiesFromRegistry(image.ImageReference);
             if (manifest is null || !manifest.HasValue)
             {
@@ -121,6 +119,8 @@ namespace Clutch.API.Services.Image
             // - Image already exists in the registry
             // - Image does not exist in the registry
             //   + If image does not exist, we need to trigger the build pipeline
+            // We also need to create a tag for the image
+            // Most of the time, we can simply copy the semantic version of the release
             throw new NotImplementedException();
         }
 

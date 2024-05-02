@@ -33,12 +33,6 @@ namespace Clutch.API.Models.Image
         [StringLength(40)]
         public string? CommitHash { get; set; }
 
-        // This is stored in the DB as a JSON string with metadata associated with each plugin
-        // We create a class to represent the JSON object to make it easier to work with
-        public List<Plugin>? Plugins { get; set; }
-
-        public string? ServerConfig { get; set; }
-
         public bool HasValue => !IsNullOrEmpty;
 
         private bool IsNullOrEmpty
