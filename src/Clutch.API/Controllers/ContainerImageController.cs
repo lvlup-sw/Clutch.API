@@ -19,7 +19,7 @@ namespace Clutch.API.Controllers
         private readonly IMapper _mapper = mapper;
 
         [HttpGet("GetImage/{request}")]
-        //[ValidateRepository]  Validate ContainerImageRequest
+        //[ValidateRequest]  Validate ContainerImageRequest
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,16 +42,16 @@ namespace Clutch.API.Controllers
 
         [HttpPut("SetImage/")]
         [ValidateContainerImage]
+        // [ValidateRequest]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<IActionResult> SetContainerImage(ContainerImage containerImage)
+        public async Task<IActionResult> SetContainerImage(ContainerImageRequest request)
         {
-            var containerImageModel = _mapper.Map<ContainerImageModel>(containerImage);
-            bool success = await _service.SetImageAsync(containerImageModel);
+            bool success = await _service.SetImageAsync(request);
 
             return success 
                 ? Ok()

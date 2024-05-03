@@ -12,10 +12,9 @@ Backend data services include a MariaDB instance hosted on my local NFS server.
 
 Todo:
     - Implement the rest of the behavior for object properties (eg Status, RegistryType, etc)
-    - Figure out interactions with Registry
-        + Right now, we are making HTTPS requests to the GHCR API
-        + If we want to support multiple registries, we may need to make this generic
-        + EG a Registry "service" which abstracts out the logic required for different registries    
+    - Develop RegsitryService
+        + Create an abstract base class which each unique Registry will inherit
+        + EG AzureRegistryService : RegistryService 
     - Implement the rest of the endpoints for Container Service
     - Write tests
     - Create manual MVP in GCP for API

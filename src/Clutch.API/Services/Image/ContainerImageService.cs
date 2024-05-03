@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using RestSharp;
 using System.Text;
 using System.Security.Cryptography;
+using Serilog;
 
 // Service Responsibilities:
 // - "Business logic" for image management.
@@ -60,17 +61,19 @@ namespace Clutch.API.Services.Image
             return new ContainerImageResponseData(true, image, manifest);
         }
 
-        public async Task<bool> SetImageAsync(ContainerImageModel containerImageModel)
+        public async Task<bool> SetImageAsync(ContainerImageRequest request)
         {
-            // Before continuing we validate the image model
-            if (!ValidateImageModel(containerImageModel))
+            // First we need to construct the image model from the request
+            var containerImage = ConstructImageModel(request);
+            if (containerImage is null || !containerImage.HasValue)
             {
                 _logger.LogError("Failed to construct the image model.");
                 return false;
             }
 
-            return await SetImageInRegistry(containerImageModel)
-                && await _imageProvider.SetImageAsync(containerImageModel);
+            // If we have a valid model, try to set in the registry and database
+            return await SetImageInRegistry(containerImage)
+                && await _imageProvider.SetImageAsync(containerImage);
         }
 
         public async Task<bool> DeleteImageAsync(string Repository)
@@ -85,7 +88,7 @@ namespace Clutch.API.Services.Image
             return await _imageProvider.GetLatestImagesAsync();
         }
 
-        private bool ValidateImageModel(ContainerImageModel image)
+        private ContainerImageModel ConstructImageModel(ContainerImageRequest request)
         {
             // We need to validate the image model before proceeding
             // This includes checking the image reference, game version, and other properties
@@ -94,7 +97,7 @@ namespace Clutch.API.Services.Image
             // - Status
             // - ServerConfig
 
-            return true;
+            return ContainerImageModel.Null;
         }
 
         // Registry interactions
