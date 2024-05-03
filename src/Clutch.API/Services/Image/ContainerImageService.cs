@@ -30,13 +30,16 @@ namespace Clutch.API.Services.Image
         public async Task<ContainerImageResponseData> GetImageAsync(ContainerImageRequest request, string version)
         {
             // Serialize and hash the request object
-            // We also use the API version as a prefix for the cache key
-            string serializedRequest = JsonConvert.SerializeObject(request);
-            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(version + ":" + serializedRequest));
+            byte[] hash = SHA256.HashData(
+                Encoding.UTF8.GetBytes(
+                    JsonConvert.SerializeObject(request)
+                )
+            );
 
             // Construct the cache key by converting each byte
             // in the hash into a two-character hexadecimal representation
-            string cacheKey = string.Join("", hash.Select(b => b.ToString("x2"))).ToLower();
+            // We use the Version, Repository, and Tag as prefixes
+            string cacheKey = $"{version}:{request.Repository}:{request.Tag}:{string.Join("", hash.Select(b => b.ToString("x2"))).ToLower()}";
 
             // Retrieve from cacheProvider (which will call the imageProvider if not found)
             var image = await _cacheProvider.GetFromCacheAsync(cacheKey);

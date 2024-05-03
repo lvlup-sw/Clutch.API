@@ -31,13 +31,13 @@ namespace Clutch.API.Controllers
             string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
             var containerImageResponseData = await _service.GetImageAsync(request, version);
 
-            return !ValidateResponse(containerImageResponseData)
-                ? NotFound()
-                : Ok(new ContainerImageResponse(
+            return ValidateResponse(containerImageResponseData)
+                ? Ok(new ContainerImageResponse(
                     containerImageResponseData.Success,
                     _mapper.Map<ContainerImageVersion>(containerImageResponseData.ContainerImageModel),
                     containerImageResponseData.RegistryManifest
-                ));
+                ))
+                : NotFound();
         }
 
         [HttpPut("SetImage/")]

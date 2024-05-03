@@ -11,8 +11,8 @@ using Clutch.API.Repositories.Interfaces;
 // - DOES NOT directly manipulate the database; that is the repository's job.
 namespace Clutch.API.Providers.Image
 {
-    // In the future, we will add other Repository interfaces to this class.
-    // For now, we only have the ContainerImageRepository class so this acts
+    // In the future, we will add other repository interfaces to this class.
+    // For now, we only have the ContainerImagerepository class so this acts
     // as a pass-through with polly decorations.
     public class ContainerImageProvider : IContainerImageProvider
     {
@@ -47,14 +47,18 @@ namespace Clutch.API.Providers.Image
                 : null;
         }
 
-        public async Task<ContainerImageModel?> GetImageByReferenceAsync(string Repository)
+        public async Task<ContainerImageModel?> GetImageByReferenceAsync(string key)
         {
+            // Extract repository and tag from key
+            string[] keyItems = key.Split(':');
+            string repositoryId = $"{keyItems[1]}:{keyItems[2]}";
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
-                _logger.LogDebug("Attempting to retrieve entry with ref {Repository} from database.", Repository);
-                ContainerImageModel data = await _repository.GetImageByReferenceAsync(Repository);
+                _logger.LogDebug("Attempting to retrieve entry with ref {repositoryId} from database.", repositoryId);
+                ContainerImageModel data = await _repository.GetImageByReferenceAsync(repositoryId);
                 return data.HasValue ? data : ContainerImageModel.Null;
-            }, new Context($"ContainerImageProvider.GetImageByReferenceAsync for Image Ref: {Repository}"));
+            }, new Context($"ContainerImageProvider.GetImageByReferenceAsync for Image Ref: {repositoryId}"));
 
             return result is ContainerImageModel image && image.HasValue
                 ? image
@@ -89,13 +93,13 @@ namespace Clutch.API.Providers.Image
                 : default;
         }
 
-        public async Task<bool> DeleteFromDatabaseAsync(string Repository)
+        public async Task<bool> DeleteFromDatabaseAsync(string repository)
         {
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to delete image from the database.");
-                return await _repository.DeleteImageAsync(Repository);
-            }, new Context($"ContainerImageProvider.DeleteImageAsync for Image Ref: {Repository}"));
+                return await _repository.DeleteImageAsync(repository);
+            }, new Context($"ContainerImageProvider.DeleteImageAsync for Image Ref: {repository}"));
 
             return result is bool success
                 ? success
