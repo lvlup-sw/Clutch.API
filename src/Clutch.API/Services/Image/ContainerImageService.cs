@@ -7,6 +7,7 @@ using Clutch.API.Services.Interfaces;
 using Newtonsoft.Json;
 using RestSharp;
 using System.Text;
+using System.Security.Cryptography;
 
 // Service Responsibilities:
 // - "Business logic" for image management.
@@ -26,10 +27,19 @@ namespace Clutch.API.Services.Image
         private const string org = "lvlup-sw";
         private const string repository = "clutchapi";
 
-        public async Task<ContainerImageResponseData> GetImageAsync(string imageReference)
+        public async Task<ContainerImageResponseData> GetImageAsync(ContainerImageRequest request, string version)
         {
+            // Serialize and hash the request object
+            // We also use the API version as a prefix for the cache key
+            string serializedRequest = JsonConvert.SerializeObject(request);
+            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(version + ":" + serializedRequest));
+
+            // Construct the cache key by converting each byte
+            // in the hash into a two-character hexadecimal representation
+            string cacheKey = string.Join("", hash.Select(b => b.ToString("x2"))).ToLower();
+
             // Retrieve from cacheProvider (which will call the imageProvider if not found)
-            var image = await _cacheProvider.GetFromCacheAsync(imageReference);
+            var image = await _cacheProvider.GetFromCacheAsync(cacheKey);
             if (image is null || !image.HasValue)
             {
                 _logger.LogError("Image not found in database.");
@@ -37,7 +47,7 @@ namespace Clutch.API.Services.Image
             }
 
             // Check the registry and construct the RegistryManifest
-            RegistryManifest manifest = await GetImagePropertiesFromRegistry(image.ImageReference);
+            var manifest = await GetManifestFromRegistry(request);
             if (manifest is null || !manifest.HasValue)
             {
                 _logger.LogError("Image not found in registry.");
@@ -60,10 +70,10 @@ namespace Clutch.API.Services.Image
                 && await _imageProvider.SetImageAsync(containerImageModel);
         }
 
-        public async Task<bool> DeleteImageAsync(string imageReference)
+        public async Task<bool> DeleteImageAsync(string Repository)
         {
-            return await DeleteFromRegistryAsync(imageReference) 
-                && await _imageProvider.DeleteFromDatabaseAsync(imageReference);
+            return await DeleteFromRegistryAsync(Repository) 
+                && await _imageProvider.DeleteFromDatabaseAsync(Repository);
         }
 
         public async Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync()
@@ -85,16 +95,15 @@ namespace Clutch.API.Services.Image
         }
 
         // Registry interactions
-        private async Task<RegistryManifest> GetImagePropertiesFromRegistry(string imageReference)
+        private async Task<RegistryManifest> GetManifestFromRegistry(ContainerImageRequest request)
         {
             // Construct the request
-            string tag = imageReference.Split(":")[1];
-            RestRequest request = new($"/v2/{org}/{repository}/manifests/{tag}");
-            request.AddHeader("Accept", "application/vnd.github+json");
-            request.AddHeader("Authorization", $"Bearer {pat}");
+            RestRequest restRequest = new($"/v2/{org}/{request.Repository}/manifests/{request.Tag}");
+            restRequest.AddHeader("Accept", "application/vnd.github+json");
+            restRequest.AddHeader("Authorization", $"Bearer {pat}");
 
             // Send the request
-            RestResponse response = await _restClient.ExecuteAsync(request);
+            RestResponse response = await _restClient.ExecuteAsync(restRequest);
 
             if (!response.IsSuccessful)
             {
@@ -124,7 +133,7 @@ namespace Clutch.API.Services.Image
             throw new NotImplementedException();
         }
 
-        private async Task<bool> DeleteFromRegistryAsync(string imageReference)
+        private async Task<bool> DeleteFromRegistryAsync(string Repository)
         {
             // We need to call the GitHub API to delete the image from the registry.
             // We will need to authenticate with a token.
@@ -138,7 +147,7 @@ namespace Clutch.API.Services.Image
             ContainerImageModel imageModel = new()
             {
                 ImageID = 0,
-                ImageReference = parameters.ImageReference,
+                Repository = parameters.Repository,
                 GameVersion = parameters.GameVersion,
                 BuildDate = parameters.BuildDate,
                 RegistryURL = parameters.RegistryURL,

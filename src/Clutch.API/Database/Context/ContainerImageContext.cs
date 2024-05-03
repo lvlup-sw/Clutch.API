@@ -14,7 +14,7 @@ namespace Clutch.API.Database.Context
             var builder = modelBuilder.Entity<ContainerImageModel>();
 
             builder.ToTable("container_images");
-            builder.HasIndex(c => new { c.ImageID, c.ImageReference }).IsUnique();
+            builder.HasIndex(c => new { c.ImageID, c.Repository }).IsUnique();
             builder.Property(c => c.Plugins)
                    .HasConversion(
                        v => JsonConvert.SerializeObject(v),

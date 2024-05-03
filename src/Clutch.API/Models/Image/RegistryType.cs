@@ -2,6 +2,7 @@
 {
     public enum RegistryType
     {
+        Invalid = -1,
         Local = 0,  // GHCR
         Docker = 1,
         Harbor = 2,

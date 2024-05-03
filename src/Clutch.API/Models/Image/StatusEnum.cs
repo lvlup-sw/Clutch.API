@@ -2,8 +2,9 @@
 {
     public enum StatusEnum
     {
-        Unavailable,
-        Available,
-        Building
+        Invalid = -1,
+        Unavailable = 0,
+        Available = 1,
+        Building = 2
     }
 }

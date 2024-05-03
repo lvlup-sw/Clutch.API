@@ -5,7 +5,7 @@ namespace Clutch.API.Models.Image
     // Skeleton class for the build parameters of a container image
     public class BuildParameters
     {
-        public required string ImageReference { get; set; }
+        public required string Repository { get; set; }
         public int GameVersion { get; set; } // BuildID number
         public DateTime BuildDate { get; set; }
         public required string RegistryURL { get; set; }

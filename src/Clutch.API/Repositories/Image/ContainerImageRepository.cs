@@ -29,13 +29,13 @@ namespace Clutch.API.Repositories.Image
             }
         }
 
-        public async Task<ContainerImageModel> GetImageByReferenceAsync(string imageReference)
+        public async Task<ContainerImageModel> GetImageByReferenceAsync(string Repository)
         {
             try
             {
                 _logger.LogDebug("Getting image from the DB.");
                 return await _context.ContainerImages
-                    .Where(img => img.ImageReference.Contains(imageReference))
+                    .Where(img => img.Repository.Contains(Repository))
                     .FirstOrDefaultAsync() ?? ContainerImageModel.Null;
             }
             catch (Exception ex)
@@ -101,13 +101,13 @@ namespace Clutch.API.Repositories.Image
             }
         }
 
-        public async Task<bool> DeleteImageAsync(string imageReference)
+        public async Task<bool> DeleteImageAsync(string Repository)
         {
             try
             {
                 int entries = 0;
                 var imageToDelete = await _context.ContainerImages
-                    .FirstOrDefaultAsync(img => img.ImageReference == imageReference);
+                    .FirstOrDefaultAsync(img => img.Repository == Repository);
 
                 if (imageToDelete is not null)
                 {

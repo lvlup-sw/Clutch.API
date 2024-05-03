@@ -1,14 +1,12 @@
-﻿using static System.Net.Mime.MediaTypeNames;
-
-namespace Clutch.API.Models.Image
+﻿namespace Clutch.API.Models.Image
 {
     public class RegistryManifest
     {
-        public int schemaVersion { get; set; }
-        public required string mediaType { get; set; }
-        public required ManifestConfig config { get; set; }
-        public required List<ManifestConfig> layers { get; set; }
-        public Dictionary<string, string>? labels { get; set; }
+        public int SchemaVersion { get; set; }
+        public required string MediaType { get; set; }
+        public required ManifestConfig Config { get; set; }
+        public required List<ManifestConfig> Layers { get; set; }
+        public Dictionary<string, string>? Labels { get; set; }
 
         public bool HasValue => !IsNullOrEmpty;
 
@@ -16,25 +14,25 @@ namespace Clutch.API.Models.Image
         {
             get
             {
-                if (mediaType.Equals(Application.Json)) return true;
-                if (config.Count == 0) return true;
-                if (layers.Count == 0) return true;
+                if (string.IsNullOrEmpty(MediaType)) return true;
+                if (Config.Count == 0) return true;
+                if (Layers.Count == 0) return true;
                 return false;
             }
         }
 
         public static RegistryManifest Null { get; } = new()
         {
-            mediaType = Application.Json,
-            config = new(){ digest = string.Empty, mediaType = string.Empty, size = 0 },
-            layers = [],
+            MediaType = string.Empty,
+            Config = new(){ Digest = string.Empty, MediaType = string.Empty, Size = 0 },
+            Layers = [],
         };
     }
 
     public class ManifestConfig : Dictionary<string, object>
     {
-        public required string digest { get; set; }
-        public required string mediaType { get; set; }
-        public required int size { get; set; }
+        public required string Digest { get; set; }
+        public required string MediaType { get; set; }
+        public required int Size { get; set; }
     }
 }

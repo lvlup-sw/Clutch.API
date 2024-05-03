@@ -1,21 +1,11 @@
-﻿using Clutch.API.Utilities;
-using System.ComponentModel.DataAnnotations;
-
-namespace Clutch.API.Models.Image
+﻿namespace Clutch.API.Models.Image
 {
-    public class ContainerImage
+    public class ContainerImageRequest
     {
-        [Key]
-        [Required]
-        [StringLength(255)]
         public required string Repository { get; set; }
 
-        [Required]
-        public required string Tag { get; set; } // BuildID number
+        public required string Tag { get; set; }
 
-        [Required]
         public required RegistryType RegistryType { get; set; }
-
-        public string? Digest 
     }
 }

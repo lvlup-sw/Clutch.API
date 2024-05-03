@@ -9,8 +9,8 @@ namespace Clutch.API.Models.Image
     {
         public ContainerImageMap()
         {
-            CreateMap<ContainerImageModel, ContainerImage>();
-            CreateMap<ContainerImage, ContainerImageModel>();
+            CreateMap<ContainerImageModel, ContainerImageVersion>();
+            CreateMap<ContainerImageVersion, ContainerImageModel>();
         }
     }
 }
