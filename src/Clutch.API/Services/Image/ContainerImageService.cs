@@ -8,7 +8,6 @@ using Newtonsoft.Json;
 using RestSharp;
 using System.Text;
 using System.Security.Cryptography;
-using Serilog;
 
 // Service Responsibilities:
 // - "Business logic" for image management.
@@ -17,10 +16,11 @@ using Serilog;
 // - Interacting with the Container Registry.
 namespace Clutch.API.Services.Image
 {
-    public class ContainerImageService(ICacheProvider<ContainerImageModel> cacheProvider, IContainerImageProvider imageProvider, ILogger logger, IOptions<AppSettings> settings) : IContainerImageService
+    public class ContainerImageService(ICacheProvider<ContainerImageModel> cacheProvider, IContainerImageProvider imageProvider, IRegistryProviderFactory registryProviderFactory, ILogger logger, IOptions<AppSettings> settings) : IContainerImageService
     {
         private readonly ICacheProvider<ContainerImageModel> _cacheProvider = cacheProvider;
         private readonly IContainerImageProvider _imageProvider = imageProvider;
+        private readonly IRegistryProviderFactory _registryProviderFactory = registryProviderFactory;
         private readonly ILogger _logger = logger;
         private readonly AppSettings _settings = settings.Value;
         private readonly RestClient _restClient = new("https://ghcr.io");
@@ -34,7 +34,7 @@ namespace Clutch.API.Services.Image
             string cacheKey = ConstructCacheKey(request, version);
 
             // Retrieve from cacheProvider (which will call the imageProvider if not found)
-            var image = await _cacheProvider.GetFromCacheAsync(cacheKey);
+            ContainerImageModel? image = await _cacheProvider.GetFromCacheAsync(cacheKey);
             if (image is null || !image.HasValue)
             {
                 _logger.LogError("Image not found in database.");
@@ -42,8 +42,8 @@ namespace Clutch.API.Services.Image
             }
 
             // Check the registry and construct the RegistryManifest
-            // We should call a RegistryProvider here
-            var manifest = await GetManifestFromRegistry(request);
+            IRegistryProvider? registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
+            RegistryManifest manifest = await registryProvider.GetManifestAsync(request);
             if (manifest is null || !manifest.HasValue)
             {
                 _logger.LogError("Image not found in registry.");
@@ -56,24 +56,24 @@ namespace Clutch.API.Services.Image
         public async Task<bool> SetImageAsync(ContainerImageRequest request, string version)
         {
             // First we need to construct the image model from the request
-            var containerImage = ConstructImageModel(request, version);
-            if (containerImage is null || !containerImage.HasValue)
+            ContainerImageModel image = ConstructImageModel(request, version);
+            if (image is null || !image.HasValue)
             {
                 _logger.LogError("Failed to construct the image model.");
                 return false;
             }
 
             // If we have a valid model, try to set in the registry and database
-            // We should call a RegistryProvider here
-            return await SetImageInRegistry(containerImage)
-                && await _imageProvider.SetImageAsync(containerImage);
+            return await TriggerBuildAsync(GenerateBuildParameters(image))
+                && await _imageProvider.SetImageAsync(image);
         }
 
         public async Task<bool> DeleteImageAsync(ContainerImageRequest request, string version)
         {
             string repositoryId = $"{request.Repository}:{request.Tag}";
 
-            return await DeleteFromRegistryAsync(request, version) 
+            IRegistryProvider registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
+            return await registryProvider.DeleteManifestAsync(request) 
                 && await _imageProvider.DeleteFromDatabaseAsync(repositoryId);
         }
 
@@ -113,6 +113,36 @@ namespace Clutch.API.Services.Image
             // in the hash into a two-character hexadecimal representation
             // We use the Version, Repository, and Tag as prefixes
             return $"{version}:{request.Repository}:{request.Tag}:{string.Join("", hash.Select(b => b.ToString("x2"))).ToLower()}";
+        }
+
+        private static BuildParameters GenerateBuildParameters(ContainerImageModel image)
+        {
+            return new();
+        }
+
+        public async Task<bool> TriggerBuildAsync(BuildParameters parameters)
+        {
+            /*
+            // Construct the image model from the build parameters
+            ContainerImageModel imageModel = new()
+            {
+                ImageID = 0,
+                Repository = parameters.Repository,
+                BuildDate = parameters.BuildDate,
+                Status = StatusEnum.Building,
+            };
+
+            // Trigger the build pipeline
+            // We do this by sending a POST request to the GitHub API
+            return await SendPostRequest(imageModel, parameters);
+            */
+
+            ContainerImageBuildResult result = new()
+            {
+                ContainerImageModel = ContainerImageModel.Null
+            };
+
+            return result.Success;
         }
 
         /*
@@ -161,24 +191,6 @@ namespace Clutch.API.Services.Image
             // We will need to authenticate with a token.
 
             return true;
-        }
-
-        public async Task<ContainerImageBuildResult> TriggerImageBuildAsync(BuildParameters parameters)
-        {
-            // Construct the image model from the build parameters
-            ContainerImageModel imageModel = new()
-            {
-                ImageID = 0,
-                Repository = parameters.Repository,
-                GameVersion = parameters.GameVersion,
-                BuildDate = parameters.BuildDate,
-                RegistryURL = parameters.RegistryURL,
-                Status = StatusEnum.Building,
-            };
-
-            // Trigger the build pipeline
-            // We do this by sending a POST request to the GitHub API
-            return await SendPostRequest(imageModel, parameters);
         }
 
         private async Task<ContainerImageBuildResult> SendPostRequest(ContainerImageModel imageModel, BuildParameters parameters)
