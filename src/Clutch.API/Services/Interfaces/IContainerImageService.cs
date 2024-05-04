@@ -5,8 +5,8 @@ namespace Clutch.API.Services.Interfaces
     public interface IContainerImageService
     {
         Task<ContainerImageResponseData> GetImageAsync(ContainerImageRequest request, string version);
-        Task<bool> SetImageAsync(ContainerImageRequest request);
-        Task<bool> DeleteImageAsync(ContainerImageRequest request);
+        Task<bool> SetImageAsync(ContainerImageRequest request, string version);
+        Task<bool> DeleteImageAsync(ContainerImageRequest request, string version);
         
         // Revisit this method
         Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync();

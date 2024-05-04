@@ -4,16 +4,20 @@ using System.ComponentModel.DataAnnotations;
 // This is our actual Database model, and what we use to perform our operations.
 // We do not directly use ContainerImageVersion to limit visibility into our application.
 // This protects us from over-posting attacks.
-// We have two indexes: ImageId and Repository.
+// We have two indexes: ImageId and RepositoryId.
 // Ideally we use ImageId where possible.
 namespace Clutch.API.Models.Image
 {
-    [Index(nameof(Repository), IsUnique = true)]
+    [Index(nameof(RepositoryId), IsUnique = true)]
     public class ContainerImageModel
     {
         [Key]
         [Required]
         public int ImageID { get; set; } = 0;
+
+        [Required]
+        [StringLength(384)]
+        public required string RepositoryId { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -43,6 +47,7 @@ namespace Clutch.API.Models.Image
             {
                 // Required items
                 if (ImageID == -1) return true;
+                if (string.IsNullOrEmpty(RepositoryId)) return true;
                 if (string.IsNullOrEmpty(Repository)) return true;
                 if (string.IsNullOrEmpty(Tag)) return true;
                 if (BuildDate == DateTime.MinValue) return true;
@@ -56,6 +61,7 @@ namespace Clutch.API.Models.Image
         public static ContainerImageModel Null { get; } = new()
         {
             ImageID = -1,
+            RepositoryId = string.Empty,
             Repository = string.Empty,
             Tag = string.Empty,
             BuildDate = DateTime.MinValue,

@@ -28,8 +28,7 @@ namespace Clutch.API.Controllers
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
         public async Task<ActionResult<ContainerImageResponse>> GetContainerImage(ContainerImageRequest request)
         {
-            string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
-            var containerImageResponseData = await _service.GetImageAsync(request, version);
+            var containerImageResponseData = await _service.GetImageAsync(request, GetAssemblyVersion());
 
             return ValidateResponse(containerImageResponseData)
                 ? Ok(new ContainerImageResponse(
@@ -51,7 +50,7 @@ namespace Clutch.API.Controllers
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
         public async Task<IActionResult> SetContainerImage(ContainerImageRequest request)
         {
-            bool success = await _service.SetImageAsync(request);
+            bool success = await _service.SetImageAsync(request, GetAssemblyVersion());
 
             return success 
                 ? Ok()
@@ -66,10 +65,9 @@ namespace Clutch.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<IActionResult> DeleteContainerImageModel(string Repository)
+        public async Task<IActionResult> DeleteContainerImageModel(ContainerImageRequest request)
         {
-            Repository = System.Net.WebUtility.UrlDecode(Repository);
-            var success = await _service.DeleteImageAsync(Repository);
+            bool success = await _service.DeleteImageAsync(request, GetAssemblyVersion());
 
             return success 
                 ? Ok()
@@ -81,11 +79,11 @@ namespace Clutch.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<ActionResult<IEnumerable<ContainerImage>>> GetLatestContainerImages()
+        public async Task<ActionResult<IEnumerable<ContainerImageVersion>>> GetLatestContainerImages()
         {
             var containerImageModels = await _service.GetLatestImagesAsync();
 
-            return Ok(_mapper.Map<List<ContainerImage>>(containerImageModels));
+            return Ok(_mapper.Map<List<ContainerImageVersion>>(containerImageModels));
         }
 
         private static bool ValidateResponse(ContainerImageResponseData containerImageResponseData)
@@ -95,5 +93,7 @@ namespace Clutch.API.Controllers
                 && containerImageResponseData.ContainerImageModel.HasValue
                 && containerImageResponseData.RegistryManifest.HasValue;
         }
+
+        private static string GetAssemblyVersion() => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
     }
 }

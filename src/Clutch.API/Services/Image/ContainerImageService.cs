@@ -30,17 +30,8 @@ namespace Clutch.API.Services.Image
 
         public async Task<ContainerImageResponseData> GetImageAsync(ContainerImageRequest request, string version)
         {
-            // Serialize and hash the request object
-            byte[] hash = SHA256.HashData(
-                Encoding.UTF8.GetBytes(
-                    JsonConvert.SerializeObject(request)
-                )
-            );
-
-            // Construct the cache key by converting each byte
-            // in the hash into a two-character hexadecimal representation
-            // We use the Version, Repository, and Tag as prefixes
-            string cacheKey = $"{version}:{request.Repository}:{request.Tag}:{string.Join("", hash.Select(b => b.ToString("x2"))).ToLower()}";
+            // Construct the cache key from the parameters
+            string cacheKey = ConstructCacheKey(request, version);
 
             // Retrieve from cacheProvider (which will call the imageProvider if not found)
             var image = await _cacheProvider.GetFromCacheAsync(cacheKey);
@@ -51,6 +42,7 @@ namespace Clutch.API.Services.Image
             }
 
             // Check the registry and construct the RegistryManifest
+            // We should call a RegistryProvider here
             var manifest = await GetManifestFromRegistry(request);
             if (manifest is null || !manifest.HasValue)
             {
@@ -61,10 +53,10 @@ namespace Clutch.API.Services.Image
             return new ContainerImageResponseData(true, image, manifest);
         }
 
-        public async Task<bool> SetImageAsync(ContainerImageRequest request)
+        public async Task<bool> SetImageAsync(ContainerImageRequest request, string version)
         {
             // First we need to construct the image model from the request
-            var containerImage = ConstructImageModel(request);
+            var containerImage = ConstructImageModel(request, version);
             if (containerImage is null || !containerImage.HasValue)
             {
                 _logger.LogError("Failed to construct the image model.");
@@ -72,14 +64,17 @@ namespace Clutch.API.Services.Image
             }
 
             // If we have a valid model, try to set in the registry and database
+            // We should call a RegistryProvider here
             return await SetImageInRegistry(containerImage)
                 && await _imageProvider.SetImageAsync(containerImage);
         }
 
-        public async Task<bool> DeleteImageAsync(string Repository)
+        public async Task<bool> DeleteImageAsync(ContainerImageRequest request, string version)
         {
-            return await DeleteFromRegistryAsync(Repository) 
-                && await _imageProvider.DeleteFromDatabaseAsync(Repository);
+            string repositoryId = $"{request.Repository}:{request.Tag}";
+
+            return await DeleteFromRegistryAsync(request, version) 
+                && await _imageProvider.DeleteFromDatabaseAsync(repositoryId);
         }
 
         public async Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync()
@@ -88,18 +83,39 @@ namespace Clutch.API.Services.Image
             return await _imageProvider.GetLatestImagesAsync();
         }
 
-        private ContainerImageModel ConstructImageModel(ContainerImageRequest request)
+        private ContainerImageModel ConstructImageModel(ContainerImageRequest request, string version)
         {
-            // We need to validate the image model before proceeding
-            // This includes checking the image reference, game version, and other properties
-            // We need to introduce logic to construct the following properties:
-            // - BuildDate
-            // - Status
-            // - ServerConfig
-
-            return ContainerImageModel.Null;
+            // Our pipeline will modify two values:
+            // BuildDate and Status
+            return new ContainerImageModel()
+            {
+                ImageID = 0,
+                RepositoryId = $"{request.Repository}:{request.Tag}",
+                Repository = request.Repository,
+                Tag = request.Tag,
+                BuildDate = DateTime.Now,
+                RegistryType = request.RegistryType,
+                Status = StatusEnum.Unavailable,
+                Version = version
+            };
         }
 
+        private static string ConstructCacheKey(ContainerImageRequest request, string version)
+        {
+            // Serialize and hash the request object
+            byte[] hash = SHA256.HashData(
+                Encoding.UTF8.GetBytes(
+                    JsonConvert.SerializeObject(request)
+                )
+            );
+
+            // Construct the cache key by converting each byte
+            // in the hash into a two-character hexadecimal representation
+            // We use the Version, Repository, and Tag as prefixes
+            return $"{version}:{request.Repository}:{request.Tag}:{string.Join("", hash.Select(b => b.ToString("x2"))).ToLower()}";
+        }
+
+        /*
         // Registry interactions
         private async Task<RegistryManifest> GetManifestFromRegistry(ContainerImageRequest request)
         {
@@ -173,5 +189,6 @@ namespace Clutch.API.Services.Image
                 ContainerImageModel = imageModel
             };
         }
+        */
     }
 }

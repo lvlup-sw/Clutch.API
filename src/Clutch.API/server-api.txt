@@ -11,7 +11,6 @@ Backend data services include a MariaDB instance hosted on my local NFS server.
 
 
 Todo:
-    - Implement the rest of the behavior for object properties (eg Status, RegistryType, etc)
     - Develop RegsitryService
         + Create an abstract base class which each unique Registry will inherit
         + EG AzureRegistryService : RegistryService 

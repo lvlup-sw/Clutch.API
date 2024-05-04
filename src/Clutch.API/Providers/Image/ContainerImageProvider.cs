@@ -93,13 +93,13 @@ namespace Clutch.API.Providers.Image
                 : default;
         }
 
-        public async Task<bool> DeleteFromDatabaseAsync(string repository)
+        public async Task<bool> DeleteFromDatabaseAsync(string repositoryId)
         {
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to delete image from the database.");
-                return await _repository.DeleteImageAsync(repository);
-            }, new Context($"ContainerImageProvider.DeleteImageAsync for Image Ref: {repository}"));
+                return await _repository.DeleteImageAsync(repositoryId);
+            }, new Context($"ContainerImageProvider.DeleteImageAsync for Image Ref: {repositoryId}"));
 
             return result is bool success
                 ? success
