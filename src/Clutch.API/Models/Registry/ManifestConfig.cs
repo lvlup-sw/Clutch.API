@@ -1,4 +1,4 @@
-﻿namespace Clutch.API.Models.Image
+﻿namespace Clutch.API.Models.Registry
 {
     public class ManifestConfig : Dictionary<string, object>
     {

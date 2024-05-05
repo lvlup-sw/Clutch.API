@@ -14,6 +14,7 @@ using Clutch.API.Services.Image;
 using Clutch.API.Providers.Interfaces;
 using Clutch.API.Providers.Image;
 using Clutch.API.Models.Image;
+using Clutch.API.Providers.Registry;
 
 namespace Clutch.API
 {

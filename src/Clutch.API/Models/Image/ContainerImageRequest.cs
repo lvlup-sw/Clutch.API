@@ -1,4 +1,6 @@
-﻿namespace Clutch.API.Models.Image
+﻿using Clutch.API.Models.Enums;
+
+namespace Clutch.API.Models.Image
 {
     public class ContainerImageRequest
     {

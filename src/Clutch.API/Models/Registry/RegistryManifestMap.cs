@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 
-namespace Clutch.API.Models.Image
+namespace Clutch.API.Models.Registry
 {
     // This is an AutoMapper profile to map between the ContainerImageModel and the ContainerImage.
     // AutoMapper can automatically map nested objects and collections between different data structures.

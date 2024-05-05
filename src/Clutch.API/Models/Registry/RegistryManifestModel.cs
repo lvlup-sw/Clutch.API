@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Clutch.API.Models.Image
+namespace Clutch.API.Models.Registry
 {
     public class RegistryManifestModel
     {

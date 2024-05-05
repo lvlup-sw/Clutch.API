@@ -1,4 +1,5 @@
 using Clutch.API.Models.Image;
+using Clutch.API.Models.Registry;
 using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Options;
@@ -6,7 +7,7 @@ using Newtonsoft.Json;
 using RestSharp;
 using System.Text;
 
-namespace Clutch.API.Providers.Image
+namespace Clutch.API.Providers.Registry
 {
     // Implements GHCR
     public class RegistryProviderBase(ILogger logger, IOptions<AppSettings> settings) : IRegistryProvider
@@ -16,7 +17,7 @@ namespace Clutch.API.Providers.Image
         private readonly RestClient _restClient = new("https://ghcr.io");
         private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(settings.Value.GithubPAT!));
 
-        public async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
+        public override async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {
             // Construct the request
             string[] parts = request.Repository.Split('/');
@@ -44,21 +45,21 @@ namespace Clutch.API.Providers.Image
             }
         }
 
-        public async Task<bool> SetManifestAsync(ContainerImageRequest request)
+        public override async Task<bool> SetManifestAsync(ContainerImageRequest request)
         {
             // We will trigger the build pipeline here
 
             return true;
         }
 
-        public async Task<bool> DeleteManifestAsync(ContainerImageRequest request)
+        public override async Task<bool> DeleteManifestAsync(ContainerImageRequest request)
         {
             // We will call the api here
 
             return true;
         }
 
-        public async Task<IEnumerable<ContainerImageModel>?> GetLatestManifestsAsync()
+        public override async Task<IEnumerable<ContainerImageModel>?> GetLatestManifestsAsync()
         {
             throw new NotImplementedException();
         }

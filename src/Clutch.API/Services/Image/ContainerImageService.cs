@@ -7,6 +7,8 @@ using Clutch.API.Services.Interfaces;
 using Newtonsoft.Json;
 using System.Text;
 using System.Security.Cryptography;
+using Clutch.API.Models.Enums;
+using Clutch.API.Models.Registry;
 
 // Service Responsibilities:
 // - "Business logic" for image management.

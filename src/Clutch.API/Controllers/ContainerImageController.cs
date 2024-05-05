@@ -4,6 +4,7 @@ using Clutch.API.Controllers.Filters;
 using Clutch.API.Models.Image;
 using Clutch.API.Services.Interfaces;
 using System.Reflection;
+using Clutch.API.Models.Registry;
 
 // TODO:
 // - Batch requests for images

@@ -1,9 +1,9 @@
-using Clutch.API.Models.Image;
+using Clutch.API.Models.Enums;
 using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Options;
 
-namespace Clutch.API.Providers.Image
+namespace Clutch.API.Providers.Registry
 {
     public class RegistryProviderFactory(IServiceProvider serviceProvider) : IRegistryProviderFactory
     {
@@ -16,7 +16,7 @@ namespace Clutch.API.Providers.Image
 
             object? instance = (success && provider is not null) switch
             {
-                true  => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetLogger(provider), GetSettings()),
+                true => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetLogger(provider), GetSettings()),
                 false => ActivatorUtilities.CreateInstance(_serviceProvider, typeof(RegistryProviderBase), GetLogger(typeof(RegistryProviderBase)), GetSettings())
             };
 

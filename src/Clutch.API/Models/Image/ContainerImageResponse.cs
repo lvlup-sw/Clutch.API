@@ -1,4 +1,6 @@
-﻿namespace Clutch.API.Models.Image
+﻿using Clutch.API.Models.Registry;
+
+namespace Clutch.API.Models.Image
 {
     public class ContainerImageResponse(bool success, ContainerImage version, RegistryManifest manifest)
     {
