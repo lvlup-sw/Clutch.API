@@ -26,7 +26,7 @@ namespace Clutch.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<ActionResult<ContainerImageResponse>> GetContainerImage(ContainerImageRequest request)
+        public async Task<ActionResult<ContainerImageResponse>> GetContainerImage([FromQuery] ContainerImageRequest request)
         {
             var containerImageResponseData = await _service.GetImageAsync(request, GetAssemblyVersion());
 

@@ -38,7 +38,7 @@ namespace Clutch.API.Services.Image
             }
 
             // Check the registry and construct the RegistryManifest
-            IRegistryProvider? registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
+            IRegistryProvider registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
             RegistryManifestModel manifest = await registryProvider.GetManifestAsync(request);
             if (manifest is null || !manifest.HasValue)
             {
@@ -135,7 +135,8 @@ namespace Clutch.API.Services.Image
 
             ContainerImageBuildResult result = new()
             {
-                ContainerImageModel = ContainerImageModel.Null
+                Success = true,
+                RegistryManifestModel = RegistryManifestModel.Null
             };
 
             return result.Success;

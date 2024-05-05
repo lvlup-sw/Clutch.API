@@ -14,13 +14,12 @@ namespace Clutch.API.Providers.Interfaces
         private readonly AppSettings _settings = settings.Value;
         private readonly RestClient _restClient = new("https://ghcr.io");
         private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(settings.Value.GithubPAT!));
-        private const string org = "lvlup-sw";
-        private const string repository = "clutchapi";
 
         public async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {
             // Construct the request
-            RestRequest restRequest = new($"/v2/{org}/{request.Repository}/manifests/{request.Tag}");
+            string[] parts = request.Repository.Split('/');
+            RestRequest restRequest = new($"/v2/{parts[0]}/{parts[1]}/manifests/{request.Tag}");
             restRequest.AddHeader("Accept", "application/vnd.github+json");
             restRequest.AddHeader("Authorization", $"Bearer {pat}");
 

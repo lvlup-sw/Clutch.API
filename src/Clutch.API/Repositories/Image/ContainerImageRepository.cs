@@ -35,7 +35,7 @@ namespace Clutch.API.Repositories.Image
             {
                 _logger.LogDebug("Getting image from the DB.");
                 return await _context.ContainerImages
-                    .Where(img => img.Repository.Contains(repositoryId))
+                    .Where(img => img.RepositoryId.Contains(repositoryId))
                     .FirstOrDefaultAsync() ?? ContainerImageModel.Null;
             }
             catch (Exception ex)

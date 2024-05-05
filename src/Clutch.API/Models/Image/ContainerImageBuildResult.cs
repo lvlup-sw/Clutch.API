@@ -4,6 +4,6 @@
     {
         public bool Success { get; set; }
 
-        public required ContainerImageModel ContainerImageModel { get; set; }
+        public required RegistryManifestModel RegistryManifestModel { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace Clutch.API.Providers.Image
         private readonly IServiceProvider _serviceProvider = serviceProvider;
         private readonly Dictionary<RegistryType, Type> _registryProviderMap = CreateMappings();
 
-        public IRegistryProvider? CreateRegistryProvider(RegistryType type)
+        public IRegistryProvider CreateRegistryProvider(RegistryType type)
         {
             bool success = _registryProviderMap.TryGetValue(type, out Type? provider);
 
@@ -18,7 +18,8 @@ namespace Clutch.API.Providers.Image
                 false => Activator.CreateInstance(typeof(RegistryProviderBase), _serviceProvider)
             };
 
-            return instance as IRegistryProvider;
+            // This is kinda hacky but the compiler is being dumb
+            return instance as IRegistryProvider ?? default!;
         }
 
         // Update mappings as new implementations are introduced

@@ -10,10 +10,7 @@ Interacts with another service (K8s)
 Backend data services include a MariaDB instance hosted on my local NFS server.
 
 
-Todo:
-    - Develop RegsitryService
-        + Create an abstract base class which each unique Registry will inherit
-        + EG AzureRegistryService : RegistryService 
+MVP Todo:
     - Implement the rest of the endpoints for Container Service
     - Write tests
     - Create manual MVP in GCP for API
