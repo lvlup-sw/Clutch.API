@@ -53,6 +53,8 @@ namespace Clutch.API
             builder.Configuration.AddEnvironmentVariables();
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
             builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
+            builder.Services.AddOptions();
+            builder.Services.AddLogging();
             builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
             {
                 return ConnectionMultiplexer.Connect(
@@ -116,8 +118,6 @@ namespace Clutch.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddGrpc();
-            builder.Services.AddOptions();
-            builder.Services.AddLogging();
             builder.Services.AddMemoryCache();
         }
 

@@ -1,11 +1,12 @@
 using Clutch.API.Models.Image;
 using Clutch.API.Properties;
+using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
 using System.Text;
 
-namespace Clutch.API.Providers.Interfaces
+namespace Clutch.API.Providers.Image
 {
     // Implements GHCR
     public class RegistryProviderBase(ILogger logger, IOptions<AppSettings> settings) : IRegistryProvider

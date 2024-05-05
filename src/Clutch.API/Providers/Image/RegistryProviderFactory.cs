@@ -1,5 +1,7 @@
 using Clutch.API.Models.Image;
+using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace Clutch.API.Providers.Image
 {
@@ -14,8 +16,8 @@ namespace Clutch.API.Providers.Image
 
             object? instance = (success && provider is not null) switch
             {
-                true  => Activator.CreateInstance(provider, _serviceProvider),
-                false => Activator.CreateInstance(typeof(RegistryProviderBase), _serviceProvider)
+                true  => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetLogger(provider), GetSettings()),
+                false => ActivatorUtilities.CreateInstance(_serviceProvider, typeof(RegistryProviderBase), GetLogger(typeof(RegistryProviderBase)), GetSettings())
             };
 
             // This is kinda hacky but the compiler is being dumb
@@ -36,5 +38,9 @@ namespace Clutch.API.Providers.Image
                 { RegistryType.Artifactory, typeof(RegistryProviderBase) }
             };
         }
+
+        private ILogger GetLogger(Type provider) => _serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(provider.Name);
+
+        private IOptions<AppSettings> GetSettings() => _serviceProvider.GetRequiredService<IOptions<AppSettings>>();
     }
 }
