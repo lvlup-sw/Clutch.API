@@ -11,7 +11,7 @@ Backend data services include a MariaDB instance hosted on my local NFS server.
 
 
 MVP Todo:
-    - Implement the rest of the endpoints for Container Service
+    - Finish implementing RegistryProviderBase
     - Write tests
     - Create manual MVP in GCP for API
         + Database connection..

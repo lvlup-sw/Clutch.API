@@ -12,6 +12,13 @@
         Task<T?> GetAsync(string key);
 
         /// <summary>
+        /// Asynchronously remove data from data source
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        Task<bool> DeleteAsync(string key);
+
+        /// <summary>
         /// Asynchronousy get batch of data from data source
         /// </summary>
         /// <param name="keys"></param>

@@ -5,7 +5,6 @@ using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
 using Clutch.API.Services.Interfaces;
 using Newtonsoft.Json;
-using RestSharp;
 using System.Text;
 using System.Security.Cryptography;
 
@@ -60,17 +59,19 @@ namespace Clutch.API.Services.Image
             }
 
             // If we have a valid model, try to set in the registry and database
-            return await TriggerBuildAsync(GenerateBuildParameters(image))
+            IRegistryProvider registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
+            return await registryProvider.SetManifestAsync(request)
                 && await _imageProvider.SetImageAsync(image);
         }
 
         public async Task<bool> DeleteImageAsync(ContainerImageRequest request, string version)
         {
-            string repositoryId = $"{request.Repository}:{request.Tag}";
+            // Construct the cache key from the parameters
+            string cacheKey = ConstructCacheKey(request, version);
 
             IRegistryProvider registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
             return await registryProvider.DeleteManifestAsync(request) 
-                && await _imageProvider.DeleteFromDatabaseAsync(repositoryId);
+                && await _cacheProvider.RemoveFromCacheAsync(cacheKey);
         }
 
         public async Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync()
@@ -79,7 +80,7 @@ namespace Clutch.API.Services.Image
             return await _imageProvider.GetLatestImagesAsync();
         }
 
-        private ContainerImageModel ConstructImageModel(ContainerImageRequest request, string version)
+        private static ContainerImageModel ConstructImageModel(ContainerImageRequest request, string version)
         {
             // Our pipeline will modify two values:
             // BuildDate and Status
@@ -109,37 +110,6 @@ namespace Clutch.API.Services.Image
             // in the hash into a two-character hexadecimal representation
             // We use the Version, Repository, and Tag as prefixes
             return $"{version}:{request.Repository}:{request.Tag}:{string.Join("", hash.Select(b => b.ToString("x2"))).ToLower()}";
-        }
-
-        private static BuildParameters GenerateBuildParameters(ContainerImageModel image)
-        {
-            return new();
-        }
-
-        public async Task<bool> TriggerBuildAsync(BuildParameters parameters)
-        {
-            /*
-            // Construct the image model from the build parameters
-            ContainerImageModel imageModel = new()
-            {
-                ImageID = 0,
-                Repository = parameters.Repository,
-                BuildDate = parameters.BuildDate,
-                Status = StatusEnum.Building,
-            };
-
-            // Trigger the build pipeline
-            // We do this by sending a POST request to the GitHub API
-            return await SendPostRequest(imageModel, parameters);
-            */
-
-            ContainerImageBuildResult result = new()
-            {
-                Success = true,
-                RegistryManifestModel = RegistryManifestModel.Null
-            };
-
-            return result.Success;
         }
     }
 }

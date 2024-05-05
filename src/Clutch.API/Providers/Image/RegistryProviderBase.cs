@@ -44,17 +44,21 @@ namespace Clutch.API.Providers.Image
             }
         }
 
-        public Task<bool> SetManifestAsync(RegistryManifestModel manifest)
+        public async Task<bool> SetManifestAsync(ContainerImageRequest request)
         {
-            throw new NotImplementedException();
+            // We will trigger the build pipeline here
+
+            return true;
         }
 
-        public Task<bool> DeleteManifestAsync(ContainerImageRequest request)
+        public async Task<bool> DeleteManifestAsync(ContainerImageRequest request)
         {
-            throw new NotImplementedException();
+            // We will call the api here
+
+            return true;
         }
 
-        public Task<IEnumerable<ContainerImageModel>?> GetLatestManifestsAsync()
+        public async Task<IEnumerable<ContainerImageModel>?> GetLatestManifestsAsync()
         {
             throw new NotImplementedException();
         }

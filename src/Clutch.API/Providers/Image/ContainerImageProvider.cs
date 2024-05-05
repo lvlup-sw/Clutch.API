@@ -93,8 +93,12 @@ namespace Clutch.API.Providers.Image
                 : default;
         }
 
-        public async Task<bool> DeleteFromDatabaseAsync(string repositoryId)
+        public async Task<bool> DeleteFromDatabaseAsync(string key)
         {
+            // Extract repository and tag from key
+            string[] keyItems = key.Split(':');
+            string repositoryId = $"{keyItems[1]}:{keyItems[2]}";
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to delete image from the database.");
@@ -121,6 +125,9 @@ namespace Clutch.API.Providers.Image
 
         // CacheProvider method
         public async Task<ContainerImageModel?> GetAsync(string key) => await GetImageByReferenceAsync(key);
+
+        // CacheProvider method
+        public async Task<bool> DeleteAsync(string key) => await DeleteFromDatabaseAsync(key);
 
         // CacheProvider method
         public async Task<Dictionary<string, ContainerImageModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = null)

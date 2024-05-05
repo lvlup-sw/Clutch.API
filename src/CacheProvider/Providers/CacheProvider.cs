@@ -156,8 +156,8 @@ namespace CacheProvider.Providers
             {
                 ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
-                var result = await _cache.RemoveAsync(key);
-                if (result)
+                bool cacheResult = await _cache.RemoveAsync(key);
+                if (cacheResult)
                 {
                     _logger.LogDebug("Entry with key {key} removed from cache.", key);
                 }
@@ -166,7 +166,17 @@ namespace CacheProvider.Providers
                     _logger.LogError("Failed to remove entry with key {key} from cache.", key);
                 }
 
-                return result;
+                bool providerResult = await _realProvider.DeleteAsync(key);
+                if (providerResult)
+                {
+                    _logger.LogDebug("Entry with key {key} removed from data source.", key);
+                }
+                else
+                {
+                    _logger.LogError("Failed to remove entry with key {key} from data source.", key);
+                }
+
+                return cacheResult && providerResult;
             }
             catch (Exception ex)
             {
