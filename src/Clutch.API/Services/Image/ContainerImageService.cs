@@ -23,10 +23,6 @@ namespace Clutch.API.Services.Image
         private readonly IRegistryProviderFactory _registryProviderFactory = registryProviderFactory;
         private readonly ILogger _logger = logger;
         private readonly AppSettings _settings = settings.Value;
-        private readonly RestClient _restClient = new("https://ghcr.io");
-        private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(settings.Value.GithubPAT!));
-        private const string org = "lvlup-sw";
-        private const string repository = "clutchapi";
 
         public async Task<ContainerImageResponseData> GetImageAsync(ContainerImageRequest request, string version)
         {
@@ -144,63 +140,5 @@ namespace Clutch.API.Services.Image
 
             return result.Success;
         }
-
-        /*
-        // Registry interactions
-        private async Task<RegistryManifest> GetManifestFromRegistry(ContainerImageRequest request)
-        {
-            // Construct the request
-            RestRequest restRequest = new($"/v2/{org}/{request.Repository}/manifests/{request.Tag}");
-            restRequest.AddHeader("Accept", "application/vnd.github+json");
-            restRequest.AddHeader("Authorization", $"Bearer {pat}");
-
-            // Send the request
-            RestResponse response = await _restClient.ExecuteAsync(restRequest);
-
-            if (!response.IsSuccessful)
-            {
-                _logger.LogError("Failed to retrieve image manifest from registry. StatusCode: {StatusCode}. ErrorMessage: {ErrorMessage}", response.StatusCode, response.ErrorMessage);
-                return RegistryManifest.Null;
-            }
-
-            try
-            {
-                return JsonConvert.DeserializeObject<RegistryManifest>(response.Content!) ?? RegistryManifest.Null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to deserialize image manifest. Exception: {ex}", ex.GetBaseException());
-                return RegistryManifest.Null;
-            }
-        }
-
-        private async Task<bool> SetImageInRegistry(ContainerImageModel image)
-        {
-            // We need to handle the following scenarios:
-            // - Image already exists in the registry
-            // - Image does not exist in the registry
-            //   + If image does not exist, we need to trigger the build pipeline
-            // We also need to create a tag for the image
-            // Most of the time, we can simply copy the semantic version of the release
-            throw new NotImplementedException();
-        }
-
-        private async Task<bool> DeleteFromRegistryAsync(string Repository)
-        {
-            // We need to call the GitHub API to delete the image from the registry.
-            // We will need to authenticate with a token.
-
-            return true;
-        }
-
-        private async Task<ContainerImageBuildResult> SendPostRequest(ContainerImageModel imageModel, BuildParameters parameters)
-        {
-            return new ContainerImageBuildResult
-            {
-                Success = true,
-                ContainerImageModel = imageModel
-            };
-        }
-        */
     }
 }
