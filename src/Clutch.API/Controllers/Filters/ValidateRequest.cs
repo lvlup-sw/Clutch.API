@@ -4,15 +4,15 @@ using Clutch.API.Models.Image;
 
 namespace Clutch.API.Controllers.Filters
 {
-    public class ValidateContainerImage : ActionFilterAttribute
+    public class ValidateRequest : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var image = context.ActionArguments["containerImage"] as ContainerImage;
+            var request = context.ActionArguments["request"] as ContainerImageRequest;
 
-            if (image is not null && !context.ModelState.IsValid)
+            if (request is not null && !context.ModelState.IsValid)
             {
-                context.ModelState.AddModelError("containerImage", "Invalid container image object.");
+                context.ModelState.AddModelError("request", "Invalid request object.");
                 context.Result = new BadRequestObjectResult(context.ModelState);
             }
         }

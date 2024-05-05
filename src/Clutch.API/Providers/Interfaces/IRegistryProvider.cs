@@ -5,8 +5,8 @@ namespace Clutch.API.Providers.Interfaces
 {
     public interface IRegistryProvider
     {
-        Task<RegistryManifest> GetManifestAsync(ContainerImageRequest request);
-        Task<bool> SetManifestAsync(RegistryManifest manifest);
+        Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request);
+        Task<bool> SetManifestAsync(RegistryManifestModel manifest);
         Task<bool> DeleteManifestAsync(ContainerImageRequest request);
         
         // Revisit this method

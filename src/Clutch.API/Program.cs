@@ -78,6 +78,17 @@ namespace Clutch.API
                     serviceProvider.GetRequiredService<IOptions<AppSettings>>()
                 );
             });
+            builder.Services.AddTransient<IRegistryProvider, RegistryProviderBase>(serviceProvider =>
+            {
+                return new RegistryProviderBase(
+                    serviceProvider.GetRequiredService<ILogger<RegistryProviderBase>>(),
+                    serviceProvider.GetRequiredService<IOptions<AppSettings>>()
+                );
+            });
+            builder.Services.AddTransient<IRegistryProviderFactory, RegistryProviderFactory>(serviceProvider =>
+            {
+                return new RegistryProviderFactory(serviceProvider);
+            });
             builder.Services.AddTransient<ICacheProvider<ContainerImageModel>>(serviceProvider =>
             {
                 return new CacheProvider<ContainerImageModel>(
@@ -92,6 +103,7 @@ namespace Clutch.API
                 return new ContainerImageService(
                     serviceProvider.GetRequiredService<ICacheProvider<ContainerImageModel>>(),
                     serviceProvider.GetRequiredService<IContainerImageProvider>(),
+                    serviceProvider.GetRequiredService<IRegistryProviderFactory>(),
                     serviceProvider.GetRequiredService<ILogger<ContainerImageService>>(),
                     serviceProvider.GetRequiredService<IOptions<AppSettings>>()
                 );

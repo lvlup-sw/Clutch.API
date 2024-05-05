@@ -5,6 +5,6 @@ namespace Clutch.API.Providers.Interfaces
 {
     public interface IRegistryProviderFactory
     {
-        IRegistryProvider CreateRegistryProvider(RegistryType type);
+        IRegistryProvider? CreateRegistryProvider(RegistryType type);
     }
 }

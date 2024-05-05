@@ -3,12 +3,12 @@ using Clutch.API.Providers.Interfaces;
 
 namespace Clutch.API.Providers.Image
 {
-    public class RegistryServiceFactory<T>(IServiceProvider serviceProvider) : IRegistryProviderFactory where T : IRegistryProvider
+    public class RegistryProviderFactory(IServiceProvider serviceProvider) : IRegistryProviderFactory
     {
         private readonly IServiceProvider _serviceProvider = serviceProvider;
         private readonly Dictionary<RegistryType, Type> _registryProviderMap = CreateMappings();
 
-        public IRegistryProvider CreateRegistryProvider(RegistryType type)
+        public IRegistryProvider? CreateRegistryProvider(RegistryType type)
         {
             bool success = _registryProviderMap.TryGetValue(type, out Type? provider);
 
@@ -18,9 +18,7 @@ namespace Clutch.API.Providers.Image
                 false => Activator.CreateInstance(typeof(RegistryProviderBase), _serviceProvider)
             };
 
-            return instance is IRegistryProvider result
-                ? result
-                : new RegistryProviderBase();
+            return instance as IRegistryProvider;
         }
 
         // Update mappings as new implementations are introduced

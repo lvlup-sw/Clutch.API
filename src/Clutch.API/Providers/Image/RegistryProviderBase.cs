@@ -1,21 +1,27 @@
 using CacheProvider.Providers.Interfaces;
 using Clutch.API.Models.Image;
+using Clutch.API.Properties;
+using Microsoft.Extensions.Options;
 
 namespace Clutch.API.Providers.Interfaces
 {
-    public class RegistryProviderBase : IRegistryProvider
+    // Implements GHCR
+    public class RegistryProviderBase(ILogger logger, IOptions<AppSettings> settings) : IRegistryProvider
     {
-        public Task<RegistryManifest> GetManifestAsync(ContainerImageRequest request, string version)
+        private readonly ILogger _logger = logger;
+        private readonly AppSettings _settings = settings.Value;
+
+        public Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> SetManifestAsync(RegistryManifest manifest)
+        public Task<bool> SetManifestAsync(RegistryManifestModel manifest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> DeleteManifestAsync(ContainerImageRequest request, string version)
+        public Task<bool> DeleteManifestAsync(ContainerImageRequest request)
         {
             throw new NotImplementedException();
         }

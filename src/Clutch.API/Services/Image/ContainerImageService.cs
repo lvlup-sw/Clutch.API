@@ -38,16 +38,16 @@ namespace Clutch.API.Services.Image
             if (image is null || !image.HasValue)
             {
                 _logger.LogError("Image not found in database.");
-                return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifest.Null);
+                return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifestModel.Null);
             }
 
             // Check the registry and construct the RegistryManifest
             IRegistryProvider? registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
-            RegistryManifest manifest = await registryProvider.GetManifestAsync(request);
+            RegistryManifestModel manifest = await registryProvider.GetManifestAsync(request);
             if (manifest is null || !manifest.HasValue)
             {
                 _logger.LogError("Image not found in registry.");
-                return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifest.Null);
+                return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifestModel.Null);
             }
             
             return new ContainerImageResponseData(true, image, manifest);

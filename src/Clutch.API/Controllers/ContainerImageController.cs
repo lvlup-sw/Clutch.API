@@ -18,8 +18,8 @@ namespace Clutch.API.Controllers
         private readonly IContainerImageService _service = service;
         private readonly IMapper _mapper = mapper;
 
-        [HttpGet("GetImage/{request}")]
-        //[ValidateRequest]  Validate ContainerImageRequest
+        [HttpGet("GetImage/")]
+        [ValidateRequest]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -33,15 +33,14 @@ namespace Clutch.API.Controllers
             return ValidateResponse(containerImageResponseData)
                 ? Ok(new ContainerImageResponse(
                     containerImageResponseData.Success,
-                    _mapper.Map<ContainerImageVersion>(containerImageResponseData.ContainerImageModel),
-                    containerImageResponseData.RegistryManifest
+                    _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel),
+                    _mapper.Map<RegistryManifest>(containerImageResponseData.RegistryManifestModel)
                 ))
                 : NotFound();
         }
 
         [HttpPut("SetImage/")]
-        [ValidateContainerImage]
-        // [ValidateRequest]
+        [ValidateRequest]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -57,8 +56,8 @@ namespace Clutch.API.Controllers
                 : NoContent();
         }
 
-        [HttpDelete("DeleteImage/{Repository}")]
-        [ValidateRepository]
+        [HttpDelete("DeleteImage/")]
+        [ValidateRequest]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -74,16 +73,16 @@ namespace Clutch.API.Controllers
                 : NoContent();
         }
 
-        [HttpGet("GetLatestImages")]
+        [HttpGet("GetLatestImages/")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<ActionResult<IEnumerable<ContainerImageVersion>>> GetLatestContainerImages()
+        public async Task<ActionResult<IEnumerable<ContainerImage>>> GetLatestContainerImages()
         {
             var containerImageModels = await _service.GetLatestImagesAsync();
 
-            return Ok(_mapper.Map<List<ContainerImageVersion>>(containerImageModels));
+            return Ok(_mapper.Map<List<ContainerImage>>(containerImageModels));
         }
 
         private static bool ValidateResponse(ContainerImageResponseData containerImageResponseData)
@@ -91,7 +90,7 @@ namespace Clutch.API.Controllers
             return containerImageResponseData is not null
                 && containerImageResponseData.Success
                 && containerImageResponseData.ContainerImageModel.HasValue
-                && containerImageResponseData.RegistryManifest.HasValue;
+                && containerImageResponseData.RegistryManifestModel.HasValue;
         }
 
         private static string GetAssemblyVersion() => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
