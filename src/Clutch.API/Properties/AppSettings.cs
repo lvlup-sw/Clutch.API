@@ -7,5 +7,7 @@
         public int ProviderRetryInterval { get; set; }
         public double CacheExpirationTime { get; set; }
         public string? GithubPAT { get; set; }
+
+        public string? DockerPAT { get; set; }
     }
 }

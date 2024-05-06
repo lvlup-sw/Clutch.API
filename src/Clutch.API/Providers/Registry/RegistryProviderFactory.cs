@@ -30,12 +30,11 @@ namespace Clutch.API.Providers.Registry
             return new()
             {
                 { RegistryType.Local, typeof(RegistryProviderBase) },
-                { RegistryType.Docker, typeof(RegistryProviderBase) },
-                { RegistryType.Google, typeof(RegistryProviderBase) },
-                { RegistryType.AWS, typeof(RegistryProviderBase) },
-                { RegistryType.Azure, typeof(RegistryProviderBase) },
-                { RegistryType.Harbor, typeof(RegistryProviderBase) },
-                { RegistryType.Artifactory, typeof(RegistryProviderBase) }
+                { RegistryType.Docker, typeof(DockerRegistryProvider) },
+                { RegistryType.Google, typeof(GoogleRegistryProvider) },
+                { RegistryType.AWS, typeof(AWSRegistryProvider) },
+                { RegistryType.Azure, typeof(AzureRegistryProvider) },
+                { RegistryType.Artifactory, typeof(ArtifactoryRegistryProvider) }
             };
         }
 

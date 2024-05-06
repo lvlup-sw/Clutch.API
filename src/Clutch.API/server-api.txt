@@ -11,9 +11,8 @@ Backend data services include a MariaDB instance hosted on my local NFS server.
 
 
 MVP Todo:
-    - Finish implementing RegistryProviderBase
-    - Implement DockerRegistryProvider
     - Write tests
+    - Rework or remove Status
     - Create manual MVP in GCP for API
         + Database connection..
         + API gateway
@@ -27,6 +26,8 @@ MVP Todo:
         + Modularized
         + Blue/Green deployment
         + Updates database with Status
+        + Scheduled workflow to update DB versioning
+            # Only for existing images listed in DB
 
 
 Endpoint Behavior

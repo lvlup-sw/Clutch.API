@@ -60,10 +60,8 @@ namespace Clutch.API.Services.Image
                 return false;
             }
 
-            // If we have a valid model, try to set in the registry and database
-            IRegistryProvider registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
-            return await registryProvider.SetManifestAsync(request)
-                && await _imageProvider.SetImageAsync(image);
+            // If we have a valid model, try to set in the database
+            return await _imageProvider.SetImageAsync(image);   // Change to cacheprovider
         }
 
         public async Task<bool> DeleteImageAsync(ContainerImageRequest request, string version)
@@ -71,14 +69,13 @@ namespace Clutch.API.Services.Image
             // Construct the cache key from the parameters
             string cacheKey = ConstructCacheKey(request, version);
 
-            IRegistryProvider registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
-            return await registryProvider.DeleteManifestAsync(request) 
-                && await _cacheProvider.RemoveFromCacheAsync(cacheKey);
+            return await _cacheProvider.RemoveFromCacheAsync(cacheKey);
         }
 
         public async Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync()
         {
             // TODO: Figure out a caching implementation for this
+            // This is essentially going to be used by the UI to get a list of Images to select from
             return await _imageProvider.GetLatestImagesAsync();
         }
 

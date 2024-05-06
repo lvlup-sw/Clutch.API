@@ -8,7 +8,6 @@
         Google = 2,
         AWS = 3,
         Azure = 4,
-        Harbor = 5,
-        Artifactory = 6
+        Artifactory = 5
     }
 }
