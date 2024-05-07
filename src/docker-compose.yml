@@ -16,6 +16,7 @@ services:
       dockerfile: Dockerfile 
     ports:
       - 8080:80
+      - 7102:8080 
     depends_on:
       - redis 
     networks:
