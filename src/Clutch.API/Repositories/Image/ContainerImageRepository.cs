@@ -13,7 +13,7 @@ namespace Clutch.API.Repositories.Image
         private readonly ContainerImageContext _context = context;
         private readonly ILogger _logger = logger;
 
-        public async Task<ContainerImageModel> GetImageByIdAsync(int imageId)
+        public async Task<ContainerImageModel> GetImageAsync(int imageId)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace Clutch.API.Repositories.Image
             }
         }
 
-        public async Task<ContainerImageModel> GetImageByReferenceAsync(string repositoryId)
+        public async Task<ContainerImageModel> GetImageAsync(string repositoryId)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace Clutch.API.Repositories.Image
             try
             {
                 // Auto-incrementing keys are always 0
-                if (newImage is null || newImage.ImageID != 0) return false;
+                if (!newImage.HasValue || newImage.ImageID != 0) return false;
 
                 _logger.LogDebug("Adding new image to the DB.");
                 _context.ContainerImages.Add(newImage);

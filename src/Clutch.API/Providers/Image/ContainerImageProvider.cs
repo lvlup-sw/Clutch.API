@@ -33,21 +33,21 @@ namespace Clutch.API.Providers.Image
             _policy = CreatePolicy();
         }
 
-        public async Task<ContainerImageModel?> GetImageByIdAsync(int imageId)
+        public async Task<ContainerImageModel?> GetImageAsync(int imageId)
         {
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to retrieve entry with ID {imageId} from database.", imageId);
-                ContainerImageModel data = await _repository.GetImageByIdAsync(imageId);
+                ContainerImageModel data = await _repository.GetImageAsync(imageId);
                 return data.HasValue ? data : ContainerImageModel.Null;
-            }, new Context($"ContainerImageProvider.GetImageByIdAsync for Image ID: {imageId}"));
+            }, new Context($"ContainerImageProvider.GetImageAsync for Image ID: {imageId}"));
 
             return result is ContainerImageModel image && image.HasValue 
                 ? image
                 : null;
         }
 
-        public async Task<ContainerImageModel?> GetImageByReferenceAsync(string key)
+        public async Task<ContainerImageModel?> GetImageAsync(string key)
         {
             // Extract repository and tag from key
             string[] keyItems = key.Split(':');
@@ -56,9 +56,9 @@ namespace Clutch.API.Providers.Image
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to retrieve entry with ref {repositoryId} from database.", repositoryId);
-                ContainerImageModel data = await _repository.GetImageByReferenceAsync(repositoryId);
+                ContainerImageModel data = await _repository.GetImageAsync(repositoryId);
                 return data.HasValue ? data : ContainerImageModel.Null;
-            }, new Context($"ContainerImageProvider.GetImageByReferenceAsync for Image Ref: {repositoryId}"));
+            }, new Context($"ContainerImageProvider.GetImageAsync for Image Ref: {repositoryId}"));
 
             return result is ContainerImageModel image && image.HasValue
                 ? image
@@ -124,7 +124,7 @@ namespace Clutch.API.Providers.Image
         }
 
         // CacheProvider method
-        public async Task<ContainerImageModel?> GetAsync(string key) => await GetImageByReferenceAsync(key);
+        public async Task<ContainerImageModel?> GetAsync(string key) => await GetImageAsync(key);
 
         // CacheProvider method
         public async Task<bool> DeleteAsync(string key) => await DeleteFromDatabaseAsync(key);

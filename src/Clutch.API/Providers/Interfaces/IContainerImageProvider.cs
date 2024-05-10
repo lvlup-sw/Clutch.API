@@ -5,8 +5,8 @@ namespace Clutch.API.Providers.Interfaces
 {
     public interface IContainerImageProvider : IRealProvider<ContainerImageModel>
     {
-        Task<ContainerImageModel?> GetImageByIdAsync(int imageId);
-        Task<ContainerImageModel?> GetImageByReferenceAsync(string key);
+        Task<ContainerImageModel?> GetImageAsync(int imageId);
+        Task<ContainerImageModel?> GetImageAsync(string key);
         Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync();
         Task<bool> SetImageAsync(ContainerImageModel image);
         Task<bool> DeleteFromDatabaseAsync(int imageId);
