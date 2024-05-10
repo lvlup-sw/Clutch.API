@@ -65,7 +65,7 @@ namespace Clutch.API
             builder.Services.AddDbContext<ContainerImageContext>(options =>
                 options.UseMySql(builder.Configuration.GetConnectionString("ClutchAPI"),
                     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("ClutchAPI")))
-            );
+            , ServiceLifetime.Singleton);
             builder.Services.AddTransient<IContainerImageRepository, ContainerImageRepository>(serviceProvier =>
             {
                 return new ContainerImageRepository(
