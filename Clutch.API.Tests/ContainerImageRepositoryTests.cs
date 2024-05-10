@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Data.Sqlite;
+using NuGet.Protocol.Core.Types;
+using YamlDotNet.Core.Tokens;
 
 namespace Clutch.API.Tests
 {
@@ -119,13 +121,81 @@ namespace Clutch.API.Tests
             Assert.IsFalse(result.HasValue);
         }
 
-        /*  TODO:
-            1. SetImageAsync
-                Success: New image with ID 0 properly inserted.
-                Null Input: Attempt to insert a null image.
-                Existing ID: Attempt to insert an image with a non-zero ID.
+        // DataRow doesn't allow for dynamically created items (aka objects)
+        [TestMethod]
+        public async Task SetImageAsync_Success1()
+        {
+            // Arrange
+            var request = GetContainerImageByRequest("test/image", "latest", RegistryType.Docker);
 
-            2. DeleteImageAsync (both overloads)
+            // Act
+            var result = await _repository.SetImageAsync(request);
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsTrue(_context.ContainerImages.Any());
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Success2()
+        {
+            // Arrange
+            var request = GetContainerImageByRequest("joedwards32/cs2", "latest", RegistryType.Docker);
+
+            // Act
+            var result = await _repository.SetImageAsync(request);
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsTrue(_context.ContainerImages.Any());
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Success3()
+        {
+            // Arrange
+            var request = GetContainerImageByRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+
+            // Act
+            var result = await _repository.SetImageAsync(request);
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsTrue(_context.ContainerImages.Any());
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Failure1(ContainerImageRequest request)
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Failure2(ContainerImageRequest request)
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Failure3_WithNull(ContainerImageRequest request)
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+        }      
+
+        /*  TODO:
+            1. DeleteImageAsync (both overloads)
                 Success: Image found and deleted.
                 Not Found: Image ID/Repository ID doesn't exist.
         */
@@ -159,6 +229,21 @@ namespace Clutch.API.Tests
                 Version = "1.0.0"
             };
         }
+
+        private static ContainerImageModel GetContainerImageByRequest(string repository, string tag, RegistryType registry)
+        {
+            return new ContainerImageModel
+            {
+                ImageID = 1,
+                RepositoryId = $"{repository}:{tag}",
+                Repository = repository,
+                Tag = tag,
+                BuildDate = DateTime.MaxValue,
+                RegistryType = registry,
+                Status = StatusEnum.Available,
+                Version = "1.0.0"
+            };
+        }        
 
         private static bool ImagesAreEqual(ContainerImageModel expectedImage, ContainerImageModel result)
         {
