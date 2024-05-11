@@ -12,11 +12,7 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheProvider", "CacheProvider\CacheProvider.csproj", "{56C8C527-2855-40CB-92AF-B93B45FBF19C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clutch.API.Tests", "..\Clutch.API.Tests\Clutch.API.Tests.csproj", "{6B20621F-123F-454F-9731-DB76DDECAE4C}"
-	ProjectSection(ProjectDependencies) = postProject
-		{56C8C527-2855-40CB-92AF-B93B45FBF19C} = {56C8C527-2855-40CB-92AF-B93B45FBF19C}
-		{A6C08F0C-B416-4112-9833-1DCFBE363CB7} = {A6C08F0C-B416-4112-9833-1DCFBE363CB7}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API.Tests", "Clutch.API.Tests\Clutch.API.Tests.csproj", "{7E050FCE-6C7F-492F-B5F3-C023416EABB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,10 +32,10 @@ Global
 		{56C8C527-2855-40CB-92AF-B93B45FBF19C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56C8C527-2855-40CB-92AF-B93B45FBF19C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56C8C527-2855-40CB-92AF-B93B45FBF19C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B20621F-123F-454F-9731-DB76DDECAE4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B20621F-123F-454F-9731-DB76DDECAE4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B20621F-123F-454F-9731-DB76DDECAE4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B20621F-123F-454F-9731-DB76DDECAE4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E050FCE-6C7F-492F-B5F3-C023416EABB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E050FCE-6C7F-492F-B5F3-C023416EABB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E050FCE-6C7F-492F-B5F3-C023416EABB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E050FCE-6C7F-492F-B5F3-C023416EABB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

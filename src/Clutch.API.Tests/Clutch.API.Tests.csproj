@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Clutch.API\Clutch.API.csproj" />
+    <ProjectReference Include="..\Clutch.API\Clutch.API.csproj" />
   </ItemGroup>
 
   <ItemGroup>

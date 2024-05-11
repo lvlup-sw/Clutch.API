@@ -51,7 +51,7 @@ namespace Clutch.API.Providers.Image
         {
             // Extract repository and tag from key
             string[] keyItems = key.Split(':');
-            string repositoryId = $"{keyItems[1]}:{keyItems[2]}";
+            string repositoryId = $"{keyItems[0]}:{keyItems[1]}";
 
             object result = await _policy.ExecuteAsync(async (context) =>
             {

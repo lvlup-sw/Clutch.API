@@ -47,17 +47,17 @@ namespace Clutch.API.Tests
         public async Task GetImageByIdAsync_Success(int testImageId)
         {
             // Arrange
-            var expectedImage = GetContainerImage(testImageId);
+            var expectedImage = TestUtils.GetContainerImage(testImageId);
 
             // Seed database
-            _context.ContainerImages.Add(GetContainerImage(testImageId));
+            _context.ContainerImages.Add(TestUtils.GetContainerImage(testImageId));
             _context.SaveChanges();
 
             // Act
             var result = await _repository.GetImageAsync(testImageId);
 
             // Assert
-            Assert.IsTrue(ImagesAreEqual(expectedImage, result));
+            Assert.IsTrue(TestUtils.ImagesAreEqual(expectedImage, result));
         }
 
         [DataTestMethod]
@@ -69,7 +69,7 @@ namespace Clutch.API.Tests
         {
             // Arrange
             // Seed database
-            _context.ContainerImages.Add(GetContainerImage(5));
+            _context.ContainerImages.Add(TestUtils.GetContainerImage(5));
             _context.SaveChanges();
 
             // Act
@@ -87,17 +87,17 @@ namespace Clutch.API.Tests
         public async Task GetImageByReferenceAsync_Success(string repositoryId)
         {
             // Arrange
-            var expectedImage = GetContainerImageByReference(repositoryId);
+            var expectedImage = TestUtils.GetContainerImageByReference(repositoryId);
 
             // Seed database
-            _context.ContainerImages.Add(GetContainerImageByReference(repositoryId));
+            _context.ContainerImages.Add(TestUtils.GetContainerImageByReference(repositoryId));
             _context.SaveChanges();
 
             // Act
             var result = await _repository.GetImageAsync(repositoryId);
 
             // Assert
-            Assert.IsTrue(ImagesAreEqual(expectedImage, result));
+            Assert.IsTrue(TestUtils.ImagesAreEqual(expectedImage, result));
         }
 
         [DataTestMethod]
@@ -109,7 +109,7 @@ namespace Clutch.API.Tests
         {
             // Arrange
             // Seed database
-            _context.ContainerImages.Add(GetContainerImageByReference("tensorflow/tensorflow:latest"));
+            _context.ContainerImages.Add(TestUtils.GetContainerImageByReference("tensorflow/tensorflow:latest"));
             _context.SaveChanges();
 
             // Act
@@ -124,7 +124,7 @@ namespace Clutch.API.Tests
         public async Task SetImageAsync_Success1()
         {
             // Arrange
-            var request = GetContainerImageByRequest("test/image", "latest", RegistryType.Docker);
+            var request = TestUtils.GetContainerImageByRequest("test/image", "latest", RegistryType.Docker);
 
             // Act
             var result = await _repository.SetImageAsync(request);
@@ -138,7 +138,7 @@ namespace Clutch.API.Tests
         public async Task SetImageAsync_Success2()
         {
             // Arrange
-            var request = GetContainerImageByRequest("joedwards32/cs2", "latest", RegistryType.Docker);
+            var request = TestUtils.GetContainerImageByRequest("joedwards32/cs2", "latest", RegistryType.Docker);
 
             // Act
             var result = await _repository.SetImageAsync(request);
@@ -152,7 +152,7 @@ namespace Clutch.API.Tests
         public async Task SetImageAsync_Success3()
         {
             // Arrange
-            var request = GetContainerImageByRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var request = TestUtils.GetContainerImageByRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
 
             // Act
             var result = await _repository.SetImageAsync(request);
@@ -166,7 +166,7 @@ namespace Clutch.API.Tests
         public async Task SetImageAsync_Failure1_WithInvalid()
         {
             // Arrange
-            var request = GetContainerImageByRequest("", "", RegistryType.Invalid);
+            var request = TestUtils.GetContainerImageByRequest("", "", RegistryType.Invalid);
 
             // Act
             var result = await _repository.SetImageAsync(request);
@@ -213,7 +213,7 @@ namespace Clutch.API.Tests
         {
             // Arrange
             // Seed database
-            _context.ContainerImages.Add(GetContainerImage(imageId));
+            _context.ContainerImages.Add(TestUtils.GetContainerImage(imageId));
             _context.SaveChanges();
 
             // Act
@@ -233,7 +233,7 @@ namespace Clutch.API.Tests
         {
             // Arrange
             // Seed database
-            _context.ContainerImages.Add(GetContainerImageByReference(repositoryId));
+            _context.ContainerImages.Add(TestUtils.GetContainerImageByReference(repositoryId));
             _context.SaveChanges();
 
             // Act
@@ -253,7 +253,7 @@ namespace Clutch.API.Tests
         {
             // Arrange
             // Seed database
-            _context.ContainerImages.Add(GetContainerImage(5));
+            _context.ContainerImages.Add(TestUtils.GetContainerImage(5));
             _context.SaveChanges();
 
             // Act
@@ -261,7 +261,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsFalse(result);
-            Assert.IsTrue(_context.ContainerImages.Contains(GetContainerImage(5)));
+            Assert.IsTrue(_context.ContainerImages.Contains(TestUtils.GetContainerImage(5)));
         }
 
         [DataTestMethod]
@@ -273,7 +273,7 @@ namespace Clutch.API.Tests
         {
             // Arrange
             // Seed database
-            _context.ContainerImages.Add(GetContainerImageByReference("tensorflow/tensorflow:latest"));
+            _context.ContainerImages.Add(TestUtils.GetContainerImageByReference("tensorflow/tensorflow:latest"));
             _context.SaveChanges();
 
             // Act
@@ -281,65 +281,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsFalse(result);
-            Assert.IsTrue(_context.ContainerImages.Contains(GetContainerImageByReference("tensorflow/tensorflow:latest")));
-        }
-
-        private static ContainerImageModel GetContainerImage(int testImageId)
-        {
-            return new ContainerImageModel
-            {
-                ImageID = testImageId,
-                RepositoryId = "test/image:latest",
-                Repository = "test/image",
-                Tag = "latest",
-                BuildDate = DateTime.MaxValue,
-                RegistryType = RegistryType.Docker,
-                Status = StatusEnum.Available,
-                Version = "1.0.0"
-            };
-        }
-
-        private static ContainerImageModel GetContainerImageByReference(string repositoryId)
-        {
-            return new ContainerImageModel
-            {
-                ImageID = 1,
-                RepositoryId = repositoryId,
-                Repository = repositoryId[..repositoryId.IndexOf(':')],
-                Tag = "latest",
-                BuildDate = DateTime.MaxValue,
-                RegistryType = RegistryType.Docker,
-                Status = StatusEnum.Available,
-                Version = "1.0.0"
-            };
-        }
-
-        private static ContainerImageModel GetContainerImageByRequest(string repository, string tag, RegistryType registry)
-        {
-            return new ContainerImageModel
-            {
-                ImageID = 0,
-                RepositoryId = $"{repository}:{tag}",
-                Repository = repository,
-                Tag = tag,
-                BuildDate = DateTime.MaxValue,
-                RegistryType = registry,
-                Status = StatusEnum.Available,
-                Version = "1.0.0"
-            };
-        }        
-
-        private static bool ImagesAreEqual(ContainerImageModel expectedImage, ContainerImageModel result)
-        {
-            return
-                result.ImageID == expectedImage.ImageID &&
-                result.RepositoryId == expectedImage.RepositoryId &&
-                result.Repository == expectedImage.Repository &&
-                result.Tag == expectedImage.Tag &&
-                result.BuildDate == expectedImage.BuildDate &&
-                result.RegistryType == expectedImage.RegistryType &&
-                result.Status == expectedImage.Status &&
-                result.Version == expectedImage.Version;
+            Assert.IsTrue(_context.ContainerImages.Contains(TestUtils.GetContainerImageByReference("tensorflow/tensorflow:latest")));
         }
     }
 }
