@@ -113,7 +113,7 @@ namespace Clutch.API.Tests
             _context.SaveChanges();
 
             // Act
-            var result = await _repository.GetImageAsync(repositoryId);
+            var result = await _repository.GetImageAsync($"1.0.0:{repositoryId}:testhash");
 
             // Assert
             Assert.IsFalse(result.HasValue);
@@ -263,7 +263,7 @@ namespace Clutch.API.Tests
             _context.SaveChanges();
 
             // Act
-            var result = await _repository.DeleteImageAsync(repositoryId);
+            var result = await _repository.DeleteImageAsync($"1.0.0:{repositoryId}:testhash");
 
             // Assert
             Assert.IsFalse(result);

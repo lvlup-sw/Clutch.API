@@ -50,6 +50,7 @@ namespace Clutch.API
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
+            builder.WebHost.UseKestrel(options => { options.ListenAnyIP(8080); });
             builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             builder.Configuration.AddEnvironmentVariables();
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -143,11 +144,7 @@ namespace Clutch.API
             }
 
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Clutch.API V1"); 
-                c.RoutePrefix = "";
-            });
+            app.UseSwaggerUI();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();

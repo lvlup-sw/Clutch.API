@@ -107,7 +107,7 @@ namespace Clutch.API.Tests
                 .ReturnsAsync(expectedImage);
 
             // Act
-            var result = await _provider.GetImageAsync(repositoryId);
+            var result = await _provider.GetImageAsync($"1.0.0:{repositoryId}:testhash");
 
             // Assert
             Assert.IsNotNull(result);
@@ -128,7 +128,7 @@ namespace Clutch.API.Tests
                 .ReturnsAsync(default(ContainerImageModel));
 
             // Act
-            var result = await _provider.GetImageAsync(repositoryId);
+            var result = await _provider.GetImageAsync($"1.0.0:{repositoryId}:testhash");
 
             // Assert
             Assert.IsNull(result);
@@ -288,7 +288,7 @@ namespace Clutch.API.Tests
                 .Returns(Task.FromResult(true));
 
             // Act
-            var result = await _provider.DeleteFromDatabaseAsync(repositoryId);
+            var result = await _provider.DeleteFromDatabaseAsync($"1.0.0:{repositoryId}:testhash");
 
             // Assert
             Assert.IsTrue(result);
@@ -307,7 +307,7 @@ namespace Clutch.API.Tests
                 .Returns(Task.FromResult(false));
 
             // Act
-            var result = await _provider.DeleteFromDatabaseAsync(repositoryId);
+            var result = await _provider.DeleteFromDatabaseAsync($"1.0.0:{repositoryId}:testhash");
 
             // Assert
             Assert.IsFalse(result);

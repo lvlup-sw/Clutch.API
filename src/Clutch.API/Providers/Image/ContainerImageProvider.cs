@@ -51,12 +51,9 @@ namespace Clutch.API.Providers.Image
 
         public async Task<ContainerImageModel?> GetImageAsync(string key)
         {
-            if (string.IsNullOrEmpty(key)) return null;
-
             // Extract repository and tag from key
-            string[] keyItems = key.Split(':');
-            if (keyItems.Length != 2) return null;
-            string repositoryId = $"{keyItems[0]}:{keyItems[1]}";
+            string repositoryId = ExtractIdFromKey(key);
+            if (string.IsNullOrEmpty(repositoryId)) return null;
 
             object result = await _policy.ExecuteAsync(async (context) =>
             {
@@ -94,7 +91,6 @@ namespace Clutch.API.Providers.Image
                 return await _repository.SetImageAsync(image);
             }, new Context($"ContainerImageProvider.SetImageAsync for Image Ref: {image.Repository}"));
 
-            // TODO: We need to trigger the build pipeline before returning.
             return result is bool success
                 ? success
                 : default;
@@ -102,12 +98,9 @@ namespace Clutch.API.Providers.Image
 
         public async Task<bool> DeleteFromDatabaseAsync(string key)
         {
-            if (string.IsNullOrEmpty(key)) return false;
-
             // Extract repository and tag from key
-            string[] keyItems = key.Split(':');
-            if (keyItems.Length != 2) return false;
-            string repositoryId = $"{keyItems[0]}:{keyItems[1]}";
+            string repositoryId = ExtractIdFromKey(key);
+            if (string.IsNullOrEmpty(repositoryId)) return false;
 
             object result = await _policy.ExecuteAsync(async (context) =>
             {
@@ -148,6 +141,22 @@ namespace Clutch.API.Providers.Image
         public async Task<Dictionary<string, ContainerImageModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+
+        private string ExtractIdFromKey(string key)
+        {
+            try
+            {
+                // Expected key format: {version}:{repository}:{tag}:{hash}
+                string[] keyItems = key.Split(':');
+                if (keyItems.Length != 4) throw new Exception();
+                return $"{keyItems[1]}:{keyItems[2]}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unable to extract valid Id from cache key: {key}", key);
+                return string.Empty;
+            }
         }
 
         private AsyncPolicyWrap<object> CreatePolicy()

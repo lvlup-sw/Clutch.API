@@ -9,12 +9,14 @@ services:
 
   Clutch.api:
     image: ${DOCKER_REGISTRY-}clutchapi
+    volumes:
+      - ../src/Clutch.API:/app
     build:
       context: .
       dockerfile: Clutch.API/Dockerfile 
     ports:
-      - 8080:80
-      - 7102:8080 
+      - 8080:8080
+      # MAC - 7102:8080 
     depends_on:
       - redis 
     networks:
