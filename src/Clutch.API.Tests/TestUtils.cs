@@ -1,5 +1,8 @@
 ﻿using Clutch.API.Models.Enums;
 using Clutch.API.Models.Image;
+using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Clutch.API.Tests
 {
@@ -61,6 +64,27 @@ namespace Clutch.API.Tests
                 result.RegistryType == expectedImage.RegistryType &&
                 result.Status == expectedImage.Status &&
                 result.Version == expectedImage.Version;
+        }
+
+        public static ContainerImageRequest GetContainerImageRequest(string repository, string tag, RegistryType registry)
+        {
+            return new()
+            {
+                Repository = repository,
+                Tag = tag,
+                RegistryType= registry
+            };
+        }
+
+        public static string ConstructCacheKey(ContainerImageRequest request, string version)
+        {
+            byte[] hash = SHA256.HashData(
+                Encoding.UTF8.GetBytes(
+                    JsonConvert.SerializeObject(request)
+                )
+            );
+
+            return $"{version}:{request.Repository}:{request.Tag}:{string.Join("", hash.Select(b => b.ToString("x2"))).ToLower()}";
         }
     }
 }

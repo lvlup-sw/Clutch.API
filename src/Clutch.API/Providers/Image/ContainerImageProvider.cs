@@ -186,7 +186,7 @@ namespace Clutch.API.Providers.Image
                         return Task.CompletedTask;
                     });
 
-            return Policy.WrapAsync(retryPolicy, fallbackPolicy);
+            return fallbackPolicy.WrapAsync(retryPolicy);
         }
     }
 }

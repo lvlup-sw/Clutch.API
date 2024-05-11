@@ -79,21 +79,29 @@ namespace Clutch.API.Services.Image
             return await _imageProvider.GetLatestImagesAsync();
         }
 
-        private static ContainerImageModel ConstructImageModel(ContainerImageRequest request, string version)
+        private ContainerImageModel ConstructImageModel(ContainerImageRequest request, string version)
         {
             // Our pipeline will modify two values:
             // BuildDate and Status
-            return new ContainerImageModel()
+            try
             {
-                ImageID = 0,
-                RepositoryId = $"{request.Repository}:{request.Tag}",
-                Repository = request.Repository,
-                Tag = request.Tag,
-                BuildDate = DateTime.Now,
-                RegistryType = request.RegistryType,
-                Status = StatusEnum.Unavailable,
-                Version = version
-            };
+                return new ContainerImageModel()
+                {
+                    ImageID = 0,
+                    RepositoryId = $"{request.Repository}:{request.Tag}",
+                    Repository = request.Repository,
+                    Tag = request.Tag,
+                    BuildDate = DateTime.Now,
+                    RegistryType = request.RegistryType,
+                    Status = StatusEnum.Available,
+                    Version = version
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.GetBaseException(), "Error creating the image model to set in DB.");
+                return ContainerImageModel.Null;
+            }
         }
 
         private static string ConstructCacheKey(ContainerImageRequest request, string version)

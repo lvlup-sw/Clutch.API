@@ -345,5 +345,57 @@ namespace Clutch.API.Tests
             Assert.IsNull(result);
             _mockRepository.Verify(repo => repo.GetImageAsync(123), Times.Once);
         }
+
+        [TestMethod]
+        public async Task GetImageAsync_TransientError_RetriesCorrectly()
+        {
+            // Arrange
+            var expectedImage = TestUtils.GetContainerImage(1);
+            int retryCount = 0;
+            _mockRepository
+                .Setup(repo => repo.GetImageAsync(It.IsAny<int>()))
+                .ReturnsAsync(() =>
+                {
+                    if (retryCount < 1)
+                    {
+                        retryCount++;
+                        throw new Exception("Transient error");
+                    }
+                    return expectedImage;
+                });
+
+            // Act
+            var result = await _provider.GetImageAsync(1);
+
+            // Assert
+            Assert.AreEqual(expectedImage, result);
+            _mockRepository.Verify(repo => repo.GetImageAsync(1), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_TransientError_UsesFallbackCorrectly()
+        {
+            // Arrange
+            var expectedImage = TestUtils.GetContainerImage(1);
+            int retryCount = 0;
+            _mockRepository
+                .Setup(repo => repo.GetImageAsync(It.IsAny<int>()))
+                .ReturnsAsync(() =>
+                {
+                    if (retryCount < 1)
+                    {
+                        retryCount++;
+                        throw new Exception("Transient error");
+                    }
+                    throw new Exception("Final transient error");
+                });
+
+            // Act
+            var result = await _provider.GetImageAsync(1);
+
+            // Assert
+            Assert.IsNull(result);
+            _mockRepository.Verify(repo => repo.GetImageAsync(1), Times.Exactly(2));
+        }
     }
 }
