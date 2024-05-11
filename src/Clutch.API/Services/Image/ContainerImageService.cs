@@ -52,7 +52,10 @@ namespace Clutch.API.Services.Image
 
         public async Task<bool> SetImageAsync(ContainerImageRequest request, string version)
         {
-            // First we need to construct the image model from the request
+            // Construct the cache key from the parameters
+            string cacheKey = ConstructCacheKey(request, version);
+
+            // Construct the image model from the request
             ContainerImageModel image = ConstructImageModel(request, version);
             if (image is null || !image.HasValue)
             {
@@ -61,7 +64,7 @@ namespace Clutch.API.Services.Image
             }
 
             // If we have a valid model, try to set in the database
-            return await _imageProvider.SetImageAsync(image);   // Change to cacheprovider
+            return await _cacheProvider.SetInCacheAsync(cacheKey, image);
         }
 
         public async Task<bool> DeleteImageAsync(ContainerImageRequest request, string version)

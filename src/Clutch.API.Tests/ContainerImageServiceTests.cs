@@ -52,6 +52,17 @@ namespace Clutch.API.Tests
             _mockRegistryProviderFactory.Reset();
         }
 
+        /*  TODO:
+            GetImageAsync_Success1-3()
+            GetImageAsync_ImageNotFoundInCache_CallsImageProvider
+            GetImageAsync_ImageNotFoundInRegistry
+            GetImageAsync_ErrorRetrievingFromCache
+            GetImageAsync_ErrorRetrievingFromRegistry
+            SetImageAsync_Success
+            SetImageAsync_Failure
+            DeleteImageAsync_Success
+            DeleteImageAsync_Failure
+        */
 
         [TestMethod]
         public async Task GetImageAsync_Success1()

@@ -10,9 +10,17 @@ Interacts with another service (K8s)
 Backend data services include a MariaDB instance hosted on my local NFS server.
 
 
-MVP Todo:
+Container API MVP Todo:
     - Write tests
-    - Rework or remove Status
+		+ Service
+			# Change return for SetImage
+		+ RegistryProvider
+		+ Controller
+		+ CacheProvider
+		+ Integration
+    - Replace Status and BuildDate
+		=> LatestDeploymentId
+		=> LatestDeploymentTime
     - Create manual MVP in GCP for API
         + Database connection..
         + API gateway
@@ -25,7 +33,7 @@ MVP Todo:
         + Automated testing
         + Modularized
         + Blue/Green deployment
-        + Updates database with Status
+        + Updates database with Deployment information
         + Scheduled workflow to update DB versioning
             # Only for existing images listed in DB
 
@@ -109,3 +117,22 @@ Suppose your /monitor endpoint shows that the response time of your pods has exc
 
 
 Assuming we are hosting the K8s service on AWS as EKS, the optimal way would be to have the controller publish events to AWS (such as an SNS topic) depending on certain criteria/conditions. If we wanted to, we could also have a listener hitting the /MONITOR endpoint as well. We could then have a lambda trigger remediation by sending a request to the /UPDATE (?) or other endpoints.
+
+
+
+{
+  "repository": "lvlup-sw/clutchapi",
+  "tag": "dev",
+  "registryType": 0
+}
+
+{
+  "repository": "joedwards32/cs2",
+  "tag": "latest",
+  "registryType": 1
+}
+
+curl -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Authorization: Bearer $token" -s "https://registry-1.docker.io/v2/joedwards32/manifests/latest" | jq .
+
+
+token=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:joedwards32:pull" \ | jq -r '.token')

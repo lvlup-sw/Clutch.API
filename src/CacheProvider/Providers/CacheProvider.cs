@@ -119,15 +119,15 @@ namespace CacheProvider.Providers
         /// <param name="key">The key to use for caching the data.</param>
         /// <param name="data">The data to cache.</param>
         /// <returns>True if the operation is successful; otherwise, false.</returns>
-        public async Task<bool> SetInCacheAsync(string key, T data, TimeSpan? expiration = null)
+        public async Task<bool> SetInCacheAsync(string key, T data, TimeSpan? expiration = default)
         {
             try
             {
                 ArgumentNullException.ThrowIfNull(data);
                 ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
-                bool result = await _cache.SetAsync(key, data, expiration);
-                if (result)
+                bool cacheResult = await _cache.SetAsync(key, data, expiration);
+                if (cacheResult)
                 {
                     _logger.LogDebug("Entry with key {key} set in cache.", key);
                 }
@@ -136,7 +136,17 @@ namespace CacheProvider.Providers
                     _logger.LogError("Failed to set entry with key {key} in cache.", key);
                 }
 
-                return result;
+                bool providerResult = await _realProvider.SetAsync(data);
+                if (providerResult)
+                {
+                    _logger.LogDebug("Entry with key {key} removed from data source.", key);
+                }
+                else
+                {
+                    _logger.LogError("Failed to remove entry with key {key} from data source.", key);
+                }
+
+                return cacheResult && providerResult;
             }
             catch (Exception ex)
             {

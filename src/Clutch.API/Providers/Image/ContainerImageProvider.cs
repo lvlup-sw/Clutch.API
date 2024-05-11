@@ -139,10 +139,13 @@ namespace Clutch.API.Providers.Image
         public async Task<ContainerImageModel?> GetAsync(string key) => await GetImageAsync(key);
 
         // CacheProvider method
+        public async Task<bool> SetAsync(ContainerImageModel data) => await SetImageAsync(data);
+
+        // CacheProvider method
         public async Task<bool> DeleteAsync(string key) => await DeleteFromDatabaseAsync(key);
 
         // CacheProvider method
-        public async Task<Dictionary<string, ContainerImageModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = null)
+        public async Task<Dictionary<string, ContainerImageModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = default)
         {
             throw new NotImplementedException();
         }

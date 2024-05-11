@@ -21,7 +21,7 @@ namespace CacheProvider.Providers.Interfaces
         /// <param name="key">The key to use for the .</param>
         /// <param name="data">The  to add to the cache.</param>
         /// <param name="expiration">The expiration time for the record.</param>
-        Task<bool> SetInCacheAsync(string key, T data, TimeSpan? expiration);
+        Task<bool> SetInCacheAsync(string key, T data, TimeSpan? expiration = default);
 
         /// <summary>
         /// Asynchronously removes an entry from the cache using a key.

@@ -12,7 +12,15 @@
         Task<T?> GetAsync(string key);
 
         /// <summary>
-        /// Asynchronously remove data from data source
+        /// Asynchronously set data in data source
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        Task<bool> SetAsync(T data);
+
+        /// <summary>
+        /// Asynchronously delete data from data source
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
