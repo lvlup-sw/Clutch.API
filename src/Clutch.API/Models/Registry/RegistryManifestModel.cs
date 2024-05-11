@@ -26,7 +26,7 @@ namespace Clutch.API.Models.Registry
             get
             {
                 if (string.IsNullOrEmpty(MediaType)) return true;
-                if (Config.Count == 0) return true;
+                if (Config.Size == 0) return true;
                 if (Layers.Count == 0) return true;
                 return false;
             }

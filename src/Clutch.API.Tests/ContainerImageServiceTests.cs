@@ -8,6 +8,7 @@ using CacheProvider.Providers.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using Clutch.API.Providers.Registry;
 
 namespace Clutch.API.Tests
 {
@@ -53,7 +54,6 @@ namespace Clutch.API.Tests
         }
 
         /*  TODO:
-            GetImageAsync_Success1-3()
             GetImageAsync_ImageNotFoundInCache_CallsImageProvider
             GetImageAsync_ImageNotFoundInRegistry
             GetImageAsync_ErrorRetrievingFromCache
@@ -67,30 +67,88 @@ namespace Clutch.API.Tests
         [TestMethod]
         public async Task GetImageAsync_Success1()
         {
-            // Need to create TestUtils methods for RegistryManifestModel
-            /*
             // Arrange
-            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
             var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
-            var expectedImage = TestUtils.GetContainerImageByRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
-            var expectedManifest = new RegistryManifestModel { };
-                                                                     
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey)).ReturnsAsync(expectedImage);
+            var expectedImage = TestUtils.GetContainerImageByRequest("test/image", "latest", RegistryType.Docker);
+            var expectedManifest = TestUtils.GetRegistryManifestModel();
+            ContainerImageResponseData expectedResponse = new(true, expectedImage, expectedManifest);
 
             var mockRegistryProvider = new Mock<IRegistryProvider>();
-            mockRegistryProvider.Setup(r => r.GetManifestAsync(request)).ReturnsAsync(expectedManifest);
-            _mockRegistryProviderFactory.Setup(f => f.CreateRegistryProvider(It.IsAny<RegistryType>()))
-                                       .Returns(mockRegistryProvider.Object);
+            mockRegistryProvider.Setup(r => r.GetManifestAsync(request))
+                .Returns(Task.FromResult(expectedManifest));
+            _mockRegistryProviderFactory
+                .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Docker)))
+                .Returns(mockRegistryProvider.Object);
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(expectedImage);
 
             // Act
             var result = await _service.GetImageAsync(request, version);
 
             // Assert
-            Assert.IsTrue(result.IsSuccess);
-            Assert.AreEqual(expectedImage, result.Image);
-            Assert.AreEqual(expectedManifest, result.Manifest);
-            */
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_Success2()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+            var expectedImage = TestUtils.GetContainerImageByRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            var expectedManifest = TestUtils.GetRegistryManifestModel();
+            ContainerImageResponseData expectedResponse = new(true, expectedImage, expectedManifest);
+
+            var mockRegistryProvider = new Mock<IRegistryProvider>();
+            mockRegistryProvider.Setup(r => r.GetManifestAsync(request))
+                .Returns(Task.FromResult(expectedManifest));
+            _mockRegistryProviderFactory
+                .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Docker)))
+                .Returns(mockRegistryProvider.Object);
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(expectedImage);
+
+            // Act
+            var result = await _service.GetImageAsync(request, version);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_Success3()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+            var expectedImage = TestUtils.GetContainerImageByRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var expectedManifest = TestUtils.GetRegistryManifestModel();
+            ContainerImageResponseData expectedResponse = new(true, expectedImage, expectedManifest);
+
+            var mockRegistryProvider = new Mock<IRegistryProvider>();
+            mockRegistryProvider.Setup(r => r.GetManifestAsync(request))
+                .Returns(Task.FromResult(expectedManifest));
+            _mockRegistryProviderFactory
+                .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Local)))
+                .Returns(mockRegistryProvider.Object);
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(expectedImage);
+
+            // Act
+            var result = await _service.GetImageAsync(request, version);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
         }
     }
 }
