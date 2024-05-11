@@ -56,6 +56,7 @@ namespace Clutch.API.Tests
         [TestMethod]
         public async Task GetImageAsync_Success1()
         {
+            // Need to create TestUtils methods for RegistryManifestModel
             /*
             // Arrange
             var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
