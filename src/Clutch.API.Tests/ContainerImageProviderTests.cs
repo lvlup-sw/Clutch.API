@@ -5,6 +5,8 @@ using Clutch.API.Properties;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using Clutch.API.Models.Enums;
+using NuGet.Protocol.Core.Types;
 
 namespace Clutch.API.Tests
 {
@@ -80,6 +82,20 @@ namespace Clutch.API.Tests
         }
 
         [DataTestMethod]
+        [DataRow(0)]
+        [DataRow(-1)]
+        [TestMethod]
+        public async Task GetImageByIdAsync_NotFoundInvalid(int nonExistentImageId)
+        {
+            // Act & Arrange
+            var result = await _provider.DeleteFromDatabaseAsync(nonExistentImageId);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockRepository.Verify(repo => repo.DeleteImageAsync(nonExistentImageId), Times.Never);
+        }
+
+        [DataTestMethod]
         [DataRow("test/image:latest")]
         [DataRow("joedward32/cs2:latest")]
         [DataRow("lvlup-sw/clutchapi:dev")]
@@ -120,12 +136,201 @@ namespace Clutch.API.Tests
             _mockRepository.Verify(repo => repo.GetImageAsync(repositoryId), Times.Once);
         }
 
-        /*  TODO:
-            SetImageAsync(ContainerImageModel image)
-            DeleteFromDatabaseAsync(string key)
-            DeleteFromDatabaseAsync(int imageId)
-            
-            CONSIDER:
+        [DataTestMethod]
+        [DataRow(default)]
+        [DataRow(null)]
+        [DataRow("lvlup-sw/clutchapi")]
+        [TestMethod]
+        public async Task GetImageByReferenceAsync_NotFoundInvalid(string repositoryId)
+        {
+            // Act & Arrange
+            var result = await _provider.GetImageAsync(repositoryId);
+
+            // Assert
+            Assert.IsTrue(result is null);
+            _mockRepository.Verify(repo => repo.GetImageAsync(repositoryId), Times.Never);
+        }
+
+        // DataRow doesn't allow for dynamically created data structures
+        [TestMethod]
+        public async Task SetImageAsync_Success1()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageByRequest("test/image", "latest", RegistryType.Docker);
+            _mockRepository.Setup(repo => repo.SetImageAsync(It.IsAny<ContainerImageModel>()))
+                .Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _provider.SetImageAsync(request);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockRepository.Verify(repo => repo.SetImageAsync(request), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Success2()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageByRequest("joedwards32/cs2", "latest", RegistryType.Docker);
+            _mockRepository.Setup(repo => repo.SetImageAsync(It.IsAny<ContainerImageModel>()))
+                .Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _provider.SetImageAsync(request);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockRepository.Verify(repo => repo.SetImageAsync(request), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Success3()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageByRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            _mockRepository.Setup(repo => repo.SetImageAsync(It.IsAny<ContainerImageModel>()))
+                .Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _provider.SetImageAsync(request);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockRepository.Verify(repo => repo.SetImageAsync(request), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Failure1_WithInvalid()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageByRequest("", "", RegistryType.Invalid);
+
+            // Act
+            var result = await _provider.SetImageAsync(request);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockRepository.Verify(repo => repo.SetImageAsync(request), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Failure2_WithNull()
+        {
+            // Act & Arrange
+            var result = await _provider.SetImageAsync(ContainerImageModel.Null);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockRepository.Verify(repo => repo.SetImageAsync(ContainerImageModel.Null), Times.Never);
+        }
+
+        [DataTestMethod]
+        [DataRow(1)]
+        [DataRow(5)]
+        [DataRow(10)]
+        [TestMethod]
+        public async Task DeleteImageByIdAsync_Success(int testImageId)
+        {
+            // Arrange
+            _mockRepository.Setup(repo => repo.DeleteImageAsync(It.IsAny<int>()))
+                .Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _provider.DeleteFromDatabaseAsync(testImageId);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockRepository.Verify(repo => repo.DeleteImageAsync(testImageId), Times.Once);
+        }
+
+        [DataTestMethod]
+        [DataRow(1)]
+        [DataRow(6)]
+        [DataRow(99)]
+        [TestMethod]
+        public async Task DeleteImageByIdAsync_NotFound(int testImageId)
+        {
+            // Arrange
+            _mockRepository.Setup(repo => repo.DeleteImageAsync(It.IsAny<int>()))
+                .Returns(Task.FromResult(false));
+
+            // Act
+            var result = await _provider.DeleteFromDatabaseAsync(testImageId);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockRepository.Verify(repo => repo.DeleteImageAsync(testImageId), Times.Once);
+        }
+
+        [DataTestMethod]
+        [DataRow(0)]
+        [DataRow(-1)]
+        [TestMethod]
+        public async Task DeleteImageByIdAsync_NotFoundInvalid(int testImageId)
+        {
+            // Act & Arrange
+            var result = await _provider.DeleteFromDatabaseAsync(testImageId);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockRepository.Verify(repo => repo.DeleteImageAsync(testImageId), Times.Never);
+        }
+
+        [DataTestMethod]
+        [DataRow("test/image:latest")]
+        [DataRow("joedward32/cs2:latest")]
+        [DataRow("lvlup-sw/clutchapi:dev")]
+        [TestMethod]
+        public async Task DeleteImageByReferenceAsync_Success(string repositoryId)
+        {
+            // Arrange
+            _mockRepository.Setup(repo => repo.DeleteImageAsync(It.IsAny<string>()))
+                .Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _provider.DeleteFromDatabaseAsync(repositoryId);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockRepository.Verify(repo => repo.DeleteImageAsync(repositoryId), Times.Once);
+        }
+
+        [DataTestMethod]
+        [DataRow("test/image:latest")]
+        [DataRow("joedward32/cs2:latest")]
+        [DataRow("lvlup-sw/clutchapi:dev")]
+        [TestMethod]
+        public async Task DeleteImageByReferenceAsync_NotFound(string repositoryId)
+        {
+            // Arrange
+            _mockRepository.Setup(repo => repo.DeleteImageAsync(It.IsAny<string>()))
+                .Returns(Task.FromResult(false));
+
+            // Act
+            var result = await _provider.DeleteFromDatabaseAsync(repositoryId);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockRepository.Verify(repo => repo.DeleteImageAsync(repositoryId), Times.Once);
+        }
+
+        [DataTestMethod]
+        [DataRow(default)]
+        [DataRow(null)]
+        [DataRow("lvlup-sw/clutchapi")]
+        [TestMethod]
+        public async Task DeleteImageByReferenceAsync_NotFoundInvalid(string repositoryId)
+        {
+            // Act & Arrange
+            var result = await _provider.DeleteFromDatabaseAsync(repositoryId);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockRepository.Verify(repo => repo.DeleteImageAsync(repositoryId), Times.Never);
+        }
+
+        /*  CONSIDER:
             Error Handling:
                 Test how the provider handles exceptions thrown by the repository or the policy
             Policy Behavior:

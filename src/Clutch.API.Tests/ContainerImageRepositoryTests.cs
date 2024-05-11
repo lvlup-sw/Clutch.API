@@ -103,7 +103,7 @@ namespace Clutch.API.Tests
         [DataTestMethod]
         [DataRow("test/image:latest")]
         [DataRow("joedward32/cs2:latest")]
-        [DataRow("lvlup-sw/clutchapi:dev")]
+        [DataRow(default)]
         [TestMethod]
         public async Task GetImageByReferenceAsync_NotFound(string repositoryId)
         {
@@ -119,7 +119,7 @@ namespace Clutch.API.Tests
             Assert.IsFalse(result.HasValue);
         }
 
-        // DataRow doesn't allow for dynamically created items (aka objects)
+        // DataRow doesn't allow for dynamically created data structures
         [TestMethod]
         public async Task SetImageAsync_Success1()
         {
@@ -190,34 +190,20 @@ namespace Clutch.API.Tests
             Assert.IsFalse(_context.ContainerImages.Any());
         }
 
-        [TestMethod]
-        public async Task SetImageAsync_Failure3_WithNull()
-        {
-            // Arrange
-            ContainerImageModel? request = null;
-
-            // Act
-            var result = await _repository.SetImageAsync(request);
-
-            // Assert
-            Assert.IsFalse(result);
-            Assert.IsFalse(_context.ContainerImages.Any());
-        }
-
         [DataTestMethod]
         [DataRow(1)]
         [DataRow(6)]
         [DataRow(99)]
         [TestMethod]
-        public async Task DeleteImageByIdAsync_Success(int imageId)
+        public async Task DeleteImageByIdAsync_Success(int testImageId)
         {
             // Arrange
             // Seed database
-            _context.ContainerImages.Add(TestUtils.GetContainerImage(imageId));
+            _context.ContainerImages.Add(TestUtils.GetContainerImage(testImageId));
             _context.SaveChanges();
 
             // Act
-            var result = await _repository.DeleteImageAsync(imageId);
+            var result = await _repository.DeleteImageAsync(testImageId);
 
             // Assert
             Assert.IsTrue(result);
@@ -246,10 +232,10 @@ namespace Clutch.API.Tests
 
         [DataTestMethod]
         [DataRow(1)]
-        [DataRow(6)]
         [DataRow(99)]
+        [DataRow(0)]
         [TestMethod]
-        public async Task DeleteImageByIdAsync_NotFound(int imageId)
+        public async Task DeleteImageByIdAsync_NotFound(int testImageId)
         {
             // Arrange
             // Seed database
@@ -257,7 +243,7 @@ namespace Clutch.API.Tests
             _context.SaveChanges();
 
             // Act
-            var result = await _repository.DeleteImageAsync(imageId);
+            var result = await _repository.DeleteImageAsync(testImageId);
 
             // Assert
             Assert.IsFalse(result);

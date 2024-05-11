@@ -15,6 +15,8 @@ namespace Clutch.API.Repositories.Image
 
         public async Task<ContainerImageModel> GetImageAsync(int imageId)
         {
+            if (imageId < 1) return ContainerImageModel.Null;
+
             try
             {
                 _logger.LogDebug("Getting image from the DB.");
@@ -31,6 +33,8 @@ namespace Clutch.API.Repositories.Image
 
         public async Task<ContainerImageModel> GetImageAsync(string repositoryId)
         {
+            if (string.IsNullOrEmpty(repositoryId)) return ContainerImageModel.Null;
+
             try
             {
                 _logger.LogDebug("Getting image from the DB.");
@@ -61,6 +65,8 @@ namespace Clutch.API.Repositories.Image
 
         public async Task<bool> SetImageAsync(ContainerImageModel newImage)
         {
+            if (!newImage.HasValue) return false;
+
             try
             {
                 // Auto-incrementing keys are always 0
@@ -81,6 +87,8 @@ namespace Clutch.API.Repositories.Image
 
         public async Task<bool> DeleteImageAsync(int imageId)
         {
+            if (imageId < 1) return false;
+
             try
             {
                 int entries = 0;
@@ -103,6 +111,8 @@ namespace Clutch.API.Repositories.Image
 
         public async Task<bool> DeleteImageAsync(string repositoryId)
         {
+            if (string.IsNullOrEmpty(repositoryId)) return false;
+
             try
             {
                 int entries = 0;

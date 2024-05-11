@@ -35,6 +35,8 @@ namespace Clutch.API.Providers.Image
 
         public async Task<ContainerImageModel?> GetImageAsync(int imageId)
         {
+            if (imageId < 1) return null;
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to retrieve entry with ID {imageId} from database.", imageId);
@@ -49,8 +51,11 @@ namespace Clutch.API.Providers.Image
 
         public async Task<ContainerImageModel?> GetImageAsync(string key)
         {
+            if (string.IsNullOrEmpty(key)) return null;
+
             // Extract repository and tag from key
             string[] keyItems = key.Split(':');
+            if (keyItems.Length != 2) return null;
             string repositoryId = $"{keyItems[0]}:{keyItems[1]}";
 
             object result = await _policy.ExecuteAsync(async (context) =>
@@ -81,6 +86,8 @@ namespace Clutch.API.Providers.Image
 
         public async Task<bool> SetImageAsync(ContainerImageModel image)
         {
+            if (!image.HasValue) return false;
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to set image in the database.");
@@ -95,9 +102,12 @@ namespace Clutch.API.Providers.Image
 
         public async Task<bool> DeleteFromDatabaseAsync(string key)
         {
+            if (string.IsNullOrEmpty(key)) return false;
+
             // Extract repository and tag from key
             string[] keyItems = key.Split(':');
-            string repositoryId = $"{keyItems[1]}:{keyItems[2]}";
+            if (keyItems.Length != 2) return false;
+            string repositoryId = $"{keyItems[0]}:{keyItems[1]}";
 
             object result = await _policy.ExecuteAsync(async (context) =>
             {
@@ -112,6 +122,8 @@ namespace Clutch.API.Providers.Image
 
         public async Task<bool> DeleteFromDatabaseAsync(int imageId)
         {
+            if (imageId < 1) return false;
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to delete image from the database.");
