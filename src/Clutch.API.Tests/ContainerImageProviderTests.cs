@@ -77,7 +77,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsNull(result);
-            _mockRepository.Verify(repo => repo.GetImageAsync(nonExistentImageId), Times.Once);
+            _mockRepository.Verify(repo => repo.GetImageAsync(nonExistentImageId), Times.Exactly(2));
         }
 
         [DataTestMethod]
@@ -132,7 +132,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsNull(result);
-            _mockRepository.Verify(repo => repo.GetImageAsync(repositoryId), Times.Once);
+            _mockRepository.Verify(repo => repo.GetImageAsync(repositoryId), Times.Exactly(2));
         }
 
         [DataTestMethod]
@@ -343,7 +343,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsNull(result);
-            _mockRepository.Verify(repo => repo.GetImageAsync(123), Times.Once);
+            _mockRepository.Verify(repo => repo.GetImageAsync(123), Times.Exactly(2));
         }
 
         [TestMethod]
