@@ -1,12 +1,11 @@
 ﻿using Clutch.API.Providers.Image;
 using Clutch.API.Models.Image;
+using Clutch.API.Models.Enums;
 using Clutch.API.Repositories.Interfaces;
 using Clutch.API.Properties;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Clutch.API.Models.Enums;
-using NuGet.Protocol.Core.Types;
 
 namespace Clutch.API.Tests
 {
@@ -56,7 +55,7 @@ namespace Clutch.API.Tests
             var result = await _provider.GetImageAsync(testImageId);
 
             // Assert
-            Assert.IsTrue(result is not null);
+            Assert.IsNotNull(result);
             Assert.IsTrue(result.HasValue);
             Assert.IsTrue(TestUtils.ImagesAreEqual(expectedImage, result));
         }
@@ -77,7 +76,7 @@ namespace Clutch.API.Tests
             var result = await _provider.GetImageAsync(nonExistentImageId);
 
             // Assert
-            Assert.IsTrue(result is null);
+            Assert.IsNull(result);
             _mockRepository.Verify(repo => repo.GetImageAsync(nonExistentImageId), Times.Once);
         }
 
@@ -111,7 +110,7 @@ namespace Clutch.API.Tests
             var result = await _provider.GetImageAsync(repositoryId);
 
             // Assert
-            Assert.IsTrue(result is not null);
+            Assert.IsNotNull(result);
             Assert.IsTrue(result.HasValue);
             Assert.IsTrue(TestUtils.ImagesAreEqual(expectedImage, result));
         }
@@ -132,7 +131,7 @@ namespace Clutch.API.Tests
             var result = await _provider.GetImageAsync(repositoryId);
 
             // Assert
-            Assert.IsTrue(result is null);
+            Assert.IsNull(result);
             _mockRepository.Verify(repo => repo.GetImageAsync(repositoryId), Times.Once);
         }
 
@@ -147,7 +146,7 @@ namespace Clutch.API.Tests
             var result = await _provider.GetImageAsync(repositoryId);
 
             // Assert
-            Assert.IsTrue(result is null);
+            Assert.IsNull(result);
             _mockRepository.Verify(repo => repo.GetImageAsync(repositoryId), Times.Never);
         }
 
@@ -330,11 +329,21 @@ namespace Clutch.API.Tests
             _mockRepository.Verify(repo => repo.DeleteImageAsync(repositoryId), Times.Never);
         }
 
-        /*  CONSIDER:
-            Error Handling:
-                Test how the provider handles exceptions thrown by the repository or the policy
-            Policy Behavior:
-                You might want to create specialized tests to verify that the retry policy is correctly applied in case of transient failures.
-        */
+
+        [TestMethod]
+        public async Task GetImageAsync_RepositoryThrowsException_ReturnsNull()
+        {
+            // Arrange
+            var exception = new Exception("Simulated repository error");
+            _mockRepository.Setup(repo => repo.GetImageAsync(It.IsAny<int>()))
+                           .ThrowsAsync(exception);
+
+            // Act
+            var result = await _provider.GetImageAsync(123);
+
+            // Assert
+            Assert.IsNull(result);
+            _mockRepository.Verify(repo => repo.GetImageAsync(123), Times.Once);
+        }
     }
 }
