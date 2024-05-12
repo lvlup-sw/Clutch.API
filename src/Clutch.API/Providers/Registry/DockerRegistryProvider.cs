@@ -34,7 +34,7 @@ namespace Clutch.API.Providers.Registry
                 _logger.LogError("Failed to retrieve image manifest from registry due to an exception processing the request.");
                 return RegistryManifestModel.Null;
             }
-            else if (authResponse.StatusCode != HttpStatusCode.OK)
+            else if (authResponse.StatusCode != HttpStatusCode.OK || authResponse.Content is null)
             {
                 _logger.LogError("Failed to retrieve bearer token for registry. StatusCode: {StatusCode}. ErrorMessage: {ErrorMessage}", authResponse.StatusCode, authResponse.ErrorMessage);
                 return RegistryManifestModel.Null;
@@ -42,7 +42,8 @@ namespace Clutch.API.Providers.Registry
 
             try
             {
-                rawToken = JsonConvert.DeserializeObject(authResponse.Content!) ?? string.Empty;
+                rawToken = JsonConvert.DeserializeObject(authResponse.Content) ?? string.Empty;
+                if (rawToken is string) throw new DeserializationException(authResponse, new("Deserialization returned null."));
             }
             catch (Exception ex)
             {
