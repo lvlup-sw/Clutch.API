@@ -12,13 +12,13 @@ namespace Clutch.API.Providers.Registry
 
         public void InstantiateClient(string endpoint) => restClient = new(endpoint);
 
-        public async Task<RestResponse?> ExecuteAsync(RestRequest request)
+        public async Task<RestResponse?> ExecuteAsync(RestRequest request, CancellationToken cancellationToken = default)
         {
             if (restClient is null) return default;
 
             try
             {
-                return await restClient.ExecuteAsync(request);
+                return await restClient.ExecuteAsync(request, cancellationToken);
             }
             catch (Exception ex)
             {

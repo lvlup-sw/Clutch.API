@@ -5,6 +5,6 @@ namespace Clutch.API.Providers.Interfaces
     public interface IRestClientFactory
     {
         void InstantiateClient(string endpoint);
-        Task<RestResponse?> ExecuteAsync(RestRequest request);
+        Task<RestResponse?> ExecuteAsync(RestRequest request, CancellationToken cancellationToken = default);
     }
 }

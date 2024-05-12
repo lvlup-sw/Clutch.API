@@ -1,14 +1,14 @@
-﻿using Clutch.API.Models.Image;
-using Clutch.API.Models.Registry;
-using Clutch.API.Models.Enums;
+﻿using Clutch.API.Models.Enums;
 using Clutch.API.Properties;
 using Clutch.API.Providers.Registry;
+using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using RestSharp;
 using System.Net;
+using Clutch.API.Models.Registry;
 
 namespace Clutch.API.Tests
 {
@@ -17,21 +17,21 @@ namespace Clutch.API.Tests
     {
         private Mock<ILogger> _mockLogger;
         private IOptions<AppSettings> _mockSettings;
-        private Mock<IRestClient> _mockRestClient;
+        private Mock<IRestClientFactory> _mockRestClientFactory;
 
         [TestInitialize]
         public void Setup()
         {
             _mockLogger = new Mock<ILogger>();
             _mockSettings = Options.Create(new AppSettings { GithubPAT = "fake_pat", DockerPAT = "fake_pat" });
-            _mockRestClient = new Mock<IRestClient>();
+            _mockRestClientFactory = new Mock<IRestClientFactory>();
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            _mockRestClient.VerifyAll();
-            _mockRestClient.Reset();
+            _mockRestClientFactory.VerifyAll();
+            _mockRestClientFactory.Reset();
         }
 
         #region RegistryManifestBase
@@ -41,10 +41,10 @@ namespace Clutch.API.Tests
         {
             // Arrange
             var responseContent = JsonConvert.SerializeObject(TestUtils.GetRegistryManifestModel());
-            _mockRestClient.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
+            _mockRestClientFactory.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new RestResponse { StatusCode = HttpStatusCode.OK, Content = responseContent });
 
-            var provider = new RegistryProviderBase(_mockRestClient.Object, _mockLogger.Object, _mockSettings);
+            var provider = new RegistryProviderBase(_mockRestClientFactory.Object, _mockLogger.Object, _mockSettings);
             var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
 
             // Act
@@ -53,6 +53,9 @@ namespace Clutch.API.Tests
             // Assert
             Assert.IsNotNull(result);
             Assert.IsTrue(result.HasValue);
+            _mockRestClientFactory.Verify(c => c.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+            RegistryManifestModel? response = JsonConvert.DeserializeObject<RegistryManifestModel>(responseContent);
+            Assert.IsTrue(response is not null && TestUtils.ManifestsAreEqual(response, result));
         }
 
         /*

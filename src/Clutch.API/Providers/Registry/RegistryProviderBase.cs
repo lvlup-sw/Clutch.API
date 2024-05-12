@@ -5,6 +5,7 @@ using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
+using System.Net;
 using System.Text;
 
 namespace Clutch.API.Providers.Registry
@@ -41,7 +42,7 @@ namespace Clutch.API.Providers.Registry
                 _logger.LogError("Failed to retrieve image manifest from registry due to an exception processing the request.");
                 return RegistryManifestModel.Null;
             }
-            else if (!response.IsSuccessful)
+            else if (response.StatusCode != HttpStatusCode.OK)
             {
                 _logger.LogError("Failed to retrieve image manifest from registry. StatusCode: {StatusCode}. ErrorMessage: {ErrorMessage}", response.StatusCode, response.ErrorMessage);
                 return RegistryManifestModel.Null;

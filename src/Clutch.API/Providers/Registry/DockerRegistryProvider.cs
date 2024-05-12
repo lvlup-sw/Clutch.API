@@ -5,6 +5,7 @@ using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
+using System.Net;
 using System.Text;
 
 namespace Clutch.API.Providers.Registry
@@ -33,7 +34,7 @@ namespace Clutch.API.Providers.Registry
                 _logger.LogError("Failed to retrieve image manifest from registry due to an exception processing the request.");
                 return RegistryManifestModel.Null;
             }
-            else if (!authResponse.IsSuccessful)
+            else if (authResponse.StatusCode != HttpStatusCode.OK)
             {
                 _logger.LogError("Failed to retrieve bearer token for registry. StatusCode: {StatusCode}. ErrorMessage: {ErrorMessage}", authResponse.StatusCode, authResponse.ErrorMessage);
                 return RegistryManifestModel.Null;

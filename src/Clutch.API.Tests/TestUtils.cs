@@ -162,7 +162,7 @@ namespace Clutch.API.Tests
                 result.SchemaVersion == expectedManifest.SchemaVersion &&
                 result.MediaType.Equals(expectedManifest.MediaType) &&
                 result.Config.Equals(expectedManifest.Config) &&
-                result.Layers.Equals(expectedManifest.Layers);
+                result.Layers.SequenceEqual(expectedManifest.Layers);
         }
 
         public static ContainerImageRequest GetContainerImageRequest(string repository, string tag, RegistryType registry)
