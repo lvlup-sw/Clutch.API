@@ -1,20 +1,22 @@
 using CacheProvider.Providers;
 using CacheProvider.Providers.Interfaces;
-using StackExchange.Redis;
-using System.Diagnostics;
-using Microsoft.OpenApi.Models;
+using Clutch.API.Database.Context;
+using Clutch.API.Models.Image;
+using Clutch.API.Properties;
+using Clutch.API.Providers.Image;
+using Clutch.API.Providers.Interfaces;
+using Clutch.API.Providers.Registry;
 using Clutch.API.Repositories.Image;
 using Clutch.API.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Clutch.API.Database.Context;
-using Clutch.API.Properties;
-using Clutch.API.Services.Interfaces;
 using Clutch.API.Services.Image;
-using Clutch.API.Providers.Interfaces;
-using Clutch.API.Providers.Image;
-using Clutch.API.Models.Image;
-using Clutch.API.Providers.Registry;
+using Clutch.API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
+using RestSharp;
+using StackExchange.Redis;
+using System.Diagnostics;
 
 namespace Clutch.API
 {
@@ -57,6 +59,7 @@ namespace Clutch.API
             builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
             builder.Services.AddOptions();
             builder.Services.AddLogging();
+            builder.Services.AddSingleton<IRestClientFactory, RestClientFactory>();
             builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
             {
                 return ConnectionMultiplexer.Connect(
@@ -85,7 +88,16 @@ namespace Clutch.API
             builder.Services.AddTransient<IRegistryProvider, RegistryProviderBase>(serviceProvider =>
             {
                 return new RegistryProviderBase(
+                    serviceProvider.GetRequiredService<IRestClientFactory>(),
                     serviceProvider.GetRequiredService<ILogger<RegistryProviderBase>>(),
+                    serviceProvider.GetRequiredService<IOptions<AppSettings>>()
+                );
+            });
+            builder.Services.AddTransient<IRegistryProvider, DockerRegistryProvider>(serviceProvider =>
+            {
+                return new DockerRegistryProvider(
+                    serviceProvider.GetRequiredService<IRestClientFactory>(),
+                    serviceProvider.GetRequiredService<ILogger<DockerRegistryProvider>>(),
                     serviceProvider.GetRequiredService<IOptions<AppSettings>>()
                 );
             });

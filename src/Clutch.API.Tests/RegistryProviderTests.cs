@@ -1,5 +1,6 @@
 ﻿using Clutch.API.Models.Image;
 using Clutch.API.Models.Registry;
+using Clutch.API.Models.Enums;
 using Clutch.API.Properties;
 using Clutch.API.Providers.Registry;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using RestSharp;
+using System.Net;
 
 namespace Clutch.API.Tests
 {
@@ -15,14 +17,14 @@ namespace Clutch.API.Tests
     {
         private Mock<ILogger> _mockLogger;
         private IOptions<AppSettings> _mockSettings;
-        private Mock<RestClient> _mockRestClient;
+        private Mock<IRestClient> _mockRestClient;
 
         [TestInitialize]
         public void Setup()
         {
             _mockLogger = new Mock<ILogger>();
             _mockSettings = Options.Create(new AppSettings { GithubPAT = "fake_pat", DockerPAT = "fake_pat" });
-            _mockRestClient = new Mock<RestClient>();
+            _mockRestClient = new Mock<IRestClient>();
         }
 
         [TestCleanup]
@@ -34,27 +36,26 @@ namespace Clutch.API.Tests
 
         #region RegistryManifestBase
 
-        /*
         [TestMethod]
         public async Task GetManifestAsync_Success()
         {
             // Arrange
-            var mockRestClient = new Mock<RestClient>();
-            var responseContent = JsonConvert.SerializeObject(new RegistryManifestModel()); // Create sample manifest JSON
-            mockRestClient.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
-                          .ReturnsAsync(new RestResponse { IsSuccessful = true, Content = responseContent });
+            var responseContent = JsonConvert.SerializeObject(TestUtils.GetRegistryManifestModel());
+            _mockRestClient.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new RestResponse { StatusCode = HttpStatusCode.OK, Content = responseContent });
 
-            var provider = new RegistryProviderBase(_mockLogger.Object, _mockSettings, mockRestClient.Object);
-            var request = new ContainerImageRequest { Repository = "owner/repo", Tag = "latest" };
+            var provider = new RegistryProviderBase(_mockRestClient.Object, _mockLogger.Object, _mockSettings);
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
 
             // Act
             var result = await provider.GetManifestAsync(request);
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.HasValue); // Assuming you have a 'HasValue' property in RegistryManifestModel
+            Assert.IsTrue(result.HasValue);
         }
 
+        /*
         [TestMethod]
         public async Task GetManifestAsync_UnsuccessfulResponse()
         {

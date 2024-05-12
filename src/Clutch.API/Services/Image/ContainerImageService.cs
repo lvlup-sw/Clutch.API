@@ -1,14 +1,14 @@
 ﻿using CacheProvider.Providers.Interfaces;
-using Microsoft.Extensions.Options;
+using Clutch.API.Models.Enums;
 using Clutch.API.Models.Image;
+using Clutch.API.Models.Registry;
 using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
 using Clutch.API.Services.Interfaces;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System.Text;
 using System.Security.Cryptography;
-using Clutch.API.Models.Enums;
-using Clutch.API.Models.Registry;
+using System.Text;
 
 // Service Responsibilities:
 // - "Business logic" for image management.
@@ -46,7 +46,7 @@ namespace Clutch.API.Services.Image
                 _logger.LogError("Image not found in registry.");
                 return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifestModel.Null);
             }
-            
+
             return new ContainerImageResponseData(true, image, manifest);
         }
 

@@ -1,15 +1,13 @@
 ﻿using Clutch.API.Models.Image;
 using Clutch.API.Models.Registry;
 using Clutch.API.Properties;
+using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using RestSharp;
-using System.IO;
-using System.Text;
 
 namespace Clutch.API.Providers.Registry
 {
-    public class AzureRegistryProvider(ILogger logger, IOptions<AppSettings> settings) : RegistryProviderBase(logger, settings)
+    public class AzureRegistryProvider(IRestClientFactory restClientFactory, ILogger logger, IOptions<AppSettings> settings) : RegistryProviderBase(restClientFactory, logger, settings)
     {
         public override async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {

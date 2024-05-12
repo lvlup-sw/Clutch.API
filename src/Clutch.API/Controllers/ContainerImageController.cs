@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Clutch.API.Controllers.Filters;
 using Clutch.API.Models.Image;
-using Clutch.API.Services.Interfaces;
-using System.Reflection;
 using Clutch.API.Models.Registry;
+using Clutch.API.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 
 // TODO:
 // - Batch requests for images
@@ -54,7 +54,7 @@ namespace Clutch.API.Controllers
         {
             bool success = await _service.SetImageAsync(request, GetAssemblyVersion());
 
-            return success 
+            return success
                 ? Ok()
                 : NoContent();
         }
@@ -72,7 +72,7 @@ namespace Clutch.API.Controllers
         {
             bool success = await _service.DeleteImageAsync(request, GetAssemblyVersion());
 
-            return success 
+            return success
                 ? Ok()
                 : NoContent();
         }

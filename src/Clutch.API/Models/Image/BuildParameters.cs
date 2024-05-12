@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Clutch.API.Models.Image
+﻿namespace Clutch.API.Models.Image
 {
     // Skeleton class for the build parameters of a container image
     public class BuildParameters

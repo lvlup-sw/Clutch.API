@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Clutch.API.Models.Enums;
+﻿using Clutch.API.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Clutch.API.Models.Image
 {
@@ -20,6 +20,6 @@ namespace Clutch.API.Models.Image
         public RegistryType RegistryType { get; set; }
 
         [Required]
-        public StatusEnum Status { get; set; }        
+        public StatusEnum Status { get; set; }
     }
 }

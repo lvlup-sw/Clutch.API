@@ -1,10 +1,10 @@
-﻿using Polly;
-using Polly.Wrap;
-using Microsoft.Extensions.Options;
-using Clutch.API.Models.Image;
+﻿using Clutch.API.Models.Image;
 using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
 using Clutch.API.Repositories.Interfaces;
+using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Wrap;
 
 // Provider Responsibilities:
 // - Interacting with the Repositories to perform operations against the database.
@@ -44,7 +44,7 @@ namespace Clutch.API.Providers.Image
                 return data.HasValue ? data : ContainerImageModel.Null;
             }, new Context($"ContainerImageProvider.GetImageAsync for Image ID: {imageId}"));
 
-            return result is ContainerImageModel image && image.HasValue 
+            return result is ContainerImageModel image && image.HasValue
                 ? image
                 : null;
         }
