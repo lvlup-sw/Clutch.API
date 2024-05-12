@@ -11,10 +11,8 @@ using Clutch.API.Repositories.Interfaces;
 using Clutch.API.Services.Image;
 using Clutch.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using RestSharp;
 using StackExchange.Redis;
 using System.Diagnostics;
 
