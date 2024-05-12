@@ -10,18 +10,17 @@ namespace Clutch.API.Providers.Registry
         private readonly IServiceProvider _serviceProvider = serviceProvider;
         private readonly Dictionary<RegistryType, Type> _registryProviderMap = CreateMappings();
 
-        public IRegistryProvider CreateRegistryProvider(RegistryType type)
+        public IRegistryProvider? CreateRegistryProvider(RegistryType type)
         {
             bool success = _registryProviderMap.TryGetValue(type, out Type? provider);
 
-            object? instance = (success && provider is not null) switch
+            object instance = (success && provider is not null) switch
             {
-                true => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetLogger(provider), GetSettings()),
+                true  => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetLogger(provider), GetSettings()),
                 false => ActivatorUtilities.CreateInstance(_serviceProvider, typeof(RegistryProviderBase), GetLogger(typeof(RegistryProviderBase)), GetSettings())
             };
 
-            // This is kinda hacky but the compiler is being dumb
-            return instance as IRegistryProvider ?? default!;
+            return instance as IRegistryProvider;
         }
 
         // Update mappings as new implementations are introduced

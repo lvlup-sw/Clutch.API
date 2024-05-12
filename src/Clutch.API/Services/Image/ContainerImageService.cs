@@ -39,15 +39,26 @@ namespace Clutch.API.Services.Image
             }
 
             // Check the registry and construct the RegistryManifest
-            IRegistryProvider registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType);
-            RegistryManifestModel manifest = await registryProvider.GetManifestAsync(request);
-            if (manifest is null || !manifest.HasValue)
+            // We utilize a using here since the registry factory
+            // creates an instance of the class we need, which we
+            // need to dispose afterwards.
+            using (IRegistryProvider? registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType))
             {
-                _logger.LogError("Image not found in registry.");
-                return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifestModel.Null);
-            }
+                if (registryProvider is null)
+                {
+                    _logger.LogError("RegistryProviderFactory returned a null instance.");
+                    return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+                }
 
-            return new ContainerImageResponseData(true, image, manifest);
+                RegistryManifestModel manifest = await registryProvider.GetManifestAsync(request);
+                if (manifest is null || !manifest.HasValue)
+                {
+                    _logger.LogError("Image not found in registry.");
+                    return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+                }
+
+                return new ContainerImageResponseData(true, image, manifest);
+            };
         }
 
         public async Task<bool> SetImageAsync(ContainerImageRequest request, string version)

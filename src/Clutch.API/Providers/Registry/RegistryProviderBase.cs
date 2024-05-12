@@ -11,7 +11,7 @@ using System.Text;
 namespace Clutch.API.Providers.Registry
 {
     // Implements GHCR
-    public class RegistryProviderBase(IRestClientFactory restClientFactory, ILogger logger, IOptions<AppSettings> settings) : IRegistryProvider
+    public class RegistryProviderBase(IRestClientFactory restClientFactory, ILogger logger, IOptions<AppSettings> settings) : IRegistryProvider, IDisposable
     {
         private readonly ILogger _logger = logger;
         private readonly AppSettings _settings = settings.Value;
@@ -57,6 +57,29 @@ namespace Clutch.API.Providers.Registry
                 _logger.LogError("Failed to deserialize image manifest. Exception: {ex}", ex.GetBaseException());
                 return RegistryManifestModel.Null;
             }
+        }
+
+        private bool _disposed = false;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                // Currently we don't need to explicitly dispose anything
+                // RestClient recommends simply creating a new instance
+                // For each new request, as it handles the web socket on
+                // the backend.
+            }
+
+            _disposed = true;
         }
     }
 }

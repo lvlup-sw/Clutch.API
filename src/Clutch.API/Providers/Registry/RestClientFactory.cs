@@ -1,6 +1,4 @@
-﻿using Clutch.API.Models.Enums;
-using Clutch.API.Properties;
-using Clutch.API.Providers.Interfaces;
+﻿using Clutch.API.Providers.Interfaces;
 using RestSharp;
 
 namespace Clutch.API.Providers.Registry
@@ -8,17 +6,17 @@ namespace Clutch.API.Providers.Registry
     public class RestClientFactory(ILogger<RestClientFactory> logger) : IRestClientFactory
     {
         private readonly ILogger<RestClientFactory> _logger = logger;
-        private RestClient? restClient;
+        private RestClient? _restClient;
 
-        public void InstantiateClient(string endpoint) => restClient = new(endpoint);
+        public void InstantiateClient(string endpoint) => _restClient = new(endpoint);
 
         public async Task<RestResponse?> ExecuteAsync(RestRequest request, CancellationToken cancellationToken = default)
         {
-            if (restClient is null) return default;
+            if (_restClient is null) return default;
 
             try
             {
-                return await restClient.ExecuteAsync(request, cancellationToken);
+                return await _restClient.ExecuteAsync(request, cancellationToken);
             }
             catch (Exception ex)
             {
