@@ -1,20 +1,18 @@
-﻿using Polly;
-using Polly.Wrap;
-using Microsoft.Extensions.Options;
-using Clutch.API.Models.Image;
+﻿using Clutch.API.Models.Image;
 using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
 using Clutch.API.Repositories.Interfaces;
+using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Wrap;
 
 // Provider Responsibilities:
 // - Interacting with the Repositories to perform operations against the database.
-// - Triggering our CI/CD pipeline to build a new image.
-// - Interacting with any other external services for the purpose of getting data.
 // - DOES NOT directly manipulate the database; that is the repository's job.
 namespace Clutch.API.Providers.Image
 {
-    // In the future, we will add other Repository interfaces to this class.
-    // For now, we only have the ContainerImageRepository class so this acts
+    // In the future, we will add other repository interfaces to this class.
+    // For now, we only have the ContainerImagerepository class so this acts
     // as a pass-through with polly decorations.
     public class ContainerImageProvider : IContainerImageProvider
     {
@@ -35,28 +33,34 @@ namespace Clutch.API.Providers.Image
             _policy = CreatePolicy();
         }
 
-        public async Task<ContainerImageModel?> GetImageByIdAsync(int imageId)
+        public async Task<ContainerImageModel?> GetImageAsync(int imageId)
         {
+            if (imageId < 1) return null;
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to retrieve entry with ID {imageId} from database.", imageId);
-                ContainerImageModel data = await _repository.GetImageByIdAsync(imageId);
+                ContainerImageModel data = await _repository.GetImageAsync(imageId);
                 return data.HasValue ? data : ContainerImageModel.Null;
-            }, new Context($"ContainerImageProvider.GetImageByIdAsync for Image ID: {imageId}"));
+            }, new Context($"ContainerImageProvider.GetImageAsync for Image ID: {imageId}"));
 
-            return result is ContainerImageModel image && image.HasValue 
+            return result is ContainerImageModel image && image.HasValue
                 ? image
                 : null;
         }
 
-        public async Task<ContainerImageModel?> GetImageByReferenceAsync(string imageReference)
+        public async Task<ContainerImageModel?> GetImageAsync(string key)
         {
+            // Extract repository and tag from key
+            string repositoryId = ExtractIdFromKey(key);
+            if (string.IsNullOrEmpty(repositoryId)) return null;
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
-                _logger.LogDebug("Attempting to retrieve entry with ref {imageReference} from database.", imageReference);
-                ContainerImageModel data = await _repository.GetImageByReferenceAsync(imageReference);
+                _logger.LogDebug("Attempting to retrieve entry with ref {repositoryId} from database.", repositoryId);
+                ContainerImageModel data = await _repository.GetImageAsync(repositoryId);
                 return data.HasValue ? data : ContainerImageModel.Null;
-            }, new Context($"ContainerImageProvider.GetImageByReferenceAsync for Image Ref: {imageReference}"));
+            }, new Context($"ContainerImageProvider.GetImageAsync for Image Ref: {repositoryId}"));
 
             return result is ContainerImageModel image && image.HasValue
                 ? image
@@ -79,25 +83,30 @@ namespace Clutch.API.Providers.Image
 
         public async Task<bool> SetImageAsync(ContainerImageModel image)
         {
+            if (!image.HasValue) return false;
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to set image in the database.");
                 return await _repository.SetImageAsync(image);
-            }, new Context($"ContainerImageProvider.SetImageAsync for Image Ref: {image.ImageReference}"));
+            }, new Context($"ContainerImageProvider.SetImageAsync for Image Ref: {image.Repository}"));
 
-            // TODO: We need to trigger the build pipeline before returning.
             return result is bool success
                 ? success
                 : default;
         }
 
-        public async Task<bool> DeleteFromDatabaseAsync(string imageReference)
+        public async Task<bool> DeleteFromDatabaseAsync(string key)
         {
+            // Extract repository and tag from key
+            string repositoryId = ExtractIdFromKey(key);
+            if (string.IsNullOrEmpty(repositoryId)) return false;
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to delete image from the database.");
-                return await _repository.DeleteImageAsync(imageReference);
-            }, new Context($"ContainerImageProvider.DeleteImageAsync for Image Ref: {imageReference}"));
+                return await _repository.DeleteImageAsync(repositoryId);
+            }, new Context($"ContainerImageProvider.DeleteImageAsync for Image Ref: {repositoryId}"));
 
             return result is bool success
                 ? success
@@ -106,6 +115,8 @@ namespace Clutch.API.Providers.Image
 
         public async Task<bool> DeleteFromDatabaseAsync(int imageId)
         {
+            if (imageId < 1) return false;
+
             object result = await _policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to delete image from the database.");
@@ -117,58 +128,35 @@ namespace Clutch.API.Providers.Image
                 : default;
         }
 
-        public async Task<ContainerImageBuildResult> TriggerBuildAsync(BuildParameters parameters)
-        {
-            // We need to call our GHA workflow to trigger a new build.
-            // This should output to the GH container registry.
-
-            // First, we need to construct the ContainerImageModel from the BuildParameters.
-            // Then, we need to call the SetImageAsync method to store the new image in the database.
-            // Finally, we need to trigger the build pipeline.
-
-            // Construct the image model
-            ContainerImageModel imageModel = new()
-            {
-                ImageID = 0,
-                ImageReference = parameters.ImageReference,
-                GameVersion = parameters.GameVersion,
-                BuildDate = parameters.BuildDate,
-                RegistryURL = parameters.RegistryURL,
-                Status = StatusEnum.Building,
-            };
-
-            // Set the image in the database
-            bool imageWasSet = await SetImageAsync(imageModel);
-            if (!imageWasSet)
-            {
-                _logger.LogError("Failed to set image in the database.");
-                return new ContainerImageBuildResult
-                {
-                    Success = false,
-                    ContainerImageModel = ContainerImageModel.Null,
-                };
-            }
-
-            // Trigger the build pipeline
-            // We do this by sending a POST request to the GitHub API
-            return null;
-        }
-
-        public async Task<bool> DeleteFromRegistryAsync(string imageReference)
-        {
-            // We need to call the GitHub API to delete the image from the registry.
-            // We will need to authenticate with a token.
-
-            return true;
-        }
+        // CacheProvider method
+        public async Task<ContainerImageModel?> GetAsync(string key) => await GetImageAsync(key);
 
         // CacheProvider method
-        public async Task<ContainerImageModel?> GetAsync(string key) => await GetImageByReferenceAsync(key);
+        public async Task<bool> SetAsync(ContainerImageModel data) => await SetImageAsync(data);
 
         // CacheProvider method
-        public async Task<Dictionary<string, ContainerImageModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = null)
+        public async Task<bool> DeleteAsync(string key) => await DeleteFromDatabaseAsync(key);
+
+        // CacheProvider method
+        public async Task<Dictionary<string, ContainerImageModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+
+        private string ExtractIdFromKey(string key)
+        {
+            try
+            {
+                // Expected key format: {version}:{repository}:{tag}:{hash}
+                string[] keyItems = key.Split(':');
+                if (keyItems.Length != 4) throw new Exception();
+                return $"{keyItems[1]}:{keyItems[2]}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unable to extract valid Id from cache key: {key}", key);
+                return string.Empty;
+            }
         }
 
         private AsyncPolicyWrap<object> CreatePolicy()
@@ -210,7 +198,7 @@ namespace Clutch.API.Providers.Image
                         return Task.CompletedTask;
                     });
 
-            return Policy.WrapAsync(retryPolicy, fallbackPolicy);
+            return fallbackPolicy.WrapAsync(retryPolicy);
         }
     }
 }

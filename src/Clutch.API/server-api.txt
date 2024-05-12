@@ -1,3 +1,53 @@
+Clutch.API hosted on GCP Cloud Run.
+    Terraform created
+
+Interacts with another service (K8s)
+    This is a REST API which launches clusters.
+    For now, we can do a simple example but the ambition is to have scalable game servers.
+
+    This is also hosted on GCP and uses Terraform infrastructure.
+
+Backend data services include a MariaDB instance hosted on my local NFS server.
+
+
+Container API MVP Todo:
+    - Write tests
+		+ RegistryProvider
+		+ Integration
+		+ CacheProvider
+    - Rework Status and BuildDate
+		=> LatestDeploymentId
+		=> LatestDeploymentTime
+		or Status can be ArtifactStatus
+			Assuming we're storing artifacts in GCP/GH?
+			In which case, ArtifactStatus should be updated 
+			by the CI/CD pipeline, and the pipeline should
+			be triggered by SetImage.
+			Thus interactions with artifacts (eg for deployment)
+			would be handled by the Kubernetes service, which
+			makes sense and is a good division of responsibilities.
+    - Create manual MVP in GCP for API
+        + Local Database connection..
+        + API Gateway (routing to serverless)
+			# Essentially free/baked into Cloud Run price
+		+ Cloud Run (API application containers)
+			# Latency-conscious price: ~$8-12/month
+		+ ArtifactRegistry
+			# 25mb avg artifact size price: ~$1-3/month
+		+ Observability (Cloud Logging/Monitoring/Trace)
+			# Free monthly allotment for basic configuration
+		+ Authentication?
+    - Write terraform infrastructure based on MVP
+        + Try terraform cloud management
+    - Write Github Actions pipeline
+        + Automated testing
+        + Modularized
+        + Blue/Green deployment
+        + Updates database with Deployment information
+        + Scheduled workflow to update DB versioning
+            # Only for existing images listed in DB
+
+
 Endpoint Behavior
 
     Deploy (/deploy)
@@ -77,3 +127,22 @@ Suppose your /monitor endpoint shows that the response time of your pods has exc
 
 
 Assuming we are hosting the K8s service on AWS as EKS, the optimal way would be to have the controller publish events to AWS (such as an SNS topic) depending on certain criteria/conditions. If we wanted to, we could also have a listener hitting the /MONITOR endpoint as well. We could then have a lambda trigger remediation by sending a request to the /UPDATE (?) or other endpoints.
+
+
+
+{
+  "repository": "lvlup-sw/clutchapi",
+  "tag": "dev",
+  "registryType": 0
+}
+
+{
+  "repository": "joedwards32/cs2",
+  "tag": "latest",
+  "registryType": 1
+}
+
+curl -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Authorization: Bearer $token" -s "https://registry-1.docker.io/v2/joedwards32/manifests/latest" | jq .
+
+
+token=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:joedwards32:pull" \ | jq -r '.token')

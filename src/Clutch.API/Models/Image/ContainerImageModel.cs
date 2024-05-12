@@ -1,11 +1,15 @@
-﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
+﻿using Clutch.API.Models.Enums;
 using Microsoft.EntityFrameworkCore;
-using Clutch.API.Utilities;
 using System.ComponentModel.DataAnnotations;
 
+// This is our actual Database model, and what we use to perform our operations.
+// We do not directly use ContainerImageVersion to limit visibility into our application.
+// This protects us from over-posting attacks.
+// We have two indexes: ImageId and RepositoryId.
+// Ideally we use ImageId where possible.
 namespace Clutch.API.Models.Image
 {
-    [Index(nameof(ImageReference), IsUnique = true)]
+    [Index(nameof(RepositoryId), IsUnique = true)]
     public class ContainerImageModel
     {
         [Key]
@@ -13,37 +17,28 @@ namespace Clutch.API.Models.Image
         public int ImageID { get; set; } = 0;
 
         [Required]
-        [StringLength(255)]
-        public required string ImageReference { get; set; }
+        [StringLength(384)]
+        public required string RepositoryId { get; set; }
 
         [Required]
-        public int GameVersion { get; set; } // BuildID number
+        [StringLength(255)]
+        public required string Repository { get; set; }
+
+        [Required]
+        [StringLength(128)] // Dockerhub limit is 128 characters
+        public required string Tag { get; set; }
 
         [Required]
         public DateTime BuildDate { get; set; }
 
-        [Url]
         [Required]
-        [StringLength(100)]
-        public required string RegistryURL { get; set; }
+        public RegistryType RegistryType { get; set; }
 
         [Required]
         public StatusEnum Status { get; set; }
 
-        [StringLength(40)]
-        public string? CommitHash { get; set; }
-
-        public int? Layers { get; set; } // Nullable for potential flexibility
-
-        public long? Size { get; set; } // Nullable for the same reason
-
-        // This is stored in the DB as a JSON string with metadata associated with each plugin
-        // We create a class to represent the JSON object to make it easier to work with
-        public List<Plugin>? Plugins { get; set; }
-
-        public string? ServerConfig { get; set; }
-
-        public string? Notes { get; set; }
+        [Required]
+        public required string Version { get; set; }
 
         public bool HasValue => !IsNullOrEmpty;
 
@@ -51,8 +46,15 @@ namespace Clutch.API.Models.Image
         {
             get
             {
+                // Required items
                 if (ImageID == -1) return true;
-                if (string.IsNullOrEmpty(ImageReference)) return true;
+                if (string.IsNullOrEmpty(RepositoryId)) return true;
+                if (string.IsNullOrEmpty(Repository)) return true;
+                if (string.IsNullOrEmpty(Tag)) return true;
+                if (BuildDate == DateTime.MinValue) return true;
+                if (RegistryType == RegistryType.Invalid) return true;
+                if (Status == StatusEnum.Invalid) return true;
+                if (string.IsNullOrEmpty(Version)) return true;
                 return false;
             }
         }
@@ -60,12 +62,13 @@ namespace Clutch.API.Models.Image
         public static ContainerImageModel Null { get; } = new()
         {
             ImageID = -1,
-            ImageReference = string.Empty,
-            GameVersion = 0,
-            BuildDate = DateTime.Now,
-            RegistryURL = string.Empty,
-            Status = StatusEnum.Unavailable,
-            CommitHash = string.Empty,
+            RepositoryId = string.Empty,
+            Repository = string.Empty,
+            Tag = string.Empty,
+            BuildDate = DateTime.MinValue,
+            RegistryType = RegistryType.Invalid,
+            Status = StatusEnum.Invalid,
+            Version = string.Empty
         };
     }
 }

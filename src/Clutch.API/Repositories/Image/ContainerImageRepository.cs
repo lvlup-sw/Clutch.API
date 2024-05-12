@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Clutch.API.Database.Context;
+﻿using Clutch.API.Database.Context;
 using Clutch.API.Models.Image;
 using Clutch.API.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 // Repository Responsibilities:
 // - Directly manipulate the database.
@@ -13,8 +13,10 @@ namespace Clutch.API.Repositories.Image
         private readonly ContainerImageContext _context = context;
         private readonly ILogger _logger = logger;
 
-        public async Task<ContainerImageModel> GetImageByIdAsync(int imageId)
+        public async Task<ContainerImageModel> GetImageAsync(int imageId)
         {
+            if (imageId < 1) return ContainerImageModel.Null;
+
             try
             {
                 _logger.LogDebug("Getting image from the DB.");
@@ -29,13 +31,15 @@ namespace Clutch.API.Repositories.Image
             }
         }
 
-        public async Task<ContainerImageModel> GetImageByReferenceAsync(string imageReference)
+        public async Task<ContainerImageModel> GetImageAsync(string repositoryId)
         {
+            if (string.IsNullOrEmpty(repositoryId)) return ContainerImageModel.Null;
+
             try
             {
                 _logger.LogDebug("Getting image from the DB.");
                 return await _context.ContainerImages
-                    .Where(img => img.ImageReference.Contains(imageReference))
+                    .Where(img => img.RepositoryId.Contains(repositoryId))
                     .FirstOrDefaultAsync() ?? ContainerImageModel.Null;
             }
             catch (Exception ex)
@@ -61,10 +65,12 @@ namespace Clutch.API.Repositories.Image
 
         public async Task<bool> SetImageAsync(ContainerImageModel newImage)
         {
+            if (!newImage.HasValue) return false;
+
             try
             {
                 // Auto-incrementing keys are always 0
-                if (newImage is null || newImage.ImageID != 0) return false;
+                if (!newImage.HasValue || newImage.ImageID != 0) return false;
 
                 _logger.LogDebug("Adding new image to the DB.");
                 _context.ContainerImages.Add(newImage);
@@ -81,6 +87,8 @@ namespace Clutch.API.Repositories.Image
 
         public async Task<bool> DeleteImageAsync(int imageId)
         {
+            if (imageId < 1) return false;
+
             try
             {
                 int entries = 0;
@@ -101,13 +109,15 @@ namespace Clutch.API.Repositories.Image
             }
         }
 
-        public async Task<bool> DeleteImageAsync(string imageReference)
+        public async Task<bool> DeleteImageAsync(string repositoryId)
         {
+            if (string.IsNullOrEmpty(repositoryId)) return false;
+
             try
             {
                 int entries = 0;
                 var imageToDelete = await _context.ContainerImages
-                    .FirstOrDefaultAsync(img => img.ImageReference == imageReference);
+                    .FirstOrDefaultAsync(img => img.RepositoryId == repositoryId);
 
                 if (imageToDelete is not null)
                 {

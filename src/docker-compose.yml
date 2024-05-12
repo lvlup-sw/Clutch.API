@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   redis:
     image: redis
@@ -7,18 +5,24 @@ services:
       - 6379:6379
     networks:
       - backend-network
+    container_name: redis-cache
 
   Clutch.api:
     image: ${DOCKER_REGISTRY-}clutchapi
+    volumes:
+      - ../src/Clutch.API:/app
     build:
-      context: Clutch.API
-      dockerfile: Dockerfile 
+      context: .
+      dockerfile: Clutch.API/Dockerfile 
     ports:
-      - 8080:80
+      - 8080:8080
+      # MAC - 7102:8080 
     depends_on:
       - redis 
     networks:
       - backend-network
+    env_file:
+      - .env
 
 networks:
   backend-network:

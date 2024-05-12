@@ -1,9 +1,11 @@
-﻿namespace Clutch.API.Models.Image
+﻿using Clutch.API.Models.Registry;
+
+namespace Clutch.API.Models.Image
 {
-    public class ContainerImageResponseData(bool success, RegistryProperties properties, ContainerImageModel image)
+    public class ContainerImageResponseData(bool success, ContainerImageModel image, RegistryManifestModel manifest)
     {
         public bool Success { get; set; } = success;
-        public RegistryProperties RegistryProperties { get; set; } = properties;
         public ContainerImageModel ContainerImageModel { get; set; } = image;
+        public RegistryManifestModel RegistryManifestModel { get; set; } = manifest;
     }
 }

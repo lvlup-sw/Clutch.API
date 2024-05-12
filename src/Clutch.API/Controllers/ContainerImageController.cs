@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Clutch.API.Controllers.Filters;
 using Clutch.API.Models.Image;
+using Clutch.API.Models.Registry;
 using Clutch.API.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 
 // TODO:
 // - Batch requests for images
@@ -17,65 +19,65 @@ namespace Clutch.API.Controllers
         private readonly IContainerImageService _service = service;
         private readonly IMapper _mapper = mapper;
 
-        [HttpGet("GetImage/{imageReference}")]
-        [ValidateImageReference]
+        [HttpGet("GetImage/")]
+        [ValidateRequest]
+        [HandleExceptions]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<ActionResult<ContainerImageResponse>> GetContainerImage(string imageReference)
+        public async Task<ActionResult<ContainerImageResponse>> GetContainerImage([FromQuery] ContainerImageRequest request)
         {
-            imageReference = System.Net.WebUtility.UrlDecode(imageReference);
-            var containerImageResponseData = await _service.GetImageAsync(imageReference);
+            var containerImageResponseData = await _service.GetImageAsync(request, GetAssemblyVersion());
 
-            return !ValidateResponse(containerImageResponseData)
-                ? NotFound()
-                : Ok(new ContainerImageResponse(
+            return ValidateResponse(containerImageResponseData)
+                ? Ok(new ContainerImageResponse(
                     containerImageResponseData.Success,
-                    containerImageResponseData.RegistryProperties,
-                    _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel)
-                ));
+                    _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel),
+                    _mapper.Map<RegistryManifest>(containerImageResponseData.RegistryManifestModel)
+                ))
+                : NotFound();
         }
 
         [HttpPut("SetImage/")]
-        [ValidateContainerImage]
+        [ValidateRequest]
+        [HandleExceptions]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<IActionResult> SetContainerImage(ContainerImage containerImage)
+        public async Task<IActionResult> SetContainerImage(ContainerImageRequest request)
         {
-            var containerImageModel = _mapper.Map<ContainerImageModel>(containerImage);
-            bool success = await _service.SetImageAsync(containerImageModel);
+            bool success = await _service.SetImageAsync(request, GetAssemblyVersion());
 
-            return success 
+            return success
                 ? Ok()
                 : NoContent();
         }
 
-        [HttpDelete("DeleteImage/{imageReference}")]
-        [ValidateImageReference]
+        [HttpDelete("DeleteImage/")]
+        [ValidateRequest]
+        [HandleExceptions]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<IActionResult> DeleteContainerImageModel(string imageReference)
+        public async Task<IActionResult> DeleteContainerImage(ContainerImageRequest request)
         {
-            imageReference = System.Net.WebUtility.UrlDecode(imageReference);
-            var success = await _service.DeleteImageAsync(imageReference);
+            bool success = await _service.DeleteImageAsync(request, GetAssemblyVersion());
 
-            return success 
+            return success
                 ? Ok()
                 : NoContent();
         }
 
-        [HttpGet("GetLatestImages")]
+        [HttpGet("GetLatestImages/")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -92,7 +94,9 @@ namespace Clutch.API.Controllers
             return containerImageResponseData is not null
                 && containerImageResponseData.Success
                 && containerImageResponseData.ContainerImageModel.HasValue
-                && containerImageResponseData.RegistryProperties.HasValue;
+                && containerImageResponseData.RegistryManifestModel.HasValue;
         }
+
+        private static string GetAssemblyVersion() => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
     }
 }

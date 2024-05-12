@@ -1,19 +1,22 @@
 using CacheProvider.Providers;
 using CacheProvider.Providers.Interfaces;
-using StackExchange.Redis;
-using System.Diagnostics;
-using Microsoft.OpenApi.Models;
+using Clutch.API.Database.Context;
+using Clutch.API.Models.Image;
+using Clutch.API.Properties;
+using Clutch.API.Providers.Image;
+using Clutch.API.Providers.Interfaces;
+using Clutch.API.Providers.Registry;
 using Clutch.API.Repositories.Image;
 using Clutch.API.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Clutch.API.Database.Context;
-using Clutch.API.Properties;
-using Clutch.API.Services.Interfaces;
 using Clutch.API.Services.Image;
-using Clutch.API.Providers.Interfaces;
-using Clutch.API.Providers.Image;
-using Clutch.API.Models.Image;
+using Clutch.API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
+using RestSharp;
+using StackExchange.Redis;
+using System.Diagnostics;
 
 namespace Clutch.API
 {
@@ -49,8 +52,14 @@ namespace Clutch.API
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
+            builder.WebHost.UseKestrel(options => { options.ListenAnyIP(8080); });
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            builder.Configuration.AddEnvironmentVariables();
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
             builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
+            builder.Services.AddOptions();
+            builder.Services.AddLogging();
+            builder.Services.AddSingleton<IRestClientFactory, RestClientFactory>();
             builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
             {
                 return ConnectionMultiplexer.Connect(
@@ -58,9 +67,9 @@ namespace Clutch.API
                     ?? "localhost:6379,abortConnect=false,ssl=false,allowAdmin=true");
             });
             builder.Services.AddDbContext<ContainerImageContext>(options =>
-                options.UseMySql(builder.Configuration.GetConnectionString("Clutch"),
-                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("Clutch")))
-            );
+                options.UseMySql(builder.Configuration.GetConnectionString("ClutchAPI"),
+                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("ClutchAPI")))
+            , ServiceLifetime.Singleton);
             builder.Services.AddTransient<IContainerImageRepository, ContainerImageRepository>(serviceProvier =>
             {
                 return new ContainerImageRepository(
@@ -76,6 +85,26 @@ namespace Clutch.API
                     serviceProvider.GetRequiredService<IOptions<AppSettings>>()
                 );
             });
+            builder.Services.AddTransient<IRegistryProvider, RegistryProviderBase>(serviceProvider =>
+            {
+                return new RegistryProviderBase(
+                    serviceProvider.GetRequiredService<IRestClientFactory>(),
+                    serviceProvider.GetRequiredService<ILogger<RegistryProviderBase>>(),
+                    serviceProvider.GetRequiredService<IOptions<AppSettings>>()
+                );
+            });
+            builder.Services.AddTransient<IRegistryProvider, DockerRegistryProvider>(serviceProvider =>
+            {
+                return new DockerRegistryProvider(
+                    serviceProvider.GetRequiredService<IRestClientFactory>(),
+                    serviceProvider.GetRequiredService<ILogger<DockerRegistryProvider>>(),
+                    serviceProvider.GetRequiredService<IOptions<AppSettings>>()
+                );
+            });
+            builder.Services.AddTransient<IRegistryProviderFactory, RegistryProviderFactory>(serviceProvider =>
+            {
+                return new RegistryProviderFactory(serviceProvider);
+            });
             builder.Services.AddTransient<ICacheProvider<ContainerImageModel>>(serviceProvider =>
             {
                 return new CacheProvider<ContainerImageModel>(
@@ -90,6 +119,7 @@ namespace Clutch.API
                 return new ContainerImageService(
                     serviceProvider.GetRequiredService<ICacheProvider<ContainerImageModel>>(),
                     serviceProvider.GetRequiredService<IContainerImageProvider>(),
+                    serviceProvider.GetRequiredService<IRegistryProviderFactory>(),
                     serviceProvider.GetRequiredService<ILogger<ContainerImageService>>(),
                     serviceProvider.GetRequiredService<IOptions<AppSettings>>()
                 );
@@ -102,8 +132,6 @@ namespace Clutch.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddGrpc();
-            builder.Services.AddOptions();
-            builder.Services.AddLogging();
             builder.Services.AddMemoryCache();
         }
 

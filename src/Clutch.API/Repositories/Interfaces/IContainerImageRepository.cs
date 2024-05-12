@@ -4,11 +4,11 @@ namespace Clutch.API.Repositories.Interfaces
 {
     public interface IContainerImageRepository
     {
-        Task<ContainerImageModel> GetImageByIdAsync(int imageId);
-        Task<ContainerImageModel> GetImageByReferenceAsync(string imageReference);
+        Task<ContainerImageModel> GetImageAsync(int imageId);
+        Task<ContainerImageModel> GetImageAsync(string repository);
         Task<IEnumerable<ContainerImageModel>> GetLatestImagesAsync();
         Task<bool> SetImageAsync(ContainerImageModel image);
         Task<bool> DeleteImageAsync(int imageId);
-        Task<bool> DeleteImageAsync(string imageReference);
+        Task<bool> DeleteImageAsync(string repository);
     }
 }

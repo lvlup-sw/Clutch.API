@@ -48,10 +48,7 @@ namespace CacheProvider.Caches
                 ? $"Get operation completed for key: {key}"
                 : $"Get operation failed for key: {key}";
 
-            if (success)
-                _logger.LogInformation(message);
-            else
-                _logger.LogError(message);
+            _logger.LogDebug(message);
 
             return success;
         }
@@ -67,7 +64,7 @@ namespace CacheProvider.Caches
         public void Set<T>(string key, T data)
         {
             _cache.CreateEntry(key).SetValue(data);
-            _logger.LogInformation("Set operation completed for key: {key}", key);
+            _logger.LogDebug("Set operation completed for key: {key}", key);
         }
 
         /// <summary>
@@ -80,7 +77,7 @@ namespace CacheProvider.Caches
         public void Remove(object key)
         {
             _cache.Remove(key);
-            _logger.LogInformation("Remove operation completed for key: {key}", key);
+            _logger.LogDebug("Remove operation completed for key: {key}", key);
         }
 
         /// <summary>
@@ -90,7 +87,7 @@ namespace CacheProvider.Caches
         /// <returns>The created cache entry.</returns>
         public ICacheEntry CreateEntry(object key)
         {
-            _logger.LogInformation("Creating cache entry for key {key}.", key);
+            _logger.LogDebug("Creating cache entry for key {key}.", key);
             return _cache.CreateEntry(key);
         }
 
@@ -99,7 +96,7 @@ namespace CacheProvider.Caches
         /// </summary>
         public void Dispose()
         {
-            _logger.LogInformation("Disposing memory cache.");
+            _logger.LogDebug("Disposing memory cache.");
             _cache.Dispose();
         }
 
