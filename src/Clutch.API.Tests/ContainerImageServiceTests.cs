@@ -54,10 +54,6 @@ namespace Clutch.API.Tests
         }
 
         /*  TODO:
-            GetImageAsync_ImageNotFoundInCache_CallsImageProvider
-            GetImageAsync_ImageNotFoundInRegistry
-            GetImageAsync_ErrorRetrievingFromCache
-            GetImageAsync_ErrorRetrievingFromRegistry
             SetImageAsync_Success
             SetImageAsync_Failure
             DeleteImageAsync_Success
@@ -149,6 +145,393 @@ namespace Clutch.API.Tests
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Success);
             Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_ImageNotFound1()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+            ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(default(ContainerImageModel));
+
+            // Act
+            var result = await _service.GetImageAsync(request, version);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_ImageNotFound2()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+            ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(default(ContainerImageModel));
+
+            // Act
+            var result = await _service.GetImageAsync(request, version);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_ImageNotFound3()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+            ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(default(ContainerImageModel));
+
+            // Act
+            var result = await _service.GetImageAsync(request, version);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_ManifestNotFound1()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+            var expectedImage = TestUtils.GetContainerImageByRequest("test/image", "latest", RegistryType.Docker);
+            ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+
+            var mockRegistryProvider = new Mock<IRegistryProvider>();
+            mockRegistryProvider.Setup(r => r.GetManifestAsync(request))
+                .Returns(Task.FromResult(RegistryManifestModel.Null));
+            _mockRegistryProviderFactory
+                .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Docker)))
+                .Returns(mockRegistryProvider.Object);
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(expectedImage);
+
+            // Act
+            var result = await _service.GetImageAsync(request, version);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_ManifestNotFound2()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+            var expectedImage = TestUtils.GetContainerImageByRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+
+            var mockRegistryProvider = new Mock<IRegistryProvider>();
+            mockRegistryProvider.Setup(r => r.GetManifestAsync(request))
+                .Returns(Task.FromResult(RegistryManifestModel.Null));
+            _mockRegistryProviderFactory
+                .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Docker)))
+                .Returns(mockRegistryProvider.Object);
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(expectedImage);
+
+            // Act
+            var result = await _service.GetImageAsync(request, version);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task GetImageAsync_ManifestNotFound3()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+            var expectedImage = TestUtils.GetContainerImageByRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+
+            var mockRegistryProvider = new Mock<IRegistryProvider>();
+            mockRegistryProvider.Setup(r => r.GetManifestAsync(request))
+                .Returns(Task.FromResult(RegistryManifestModel.Null));
+            _mockRegistryProviderFactory
+                .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Local)))
+                .Returns(mockRegistryProvider.Object);
+            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+                .ReturnsAsync(expectedImage);
+
+            // Act
+            var result = await _service.GetImageAsync(request, version);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Success1()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.SetImageAsync(request, version);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Success2()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.SetImageAsync(request, version);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Success3()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.SetImageAsync(request, version);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Failure1()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _service.SetImageAsync(request, version);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Failure2()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _service.SetImageAsync(request, version);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetImageAsync_Failure3()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _service.SetImageAsync(request, version);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteImageAsync_Success1()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.DeleteImageAsync(request, version);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteImageAsync_Success2()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.DeleteImageAsync(request, version);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteImageAsync_Success3()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.DeleteImageAsync(request, version);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteImageAsync_Failure1()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _service.DeleteImageAsync(request, version);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteImageAsync_Failure2()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("joedward32/cs2", "latest", RegistryType.Docker);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _service.DeleteImageAsync(request, version);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteImageAsync_Failure3()
+        {
+            // Arrange
+            var version = "1.0.0";
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            var cacheKey = TestUtils.ConstructCacheKey(request, version);
+
+            _mockCacheProvider
+                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _service.DeleteImageAsync(request, version);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
         }
     }
 }
