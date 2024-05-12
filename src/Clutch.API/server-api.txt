@@ -12,19 +12,27 @@ Backend data services include a MariaDB instance hosted on my local NFS server.
 
 Container API MVP Todo:
     - Write tests
-		+ Controller	
 		+ RegistryProvider
 		+ Integration
 		+ CacheProvider
     - Replace Status and BuildDate
 		=> LatestDeploymentId
 		=> LatestDeploymentTime
+		or Status can be ArtifactStatus
+			Assuming we're storing artifacts in GCP/GH?
+			In which case, ArtifactStatus should be updated 
+			by the CI/CD pipeline, and the pipeline should
+			be triggered by SetImage.
+			Thus interactions with artifacts (eg for deployment)
+			would be handled by the Kubernetes service, which
+			makes sense and is a good division of responsibilities.
     - Create manual MVP in GCP for API
         + Database connection..
         + API gateway
         + Logging
         + Monitoring
-        + Registry?
+        + ArtifactRegistry
+		+ Authentication
     - Write terraform infrastructure based on MVP
         + Try terraform cloud management
     - Write Github Actions pipeline

@@ -68,7 +68,7 @@ namespace Clutch.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
-        public async Task<IActionResult> DeleteContainerImageModel(ContainerImageRequest request)
+        public async Task<IActionResult> DeleteContainerImage(ContainerImageRequest request)
         {
             bool success = await _service.DeleteImageAsync(request, GetAssemblyVersion());
 

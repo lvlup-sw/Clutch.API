@@ -4,14 +4,13 @@ using Clutch.API.Models.Image;
 using Clutch.API.Models.Registry;
 using Clutch.API.Services.Interfaces;
 using Clutch.API.Models.Enums;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-using System.Net;
 using Clutch.API.Controllers.Filters;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Moq;
 
 namespace Clutch.API.Tests
 {
@@ -67,6 +66,7 @@ namespace Clutch.API.Tests
             Assert.IsTrue(response.Success);
             Assert.IsTrue(response.ContainerImage.Equals(expectedResponse.ContainerImage));
             Assert.IsTrue(response.RegistryManifest.Equals(expectedResponse.RegistryManifest));
+            _mockService.Verify(s => s.GetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -95,6 +95,7 @@ namespace Clutch.API.Tests
             Assert.IsTrue(response.Success);
             Assert.IsTrue(response.ContainerImage.Equals(expectedResponse.ContainerImage));
             Assert.IsTrue(response.RegistryManifest.Equals(expectedResponse.RegistryManifest));
+            _mockService.Verify(s => s.GetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -123,6 +124,7 @@ namespace Clutch.API.Tests
             Assert.IsTrue(response.Success);
             Assert.IsTrue(response.ContainerImage.Equals(expectedResponse.ContainerImage));
             Assert.IsTrue(response.RegistryManifest.Equals(expectedResponse.RegistryManifest));
+            _mockService.Verify(s => s.GetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -151,6 +153,7 @@ namespace Clutch.API.Tests
             Assert.IsTrue(response.Success);
             Assert.IsTrue(response.ContainerImage.Equals(expectedResponse.ContainerImage));
             Assert.IsTrue(response.RegistryManifest.Equals(expectedResponse.RegistryManifest));
+            _mockService.Verify(s => s.GetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -169,6 +172,7 @@ namespace Clutch.API.Tests
             var notFoundResult = result.Result as NotFoundResult;
             Assert.IsNotNull(notFoundResult);
             Assert.IsNotNull(notFoundResult.StatusCode == 404);
+            _mockService.Verify(s => s.GetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -187,6 +191,7 @@ namespace Clutch.API.Tests
             var notFoundResult = result.Result as NotFoundResult;
             Assert.IsNotNull(notFoundResult);
             Assert.IsNotNull(notFoundResult.StatusCode == 404);
+            _mockService.Verify(s => s.GetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -205,10 +210,224 @@ namespace Clutch.API.Tests
             var notFoundResult = result.Result as NotFoundResult;
             Assert.IsNotNull(notFoundResult);
             Assert.IsNotNull(notFoundResult.StatusCode == 404);
+            _mockService.Verify(s => s.GetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        #endregion
+        #region SetContainerImage
+
+        [TestMethod]
+        public async Task SetContainerImage_Success_ReturnsOk1()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            _mockService.Setup(s => s.SetImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _controller.SetContainerImage(request);
+
+            // Assert
+            var typeResult = result as OkResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 200);
+            _mockService.Verify(s => s.SetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
         }
 
         [TestMethod]
-        public void GetContainerImage_InvalidRequest_ReturnsBadRequest()
+        public async Task SetContainerImage_Success_ReturnsOk2()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("joedwards32/cs2", "latest", RegistryType.Docker);
+            _mockService.Setup(s => s.SetImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _controller.SetContainerImage(request);
+
+            // Assert
+            var typeResult = result as OkResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 200);
+            _mockService.Verify(s => s.SetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetContainerImage_Success_ReturnsOk3()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            _mockService.Setup(s => s.SetImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _controller.SetContainerImage(request);
+
+            // Assert
+            var typeResult = result as OkResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 200);
+            _mockService.Verify(s => s.SetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetContainerImage_Failure_ReturnsNoContent1()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            _mockService.Setup(s => s.SetImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(false));
+
+            // Act
+            var result = await _controller.SetContainerImage(request);
+
+            // Assert
+            var typeResult = result as NoContentResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 204);
+            _mockService.Verify(s => s.SetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetContainerImage_Failure_ReturnsNoContent2()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("joedwards32/cs2", "latest", RegistryType.Docker);
+            _mockService.Setup(s => s.SetImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(false));
+
+            // Act
+            var result = await _controller.SetContainerImage(request);
+
+            // Assert
+            var typeResult = result as NoContentResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 204);
+            _mockService.Verify(s => s.SetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task SetContainerImage_Failure_ReturnsNoContent3()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            _mockService.Setup(s => s.SetImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _controller.SetContainerImage(request);
+
+            // Assert
+            var typeResult = result as OkResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 200);
+            _mockService.Verify(s => s.SetImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        #endregion
+        #region DeleteContainerImage
+
+        [TestMethod]
+        public async Task DeleteContainerImage_Success_ReturnsOk1()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            _mockService.Setup(s => s.DeleteImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _controller.DeleteContainerImage(request);
+
+            // Assert
+            var typeResult = result as OkResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 200);
+            _mockService.Verify(s => s.DeleteImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteContainerImage_Success_ReturnsOk2()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("joedwards32/cs2", "latest", RegistryType.Docker);
+            _mockService.Setup(s => s.DeleteImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _controller.DeleteContainerImage(request);
+
+            // Assert
+            var typeResult = result as OkResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 200);
+            _mockService.Verify(s => s.DeleteImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteContainerImage_Success_ReturnsOk3()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            _mockService.Setup(s => s.DeleteImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _controller.DeleteContainerImage(request);
+
+            // Assert
+            var typeResult = result as OkResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 200);
+            _mockService.Verify(s => s.DeleteImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteContainerImage_Failure_ReturnsNoContent1()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("test/image", "latest", RegistryType.Docker);
+            _mockService.Setup(s => s.DeleteImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(false));
+
+            // Act
+            var result = await _controller.DeleteContainerImage(request);
+
+            // Assert
+            var typeResult = result as NoContentResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 204);
+            _mockService.Verify(s => s.DeleteImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteContainerImage_Failure_ReturnsNoContent2()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("joedwards32/cs2", "latest", RegistryType.Docker);
+            _mockService.Setup(s => s.DeleteImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(false));
+
+            // Act
+            var result = await _controller.DeleteContainerImage(request);
+
+            // Assert
+            var typeResult = result as NoContentResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 204);
+            _mockService.Verify(s => s.DeleteImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        [TestMethod]
+        public async Task DeleteContainerImage_Failure_ReturnsNoContent3()
+        {
+            // Arrange
+            var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
+            _mockService.Setup(s => s.DeleteImageAsync(request, "1.0.0.0")).Returns(Task.FromResult(true));
+
+            // Act
+            var result = await _controller.DeleteContainerImage(request);
+
+            // Assert
+            var typeResult = result as OkResult;
+            Assert.IsNotNull(typeResult);
+            Assert.IsTrue(typeResult.StatusCode == 200);
+            _mockService.Verify(s => s.DeleteImageAsync(request, "1.0.0.0"), Times.Exactly(1));
+        }
+
+        #endregion
+        #region Special Cases
+
+        [TestMethod]
+        public void ContainerImage_InvalidRequest_ReturnsBadRequest()
         {
             // Arrange
             var request = TestUtils.GetInvalidContainerImageRequest();
@@ -236,7 +455,7 @@ namespace Clutch.API.Tests
         }
 
         [TestMethod]
-        public async Task GetContainerImage_ServiceThrowsTimeoutException_ReturnsGatewayTimeout()
+        public async Task ContainerImage_ServiceThrowsTimeoutException_ReturnsGatewayTimeout()
         {
             // Arrange
             // Create ActionExecutingContext to simulate filter execution
@@ -264,7 +483,7 @@ namespace Clutch.API.Tests
         }
 
         [TestMethod]
-        public async Task GetContainerImage_ServiceThrowsException_ReturnsInternalServerError()
+        public async Task ContainerImage_ServiceThrowsException_ReturnsInternalServerError()
         {
             // Arrange
             // Create ActionExecutingContext to simulate filter execution
@@ -292,31 +511,5 @@ namespace Clutch.API.Tests
         }
 
         #endregion
-        #region SetContainerImage
-
-        #endregion
-        #region DeleteContainerImage
-
-        #endregion
-        #region Special Cases
-
-        #endregion
-        /*  TODO:
-            SetContainerImage Tests:
-                SetContainerImage_Success_ReturnsOk
-                SetContainerImage_Failure_ReturnsNoContent
-                SetContainerImage_InvalidRequest_ReturnsBadRequest
-                SetContainerImage_ServiceThrowsException_ReturnsInternalServerError
-
-            DeleteContainerImageModel Tests:
-                DeleteContainerImageModel_Success_ReturnsOk
-                DeleteContainerImageModel_Failure_ReturnsNoContent
-                DeleteContainerImageModel_InvalidRequest_ReturnsBadRequest
-                DeleteContainerImageModel_ServiceThrowsException_ReturnsInternalServerError
-
-            Additional Test Cases (Optional):
-                GetContainerImage_ServiceReturnsInvalidData_ReturnsBadRequest (If your validation logic allows for this)
-                Specific tests for different exception types thrown by the service (e.g., ArgumentException, InvalidOperationException, etc.) to ensure the correct status codes are returned.
-        */
     }
 }

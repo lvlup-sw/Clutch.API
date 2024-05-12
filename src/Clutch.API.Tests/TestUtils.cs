@@ -25,7 +25,7 @@ namespace Clutch.API.Tests
                 BuildDate = DateTime.MaxValue,
                 RegistryType = RegistryType.Docker,
                 Status = StatusEnum.Available,
-                Version = "1.0.0"
+                Version = "1.0.0.0"
             };
         }
 
@@ -40,7 +40,7 @@ namespace Clutch.API.Tests
                 BuildDate = DateTime.MaxValue,
                 RegistryType = RegistryType.Docker,
                 Status = StatusEnum.Available,
-                Version = "1.0.0"
+                Version = "1.0.0.0"
             };
         }
 
@@ -55,7 +55,7 @@ namespace Clutch.API.Tests
                 BuildDate = DateTime.MaxValue,
                 RegistryType = registry,
                 Status = StatusEnum.Available,
-                Version = "1.0.0"
+                Version = "1.0.0.0"
             };
         }
 
