@@ -39,6 +39,8 @@ namespace Clutch.API.Tests
         [TestCleanup]
         public void Cleanup() => _context.Dispose();
 
+        #region GetImage
+
         [DataTestMethod]
         [DataRow(1)]
         [DataRow(5)]
@@ -119,6 +121,9 @@ namespace Clutch.API.Tests
             Assert.IsFalse(result.HasValue);
         }
 
+        #endregion
+        #region SetImage
+
         // DataRow doesn't allow for dynamically created data structures
         [TestMethod]
         public async Task SetImageAsync_Success1()
@@ -189,6 +194,9 @@ namespace Clutch.API.Tests
             Assert.IsFalse(result);
             Assert.IsFalse(_context.ContainerImages.Any());
         }
+
+        #endregion
+        #region DeleteImage
 
         [DataTestMethod]
         [DataRow(1)]
@@ -269,5 +277,7 @@ namespace Clutch.API.Tests
             Assert.IsFalse(result);
             Assert.IsTrue(_context.ContainerImages.Contains(TestUtils.GetContainerImageByReference("tensorflow/tensorflow:latest")));
         }
+
+        #endregion
     }
 }

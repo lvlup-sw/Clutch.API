@@ -21,6 +21,7 @@ namespace Clutch.API.Controllers
 
         [HttpGet("GetImage/")]
         [ValidateRequest]
+        [HandleExceptions]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,6 +43,7 @@ namespace Clutch.API.Controllers
 
         [HttpPut("SetImage/")]
         [ValidateRequest]
+        [HandleExceptions]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -59,6 +61,7 @@ namespace Clutch.API.Controllers
 
         [HttpDelete("DeleteImage/")]
         [ValidateRequest]
+        [HandleExceptions]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

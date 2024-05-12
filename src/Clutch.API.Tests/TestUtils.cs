@@ -95,6 +95,18 @@ namespace Clutch.API.Tests
             };
         }
 
+        public static ContainerImageResponseData GetContainerImageResponseData(string repository, string tag, RegistryType registry)
+        {
+            return new(true, GetContainerImageByRequest(repository, tag, registry), GetRegistryManifestModel());
+        }
+
+        public static ContainerImageResponse GetContainerImageResponse(string repository, string tag, RegistryType registry)
+        {
+            var mapper = GetContainerImageMapper();
+            var image = mapper.Map<ContainerImage>(GetContainerImageByRequest(repository, tag, registry));
+            return new(true, image, GetRegistryManifest());
+        }
+
         public static RegistryManifestModel GetRegistryManifestModel() 
         {
             var mapper = GetRegistryMapper();
@@ -107,6 +119,17 @@ namespace Clutch.API.Tests
             {
                 cfg.CreateMap<RegistryManifestModel, RegistryManifest>();
                 cfg.CreateMap<RegistryManifest, RegistryManifestModel>();
+            });
+
+            return config.CreateMapper();
+        }
+
+        private static IMapper GetContainerImageMapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ContainerImageModel, ContainerImage>();
+                cfg.CreateMap<ContainerImage, ContainerImageModel>();
             });
 
             return config.CreateMapper();
@@ -149,6 +172,16 @@ namespace Clutch.API.Tests
                 Repository = repository,
                 Tag = tag,
                 RegistryType= registry
+            };
+        }
+
+        public static ContainerImageRequest GetInvalidContainerImageRequest()
+        {
+            return new()
+            {
+                Repository = "dog",
+                Tag = "latest",
+                RegistryType= RegistryType.Invalid
             };
         }
 

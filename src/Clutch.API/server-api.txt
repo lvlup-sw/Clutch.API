@@ -12,12 +12,10 @@ Backend data services include a MariaDB instance hosted on my local NFS server.
 
 Container API MVP Todo:
     - Write tests
-		+ Service
-			# Change return for SetImage
+		+ Controller	
 		+ RegistryProvider
-		+ Controller
-		+ CacheProvider
 		+ Integration
+		+ CacheProvider
     - Replace Status and BuildDate
 		=> LatestDeploymentId
 		=> LatestDeploymentTime

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Clutch.API.Models.Image;
+using Clutch.API.Models.Enums;
 
 namespace Clutch.API.Controllers.Filters
 {
@@ -10,11 +11,31 @@ namespace Clutch.API.Controllers.Filters
         {
             var request = context.ActionArguments["request"] as ContainerImageRequest;
 
-            if (request is not null && !context.ModelState.IsValid)
+            if (request is null || !context.ModelState.IsValid)
             {
                 context.ModelState.AddModelError("request", "Invalid request object.");
                 context.Result = new BadRequestObjectResult(context.ModelState);
+                return;
             }
+
+            if (!ValidateRequestData(request))
+            {
+                context.ModelState.AddModelError("request", "Invalid request object data.");
+                context.Result = new BadRequestObjectResult(context.ModelState);
+                return;
+            }
+
+            base.OnActionExecuting(context);
+        }
+
+        private static bool ValidateRequestData(ContainerImageRequest request)
+        {
+            return
+                !string.IsNullOrEmpty(request.Repository) &&
+                !string.IsNullOrEmpty(request.Tag) &&
+                request.Repository.Contains('/') &&
+                Enum.IsDefined(typeof(RegistryType), request.RegistryType) &&
+                request.RegistryType != RegistryType.Invalid;
         }
     }
 }

@@ -8,7 +8,6 @@ using CacheProvider.Providers.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Clutch.API.Providers.Registry;
 
 namespace Clutch.API.Tests
 {
@@ -53,12 +52,7 @@ namespace Clutch.API.Tests
             _mockRegistryProviderFactory.Reset();
         }
 
-        /*  TODO:
-            SetImageAsync_Success
-            SetImageAsync_Failure
-            DeleteImageAsync_Success
-            DeleteImageAsync_Failure
-        */
+        #region GetImage
 
         [TestMethod]
         public async Task GetImageAsync_Success1()
@@ -294,6 +288,9 @@ namespace Clutch.API.Tests
             Assert.IsTrue(TestUtils.ResponseDataAreEqual(expectedResponse, result));
         }
 
+        #endregion
+        #region SetImage
+
         [TestMethod]
         public async Task SetImageAsync_Success1()
         {
@@ -414,6 +411,9 @@ namespace Clutch.API.Tests
             _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
         }
 
+        #endregion
+        #region DeleteImage
+
         [TestMethod]
         public async Task DeleteImageAsync_Success1()
         {
@@ -533,5 +533,7 @@ namespace Clutch.API.Tests
             Assert.IsFalse(result);
             _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
         }
+
+        #endregion
     }
 }

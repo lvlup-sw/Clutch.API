@@ -39,6 +39,8 @@ namespace Clutch.API.Tests
             _mockRepository.Reset();
         }
 
+        #region GetImage
+
         [DataTestMethod]
         [DataRow(1)]
         [DataRow(5)]
@@ -150,6 +152,9 @@ namespace Clutch.API.Tests
             _mockRepository.Verify(repo => repo.GetImageAsync(repositoryId), Times.Never);
         }
 
+        #endregion
+        #region SetImage
+
         // DataRow doesn't allow for dynamically created data structures
         [TestMethod]
         public async Task SetImageAsync_Success1()
@@ -223,6 +228,9 @@ namespace Clutch.API.Tests
             Assert.IsFalse(result);
             _mockRepository.Verify(repo => repo.SetImageAsync(ContainerImageModel.Null), Times.Never);
         }
+
+        #endregion
+        #region DeleteImage
 
         [DataTestMethod]
         [DataRow(1)]
@@ -329,6 +337,9 @@ namespace Clutch.API.Tests
             _mockRepository.Verify(repo => repo.DeleteImageAsync(repositoryId), Times.Never);
         }
 
+        #endregion
+        #region Special Cases
+
 
         [TestMethod]
         public async Task GetImageAsync_RepositoryThrowsException_ReturnsNull()
@@ -397,5 +408,7 @@ namespace Clutch.API.Tests
             Assert.IsNull(result);
             _mockRepository.Verify(repo => repo.GetImageAsync(1), Times.Exactly(2));
         }
+
+        #endregion
     }
 }
