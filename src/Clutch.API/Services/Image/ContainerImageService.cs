@@ -39,8 +39,8 @@ namespace Clutch.API.Services.Image
             }
 
             // Check the registry and construct the RegistryManifest
-            // We utilize a using here since the registry factory
-            // creates an instance of the class we need, which we
+            // We utilize a Using block since the registry factory
+            // creates an instance of the class we require, which we
             // need to dispose afterwards.
             using (IRegistryProvider? registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType))
             {
