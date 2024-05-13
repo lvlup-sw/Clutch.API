@@ -99,7 +99,7 @@ namespace Clutch.API.Services.Image
             // BuildDate and Status
             try
             {
-                return new ContainerImageModel()
+                return new()
                 {
                     ImageID = 0,
                     RepositoryId = $"{request.Repository}:{request.Tag}",
