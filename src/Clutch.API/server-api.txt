@@ -12,7 +12,6 @@ Backend data services include a MariaDB instance hosted on my local NFS server.
 
 Container API MVP Todo:
     - Write tests
-		+ RegistryProvider
 		+ Integration
 		+ CacheProvider
     - Rework Status and BuildDate

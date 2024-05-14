@@ -42,7 +42,7 @@ namespace Clutch.API.Providers.Registry
                 _logger.LogError("Failed to retrieve image manifest from registry due to an exception processing the request.");
                 return RegistryManifestModel.Null;
             }
-            else if (response.StatusCode != HttpStatusCode.OK)
+            else if (response.StatusCode != HttpStatusCode.OK || response.Content is null)
             {
                 _logger.LogError("Failed to retrieve image manifest from registry. StatusCode: {StatusCode}. ErrorMessage: {ErrorMessage}", response.StatusCode, response.ErrorMessage);
                 return RegistryManifestModel.Null;
@@ -50,7 +50,7 @@ namespace Clutch.API.Providers.Registry
 
             try
             {
-                return JsonConvert.DeserializeObject<RegistryManifestModel>(response.Content!) ?? RegistryManifestModel.Null;
+                return JsonConvert.DeserializeObject<RegistryManifestModel>(response.Content) ?? RegistryManifestModel.Null;
             }
             catch (Exception ex)
             {
@@ -73,9 +73,9 @@ namespace Clutch.API.Providers.Registry
 
             if (disposing)
             {
-                // Currently we don't need to explicitly dispose anything
+                // Currently we don't need to explicitly dispose anything.
                 // RestClient recommends simply creating a new instance
-                // For each new request, as it handles the web socket on
+                // for each new request, as it handles the web socket on
                 // the backend.
             }
 
