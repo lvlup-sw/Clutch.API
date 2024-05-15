@@ -43,8 +43,7 @@ jobs:
       - name: Build and Push
         run: |
           cd src/
-          docker buildx bake -f docker-compose.yml
-          docker buildx bake --push --push-target  ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }} -f docker-compose.yml
+          docker buildx bake --set "*.tags=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}" --push -f docker-compose.yml
 
 #      - name: Authenticate with Google Cloud
 #        id: auth
