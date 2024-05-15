@@ -25,9 +25,11 @@ jobs:
   
       - name: Populate .env
         run: |
-          echo ConnectionStrings__ClutchAPI=${{ secrets.DB_CONNECTIONSTRING }} >> .env
-          echo AppSettings__GithubPAT=${{ secrets.GH_PAT }} >> .env
-          echo AppSettings__DockerPAT=${{ secrets.DOCKER_PAT }} >> .env
+          cat <<EOF > .env
+          ConnectionStrings__ClutchAPI=${{ secrets.DB_CONNECTIONSTRING }}
+          AppSettings__GithubPAT=${{ secrets.GH_PAT }}
+          AppSettings__DockerPAT=${{ secrets.DOCKER_PAT }}
+          EOF
 
       - name: Authenticate with Google Cloud
         id: auth
