@@ -40,13 +40,17 @@ jobs:
       - id: cli
         uses: google-github-actions/setup-gcloud@v2
 
+      - run: |
+          echo ls -la
+          #cd src
+          #echo ls -la
+
       - name: Bake and Push Docker Images
         uses: docker/bake-action@v4
         with:
-          source: ./src
           files: docker-compose.yml
           push: true
-          load: false 
+          load: false
 
       - name: Deploy to Cloud Run
         id: deploy
