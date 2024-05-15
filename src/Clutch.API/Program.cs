@@ -156,7 +156,6 @@ namespace Clutch.API
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Clutch.API V1");
-                //c.RoutePrefix = "";
             });
             app.UseHttpsRedirection();
             app.UseStaticFiles();
