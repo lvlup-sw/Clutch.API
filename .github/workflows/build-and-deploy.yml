@@ -42,8 +42,8 @@ jobs:
 
       - run: |
           ls -la
-          #cd src
-          #ls -la
+          cd src
+          ls -la
 
       - name: Bake and Push Docker Images
         uses: docker/bake-action@v4
