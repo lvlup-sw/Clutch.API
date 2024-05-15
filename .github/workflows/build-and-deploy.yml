@@ -43,7 +43,8 @@ jobs:
       - name: Bake and Push Docker Images
         uses: docker/bake-action@v4
         with:
-          files: ./src/docker-compose.yml
+          context: ./src
+          files: docker-compose.yml
           push: true
           load: false 
 

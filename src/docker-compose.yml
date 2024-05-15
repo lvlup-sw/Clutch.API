@@ -15,7 +15,7 @@ services:
     volumes:
       - type: bind
         source: ../..
-        target: /src 
+        target: /src
     ports:
       - 8080:8080
       # MAC - 7102:8080 
