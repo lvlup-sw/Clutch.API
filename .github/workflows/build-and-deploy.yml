@@ -20,8 +20,8 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v2
 
       - name: Authenticate with Google Cloud
         id: auth
@@ -32,13 +32,12 @@ jobs:
       - id: cli
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Build and Push Container
-        uses: docker/build-push-action@v5
+      - name: Bake and Push Docker Images
+        uses: docker/bake-action@v4
         with:
-          context: .
-          file: ./src/Clutch.API/Dockerfile
+          files: ./src/docker-compose.yml
           push: true
-          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+          load: false 
 
       - name: Deploy to Cloud Run
         id: deploy
