@@ -13,7 +13,6 @@ COPY . .
 RUN dotnet restore "Clutch.API.csproj"
 RUN dotnet build "Clutch.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Clutch.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false

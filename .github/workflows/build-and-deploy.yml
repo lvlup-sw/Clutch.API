@@ -39,11 +39,10 @@ jobs:
   
       - id: cli
         uses: google-github-actions/setup-gcloud@v2
-
-      - run: |
-          ls -la
-          cd src
-          ls -la
+      
+      - name: Login to GAR
+        run: |
+          gcloud auth configure-docker us-east4-docker.pkg.dev
 
       - name: Bake and Push Docker Images
         uses: docker/bake-action@v4
