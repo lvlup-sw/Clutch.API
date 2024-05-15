@@ -45,11 +45,12 @@ jobs:
         with:
           workdir: src/
           files: docker-compose.yml
-          load: false
+          load: true
 
       - name: Push Docker Image
         id: Push
         run: |
+          cd src/
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
 
       - name: Deploy to Cloud Run
