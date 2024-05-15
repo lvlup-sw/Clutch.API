@@ -41,9 +41,9 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - run: |
-          echo ls -la
+          ls -la
           #cd src
-          #echo ls -la
+          #ls -la
 
       - name: Bake and Push Docker Images
         uses: docker/bake-action@v4
