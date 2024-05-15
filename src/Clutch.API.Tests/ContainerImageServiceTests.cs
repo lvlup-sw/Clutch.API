@@ -4,7 +4,6 @@ using Clutch.API.Models.Registry;
 using Clutch.API.Properties;
 using Clutch.API.Services.Image;
 using Clutch.API.Providers.Interfaces;
-using CacheProvider.Providers.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;

@@ -1,6 +1,7 @@
 ﻿using CacheProvider.Caches;
+using Clutch.API.Models.Enums;
 
-namespace CacheProvider.Providers.Interfaces
+namespace Clutch.API.Providers.Interfaces
 {
     /// <summary>
     /// An interface for the Cache Provider.

@@ -1,5 +1,4 @@
-﻿using CacheProvider.Providers.Interfaces;
-using Clutch.API.Models.Enums;
+﻿using Clutch.API.Models.Enums;
 using Clutch.API.Models.Image;
 using Clutch.API.Models.Registry;
 using Clutch.API.Properties;

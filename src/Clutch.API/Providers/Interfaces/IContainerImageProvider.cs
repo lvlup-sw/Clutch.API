@@ -1,5 +1,4 @@
-﻿using CacheProvider.Providers.Interfaces;
-using Clutch.API.Models.Image;
+﻿using Clutch.API.Models.Image;
 
 namespace Clutch.API.Providers.Interfaces
 {

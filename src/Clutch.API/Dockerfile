@@ -8,12 +8,9 @@ EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src 
-COPY ./Clutch.API.sln .
-COPY ./Clutch.API/Clutch.API.csproj ./Clutch.API/ 
-RUN dotnet restore "Clutch.API/Clutch.API.csproj"
-COPY . . 
-WORKDIR "/src/Clutch.API"
+WORKDIR /src
+COPY . .
+RUN dotnet restore "Clutch.API.csproj"
 RUN dotnet build "Clutch.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 

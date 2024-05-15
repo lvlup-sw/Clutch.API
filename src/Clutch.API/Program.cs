@@ -1,5 +1,4 @@
 using CacheProvider.Providers;
-using CacheProvider.Providers.Interfaces;
 using Clutch.API.Database.Context;
 using Clutch.API.Models.Image;
 using Clutch.API.Properties;

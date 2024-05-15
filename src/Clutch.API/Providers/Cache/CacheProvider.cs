@@ -1,10 +1,12 @@
 ﻿using CacheProvider.Caches;
-using CacheProvider.Providers.Interfaces;
 using MemCache = Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Clutch.API.Providers.Interfaces;
+using Clutch.API.Models.Enums;
+using Clutch.API.Properties;
 
 namespace CacheProvider.Providers
 {

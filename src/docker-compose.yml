@@ -9,11 +9,13 @@ services:
 
   Clutch.api:
     image: ${DOCKER_REGISTRY-}clutchapi
-    volumes:
-      - ../src/Clutch.API:/app
     build:
-      context: .
-      dockerfile: Clutch.API/Dockerfile 
+      context: ./Clutch.API
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ../..
+        target: /src 
     ports:
       - 8080:8080
       # MAC - 7102:8080 

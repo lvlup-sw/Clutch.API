@@ -1,4 +1,4 @@
-﻿namespace CacheProvider.Providers.Interfaces
+﻿namespace Clutch.API.Providers.Interfaces
 {
     /// <summary>
     /// An interface for the real provider.

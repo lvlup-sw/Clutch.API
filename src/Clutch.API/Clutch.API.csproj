@@ -63,8 +63,4 @@
     <Folder Include="Utilities\Scripts\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CacheProvider\CacheProvider.csproj" />
-  </ItemGroup>
-
 </Project>

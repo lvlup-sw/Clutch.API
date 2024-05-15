@@ -3,10 +3,10 @@ using Polly.Wrap;
 using StackExchange.Redis;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using CacheProvider.Providers;
 using CacheProvider.Caches.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Clutch.API.Properties;
 
 namespace CacheProvider.Caches
 {
