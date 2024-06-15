@@ -4,6 +4,7 @@ using Clutch.API.Models.Registry;
 using Clutch.API.Properties;
 using Clutch.API.Providers.Interfaces;
 using Clutch.API.Services.Interfaces;
+using Clutch.API.Utilities;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
@@ -120,16 +121,11 @@ namespace Clutch.API.Services.Image
         private static string ConstructCacheKey(ContainerImageRequest request, string version)
         {
             // Serialize and hash the request object
-            byte[] hash = SHA256.HashData(
-                Encoding.UTF8.GetBytes(
-                    JsonConvert.SerializeObject(request)
-                )
-            );
+            var hash = CacheKeyGenerator.GenerateCacheKey(request, version);
 
-            // Construct the cache key by converting each byte
-            // in the hash into a two-character hexadecimal representation
+            // Construct the cache key with the hash
             // We use the Version, Repository, and Tag as prefixes
-            return $"{version}:{request.Repository}:{request.Tag}:{string.Join("", hash.Select(b => b.ToString("x2"))).ToLower()}";
+            return $"{version}:{request.Repository}:{request.Tag}:{hash}";
         }
     }
 }

@@ -12,7 +12,7 @@ Backend data services include a MariaDB instance hosted on my local NFS server.
 
 Container API MVP Todo:
     - Write tests
-		+ Integration
+		+ Integration	[Ignore]
 		+ CacheProvider
     - Rework Status and BuildDate
 		=> LatestDeploymentId
@@ -26,9 +26,8 @@ Container API MVP Todo:
 			would be handled by the Kubernetes service, which
 			makes sense and is a good division of responsibilities.
     - Create manual MVP in GCP for API
-        + Local Database connection..
-        + API Gateway (routing to serverless)
-			# Essentially free/baked into Cloud Run price
+        + Cloud SQL, Cloud Memorystore
+			# CORS in middleware
 		+ Cloud Run (API application containers)
 			# Latency-conscious price: ~$8-12/month
 		+ ArtifactRegistry

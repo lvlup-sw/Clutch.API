@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
+using Clutch.API.Utilities;
 
 namespace Clutch.API.Tests
 {
@@ -187,13 +188,8 @@ namespace Clutch.API.Tests
 
         public static string ConstructCacheKey(ContainerImageRequest request, string version)
         {
-            byte[] hash = SHA256.HashData(
-                Encoding.UTF8.GetBytes(
-                    JsonConvert.SerializeObject(request)
-                )
-            );
-
-            return $"{version}:{request.Repository}:{request.Tag}:{string.Join("", hash.Select(b => b.ToString("x2"))).ToLower()}";
+            var hash = CacheKeyGenerator.GenerateCacheKey(request, version);
+            return $"{version}:{request.Repository}:{request.Tag}:{hash}";
         }
     }
 }

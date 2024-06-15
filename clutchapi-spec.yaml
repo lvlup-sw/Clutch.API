@@ -1,0 +1,286 @@
+swagger: '2.0'
+info:
+  title: Clutch API
+  version: v1
+paths:
+  /swagger/index.html:
+    get:
+      summary: "Swagger UI"
+      operationId: "getSwaggerUI"
+      x-google-backend:
+        address: https://clutch-api-e3nx4nlfka-uk.a.run.app/swagger/index.html
+      responses:
+        '200':
+          description: Success        
+  /ContainerImage/DeleteImage:
+    delete:
+      operationId: deleteImage
+      x-google-backend:
+        address: https://clutch-api-e3nx4nlfka-uk.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      consumes:
+        - application/json
+        - text/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/ContainerImageRequest'
+      responses:
+        '200':
+          description: Success
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ProblemDetails'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ProblemDetails'
+        '500':
+          description: Server Error
+        '504':
+          description: Server Error
+      tags:
+        - ContainerImage
+  /ContainerImage/GetImage:
+    get:
+      operationId: getImage
+      x-google-backend:
+        address: https://clutch-api-e3nx4nlfka-uk.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS      
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: Repository
+          type: string
+        - in: query
+          name: Tag
+          type: string
+        - enum:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - -1
+          format: int32
+          in: query
+          name: RegistryType
+          type: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/ContainerImageResponse'
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ProblemDetails'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ProblemDetails'
+        '500':
+          description: Server Error
+        '504':
+          description: Server Error
+      tags:
+        - ContainerImage
+  /ContainerImage/GetLatestImages:
+    get:
+      operationId: getLatestImages
+      x-google-backend:
+        address: https://clutch-api-e3nx4nlfka-uk.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS      
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            items:
+              $ref: '#/definitions/ContainerImage'
+            type: array
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ProblemDetails'
+        '500':
+          description: Server Error
+        '504':
+          description: Server Error
+      tags:
+        - ContainerImage
+  /ContainerImage/SetImage:
+    put:
+      operationId: setImage
+      x-google-backend:
+        address: https://clutch-api-e3nx4nlfka-uk.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS      
+      consumes:
+        - application/json
+        - text/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/ContainerImageRequest'
+      responses:
+        '200':
+          description: Success
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ProblemDetails'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ProblemDetails'
+        '500':
+          description: Server Error
+        '504':
+          description: Server Error
+      tags:
+        - ContainerImage
+definitions:
+  ContainerImage:
+    additionalProperties: false
+    properties:
+      buildDate:
+        format: date-time
+        type: string
+      registryType:
+        $ref: '#/definitions/RegistryType'
+      repository:
+        maxLength: 255
+        minLength: 0
+        type: string
+      status:
+        $ref: '#/definitions/StatusEnum'
+      tag:
+        maxLength: 128
+        minLength: 0
+        type: string
+    required:
+      - buildDate
+      - registryType
+      - repository
+      - status
+      - tag
+    type: object
+  ContainerImageRequest:
+    additionalProperties: false
+    properties:
+      registryType:
+        $ref: '#/definitions/RegistryType'
+      repository:
+        type: string
+        x-nullable: true
+      tag:
+        type: string
+        x-nullable: true
+    type: object
+  ContainerImageResponse:
+    additionalProperties: false
+    properties:
+      containerImage:
+        $ref: '#/definitions/ContainerImage'
+      registryManifest:
+        $ref: '#/definitions/RegistryManifest'
+      success:
+        type: boolean
+    type: object
+  ManifestConfig:
+    additionalProperties: false
+    properties:
+      digest:
+        type: string
+        x-nullable: true
+      mediaType:
+        type: string
+        x-nullable: true
+      size:
+        format: int32
+        type: integer
+    type: object
+  ProblemDetails:
+    additionalProperties: {}
+    properties:
+      detail:
+        type: string
+        x-nullable: true
+      instance:
+        type: string
+        x-nullable: true
+      status:
+        format: int32
+        type: integer
+        x-nullable: true
+      title:
+        type: string
+        x-nullable: true
+      type:
+        type: string
+        x-nullable: true
+    type: object
+  RegistryManifest:
+    additionalProperties: false
+    properties:
+      config:
+        $ref: '#/definitions/ManifestConfig'
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+        x-nullable: true
+      layers:
+        items:
+          $ref: '#/definitions/ManifestConfig'
+        type: array
+      mediaType:
+        maxLength: 255
+        minLength: 0
+        type: string
+      schemaVersion:
+        format: int32
+        type: integer
+    required:
+      - config
+      - layers
+      - mediaType
+      - schemaVersion
+    type: object
+  RegistryType:
+    enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - -1
+    format: int32
+    type: integer
+  StatusEnum:
+    enum:
+      - 0
+      - 1
+      - 2
+      - -1
+    format: int32
+    type: integer
+x-components: {}
