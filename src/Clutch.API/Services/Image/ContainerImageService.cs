@@ -29,6 +29,11 @@ namespace Clutch.API.Services.Image
         {
             // Construct the cache key from the parameters
             string cacheKey = ConstructCacheKey(request, version);
+            if (string.IsNullOrEmpty(cacheKey)) 
+            {
+                _logger.LogError("Constructed cache key was empty or null.");
+                return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifestModel.Null);
+            }
 
             // Retrieve from cacheProvider (which will call the imageProvider if not found)
             ContainerImageModel? image = await _cacheProvider.GetFromCacheAsync(cacheKey);
@@ -65,6 +70,11 @@ namespace Clutch.API.Services.Image
         {
             // Construct the cache key from the parameters
             string cacheKey = ConstructCacheKey(request, version);
+            if (string.IsNullOrEmpty(cacheKey))
+            {
+                _logger.LogError("Constructed cache key was empty or null.");
+                return false;
+            }
 
             // Construct the image model from the request
             ContainerImageModel image = ConstructImageModel(request, version);
@@ -82,6 +92,11 @@ namespace Clutch.API.Services.Image
         {
             // Construct the cache key from the parameters
             string cacheKey = ConstructCacheKey(request, version);
+            if (string.IsNullOrEmpty(cacheKey))
+            {
+                _logger.LogError("Constructed cache key was empty or null.");
+                return false;
+            }
 
             return await _cacheProvider.RemoveFromCacheAsync(cacheKey);
         }
@@ -118,10 +133,19 @@ namespace Clutch.API.Services.Image
             }
         }
 
-        private static string ConstructCacheKey(ContainerImageRequest request, string version)
+        private string ConstructCacheKey(ContainerImageRequest request, string version)
         {
             string prefix = $"{version}:{request.Repository}:{request.Tag}";
-            return CacheKeyGenerator.GenerateCacheKey(request, prefix);
+
+            try
+            {
+                return CacheKeyGenerator.GenerateCacheKey(request, prefix);
+            } 
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.GetBaseException(), "Exception occurred while generating cache key.");
+                return string.Empty;
+            }
         }
     }
 }
