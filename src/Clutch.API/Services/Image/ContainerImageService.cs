@@ -120,12 +120,8 @@ namespace Clutch.API.Services.Image
 
         private static string ConstructCacheKey(ContainerImageRequest request, string version)
         {
-            // Serialize and hash the request object
-            var hash = CacheKeyGenerator.GenerateCacheKey(request, version);
-
-            // Construct the cache key with the hash
-            // We use the Version, Repository, and Tag as prefixes
-            return $"{version}:{request.Repository}:{request.Tag}:{hash}";
+            string prefix = $"{version}:{request.Repository}:{request.Tag}";
+            return CacheKeyGenerator.GenerateCacheKey(request, prefix);
         }
     }
 }

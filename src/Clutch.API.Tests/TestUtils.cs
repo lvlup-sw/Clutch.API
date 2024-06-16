@@ -188,8 +188,8 @@ namespace Clutch.API.Tests
 
         public static string ConstructCacheKey(ContainerImageRequest request, string version)
         {
-            var hash = CacheKeyGenerator.GenerateCacheKey(request, version);
-            return $"{version}:{request.Repository}:{request.Tag}:{hash}";
+            string prefix = $"{version}:{request.Repository}:{request.Tag}";
+            return CacheKeyGenerator.GenerateCacheKey(request, prefix);
         }
     }
 }
