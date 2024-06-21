@@ -6,9 +6,6 @@ using Clutch.API.Providers.Interfaces;
 using Clutch.API.Services.Interfaces;
 using Clutch.API.Utilities;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using System.Security.Cryptography;
-using System.Text;
 
 // Service Responsibilities:
 // - "Business logic" for image management.
