@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
-using System.Diagnostics;
 
 namespace Clutch.API
 {
@@ -24,8 +23,9 @@ namespace Clutch.API
             // Create the application
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add Aspire service defaults
+            // Add Aspire defaults
             builder.AddServiceDefaults();
+            builder.AddRedisOutputCache("cache");
 
             // Add services to the container.
             ConfigureServices(builder);
@@ -36,39 +36,11 @@ namespace Clutch.API
             // Build the application.
             var app = builder.Build();
 
-            // Map Aspire default routes
-            app.MapDefaultEndpoints();
-
-            // Configure the HTTP request pipeline.
-            ConfigureHTTP(app);
+            // Configure the app & request pipeline.
+            ConfigureApp(app);
 
             app.Run();
         }
-
-        /*
-        public static WebApplication CreateWebApp(string[] args)
-        {
-            // Start local Redis server
-            //ExecuteBashScript("../../../Start-Redis.sh");
-
-            // Create the application
-            var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-            ConfigureServices(builder);
-
-            // Configure Logging
-            ConfigureLogging(builder);
-
-            // Build the application.
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            ConfigureHTTP(app);
-
-            return app;
-        }
-        */
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
@@ -163,7 +135,7 @@ namespace Clutch.API
             builder.Logging.AddFilter("Clutch", LogLevel.Information);
         }
 
-        private static void ConfigureHTTP(WebApplication app)
+        private static void ConfigureApp(WebApplication app)
         {
             if (app.Environment.IsDevelopment())
             {
@@ -181,30 +153,16 @@ namespace Clutch.API
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Clutch.API V1");
                 //c.RoutePrefix = "";
             });
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthorization();
+            app.UseOutputCache();
+            app.MapDefaultEndpoints();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-        }
-
-        protected static void ExecuteBashScript(string scriptPath)
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = @"C:\Program Files\Git\git-bash.exe",
-                Arguments = Path.Combine(Directory.GetCurrentDirectory(), scriptPath),
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = false,
-                Verb = "runas",
-            };
-
-            var process = new Process { StartInfo = startInfo };
-            process.Start();
-            process.WaitForExit();
         }
     }
 }
