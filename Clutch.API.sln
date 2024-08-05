@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API.Tests", "src\Clu
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "src\docker-compose.dcproj", "{55CE4882-A8D9-4E17-88D8-13C6B5C5D60E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clutch.API.AppHost", "src\Clutch.API.AppHost\Clutch.API.AppHost.csproj", "{9E8A969D-C09B-434D-9A61-27F562F4187B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API.ServiceDefaults", "src\Clutch.API.ServiceDefaults\Clutch.API.ServiceDefaults.csproj", "{051886CB-AD1A-47B3-BB9D-2D2000B5E9F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +35,14 @@ Global
 		{55CE4882-A8D9-4E17-88D8-13C6B5C5D60E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55CE4882-A8D9-4E17-88D8-13C6B5C5D60E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55CE4882-A8D9-4E17-88D8-13C6B5C5D60E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E8A969D-C09B-434D-9A61-27F562F4187B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E8A969D-C09B-434D-9A61-27F562F4187B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E8A969D-C09B-434D-9A61-27F562F4187B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E8A969D-C09B-434D-9A61-27F562F4187B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{051886CB-AD1A-47B3-BB9D-2D2000B5E9F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{051886CB-AD1A-47B3-BB9D-2D2000B5E9F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{051886CB-AD1A-47B3-BB9D-2D2000B5E9F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{051886CB-AD1A-47B3-BB9D-2D2000B5E9F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

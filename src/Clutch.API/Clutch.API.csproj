@@ -18,6 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting" Version="8.1.0" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.1.0" />
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="8.1.0" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="AWSSDK.Core" Version="3.7.400.2" />
     <PackageReference Include="AWSSDK.EKS" Version="3.7.401.2" />
@@ -61,6 +64,10 @@
 
   <ItemGroup>
     <Folder Include="Utilities\Scripts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Clutch.API.ServiceDefaults\Clutch.API.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

@@ -24,6 +24,9 @@ namespace Clutch.API
             // Create the application
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add Aspire service defaults
+            builder.AddServiceDefaults();
+
             // Add services to the container.
             ConfigureServices(builder);
 
@@ -32,6 +35,9 @@ namespace Clutch.API
 
             // Build the application.
             var app = builder.Build();
+
+            // Map Aspire default routes
+            app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
             ConfigureHTTP(app);
@@ -66,7 +72,7 @@ namespace Clutch.API
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
-            builder.WebHost.UseKestrel(options => { options.ListenAnyIP(8080); });
+            //builder.WebHost.UseKestrel(options => { options.ListenAnyIP(8080); });
             builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             builder.Configuration.AddEnvironmentVariables();
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
