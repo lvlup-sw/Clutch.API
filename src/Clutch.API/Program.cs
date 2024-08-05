@@ -21,9 +21,6 @@ namespace Clutch.API
     {
         public static void Main(string[] args)
         {
-            // Aspire requires the CreateBuilder step to be within Main
-            //CreateWebApp(args).Run();
-
             // Create the application
             var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +39,7 @@ namespace Clutch.API
             app.Run();
         }
 
-        /*  DEPRECATED
+        /*
         public static WebApplication CreateWebApp(string[] args)
         {
             // Start local Redis server
