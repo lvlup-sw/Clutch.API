@@ -1,8 +1,3 @@
-using Clutch.API.Models.Enums;
-using Clutch.API.Properties;
-using Clutch.API.Providers.Interfaces;
-using Microsoft.Extensions.Options;
-
 namespace Clutch.API.Providers.Registry
 {
     public class RegistryProviderFactory(IServiceProvider serviceProvider) : IRegistryProviderFactory

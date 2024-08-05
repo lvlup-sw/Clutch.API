@@ -1,5 +1,4 @@
-﻿using Clutch.API.Models.Image;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Clutch.API.Database.Context
 {

@@ -1,6 +1,4 @@
-﻿using Clutch.API.Models.Image;
-
-namespace Clutch.API.Services.Interfaces
+﻿namespace Clutch.API.Services.Interfaces
 {
     public interface IContainerImageService
     {

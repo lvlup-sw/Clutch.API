@@ -1,9 +1,4 @@
-﻿using Clutch.API.Models.Image;
-using Clutch.API.Models.Registry;
-using Clutch.API.Properties;
-using Clutch.API.Providers.Interfaces;
-using Microsoft.Extensions.Options;
-using RestSharp;
+﻿using RestSharp;
 
 namespace Clutch.API.Providers.Registry
 {

@@ -1,14 +1,4 @@
-﻿using Polly;
-using Polly.Wrap;
-using StackExchange.Redis;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
-using CacheProvider.Caches.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using Clutch.API.Properties;
-
-namespace CacheProvider.Caches
+﻿namespace CacheProvider.Caches
 {
     /// <summary>
     /// An implementation of <see cref="ConnectionMultiplexer"/> which uses the <see cref="IDistributedCache"/> interface as a base. Polly is integrated overtop for handling exceptions and retries.

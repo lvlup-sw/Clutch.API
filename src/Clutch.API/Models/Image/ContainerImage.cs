@@ -1,5 +1,4 @@
-﻿using Clutch.API.Models.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Clutch.API.Models.Image
 {

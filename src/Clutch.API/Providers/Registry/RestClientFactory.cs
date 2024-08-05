@@ -1,5 +1,4 @@
-﻿using Clutch.API.Providers.Interfaces;
-using RestSharp;
+﻿using RestSharp;
 
 namespace Clutch.API.Providers.Registry
 {

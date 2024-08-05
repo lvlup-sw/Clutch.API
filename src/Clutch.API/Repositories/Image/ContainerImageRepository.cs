@@ -1,7 +1,4 @@
-﻿using Clutch.API.Database.Context;
-using Clutch.API.Models.Image;
-using Clutch.API.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 // Repository Responsibilities:
 // - Directly manipulate the database.
