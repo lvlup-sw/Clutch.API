@@ -14,6 +14,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 
+/* TODO:
+ *  - Rewrite using minimal API spec
+ *  - Refactor DI to use Aspire
+ */
+
 namespace Clutch.API
 {
     public class Program
@@ -45,23 +50,26 @@ namespace Clutch.API
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
             //builder.WebHost.UseKestrel(options => { options.ListenAnyIP(8080); });
-            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
             builder.Configuration.AddEnvironmentVariables();
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
             builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
             builder.Services.AddOptions();
             builder.Services.AddLogging();
             builder.Services.AddSingleton<IRestClientFactory, RestClientFactory>();
+            // Aspire provides the AddRedisClient which replaces the code below
+            /*
             builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
             {
                 return ConnectionMultiplexer.Connect(
                     builder.Configuration.GetConnectionString("Redis")
                     ?? "localhost:6379,abortConnect=false,ssl=false,allowAdmin=true");
             });
+            */
+            builder.AddRedisClient(builder.Configuration.GetConnectionString("Redis")!);
             builder.Services.AddDbContext<ContainerImageContext>(options =>
-                options.UseMySql(builder.Configuration.GetConnectionString("ClutchAPI"),
-                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("ClutchAPI")))
-            , ServiceLifetime.Singleton);
+                options.UseNpgsql(builder.Configuration.GetConnectionString("ClutchAPI")), ServiceLifetime.Scoped);
             builder.Services.AddTransient<IContainerImageRepository, ContainerImageRepository>(serviceProvier =>
             {
                 return new ContainerImageRepository(

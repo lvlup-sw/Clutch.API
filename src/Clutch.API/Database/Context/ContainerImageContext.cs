@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Clutch.API.Database.Context
 {
-    public class ContainerImageContext(DbContextOptions<ContainerImageContext> options) : DbContext(options)
+    public class ContainerImageContext(DbContextOptions<ContainerImageContext> options, IConfiguration configuration) : DbContext(options)
     {
+        private readonly IConfiguration _configuration = configuration;
+
         public virtual DbSet<ContainerImageModel> ContainerImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -17,9 +19,13 @@ namespace Clutch.API.Database.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
-                optionsBuilder.UseSqlite("DataSource=:memory:");
+                optionsBuilder.UseInMemoryDatabase("InMemoryDb");
+            }
+            else
+            {
+                optionsBuilder.UseNpgsql(_configuration.GetConnectionString("ClutchAPI"));
             }
         }
     }
