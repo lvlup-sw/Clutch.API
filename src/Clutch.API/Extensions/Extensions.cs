@@ -25,7 +25,7 @@ namespace Clutch.API.Extensions
             builder.AddRedisClient("Redis");
 
             // Database Context
-            builder.AddNpgsqlDbContext<ContainerImageContext>("Postgres", options =>
+            builder.AddNpgsqlDbContext<ContainerImageContext>("containerImageDb", options =>
             {   // We explicitly handle retries ourselves
                 options.DisableRetry = true;
             });
