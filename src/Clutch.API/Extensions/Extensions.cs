@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
+using Microsoft.EntityFrameworkCore;
 
 namespace Clutch.API.Extensions
 {
@@ -21,11 +22,13 @@ namespace Clutch.API.Extensions
             builder.Services.AddLogging();
 
             // Redis Client
-            builder.AddRedisClient(builder.Configuration.GetConnectionString("Redis") ?? "");
+            builder.AddRedisClient("Redis");
 
             // Database Context
-            builder.Services.AddDbContext<ContainerImageContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("ClutchAPI")), ServiceLifetime.Scoped);
+            builder.AddNpgsqlDbContext<ContainerImageContext>("Postgres", options =>
+            {   // We explicitly handle retries ourselves
+                options.DisableRetry = true;
+            });
 
             // Factories and Providers
             builder.Services.AddSingleton<IRestClientFactory, RestClientFactory>();
