@@ -20,7 +20,7 @@ var postgres = (builder.Environment.IsProduction()) switch
 // This is not actually creating a database
 // It is creating a CONNECTION STRING for a database
 // The provisioning is still required to happen before runtime
-// For this to work, we need to create an init script; see docs
+// We accomplish this by using EF Core migrations at startup
 var containerImageDb = postgres.AddDatabase("containerImageDb");
 
 builder.AddProject<Projects.Clutch_API>("clutch-api")

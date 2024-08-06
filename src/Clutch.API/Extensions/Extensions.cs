@@ -1,7 +1,4 @@
-﻿using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
-using Microsoft.EntityFrameworkCore;
-
-namespace Clutch.API.Extensions
+﻿namespace Clutch.API.Extensions
 {
     internal static class Extensions
     {

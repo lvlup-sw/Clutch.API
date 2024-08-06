@@ -108,7 +108,7 @@ namespace Clutch.API.Services.Image
                     RepositoryId = $"{request.Repository}:{request.Tag}",
                     Repository = request.Repository,
                     Tag = request.Tag,
-                    BuildDate = DateTime.Now,
+                    BuildDate = DateTime.UtcNow,
                     RegistryType = request.RegistryType,
                     Status = StatusEnum.Available,
                     Version = version

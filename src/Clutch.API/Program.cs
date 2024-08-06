@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 // Create the application
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +15,16 @@ var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
-// Exception routing depending on env
+// Env-specific configuration
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    // We need to seed the local db
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ContainerImageContext>();
+        context.Database.Migrate();
+    }
 }
 else
 {
