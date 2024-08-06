@@ -3,17 +3,34 @@ using RestSharp;
 
 namespace Clutch.API.Providers.Registry
 {
-    public class DockerRegistryProvider(IRestClientFactory restClientFactory, ILogger logger, IOptions<AppSettings> settings) : RegistryProviderBase(restClientFactory, logger, settings)
+    public class DockerRegistryProvider(IRestClientFactory restClientFactory, ILogger logger, IConfiguration configuration) : RegistryProviderBase(restClientFactory, logger, configuration)
     {
         private readonly ILogger _logger = logger;
-        private readonly AppSettings _settings = settings.Value;
+        private readonly IConfiguration _configuration = configuration;
         private IRestClientFactory _restClientFactory = restClientFactory;
         // Unused; only for private repos
-        private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(settings.Value.DockerPAT ?? string.Empty));
+        private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(configuration.GetConnectionString("DockerPAT") ?? string.Empty));
 
         public override async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {
             string[] parts = request.Repository.Split('/');
+            dynamic rawToken = GetToken(parts);
+
+            // Construct the API request
+            _restClientFactory.InstantiateClient("https://registry-1.docker.io");
+            RestRequest restRequest = new($"/v2/{parts[0]}/{parts[1]}/manifests/{request.Tag}");
+            restRequest.Method = Method.Get;
+            restRequest.AddHeader("Accept", "application/vnd.docker.distribution.manifest.v2+json");
+            restRequest.AddHeader("Authorization", $"Bearer {rawToken.token}");
+
+            // Send the request
+            RestResponse? response = await _restClientFactory.ExecuteAsync(restRequest);
+
+            return ValidateAndDeserializeResponse(response);
+        }
+
+        private async Task<dynamic> GetToken(string[] parts)
+        {
             dynamic rawToken;
 
             // Get the Bearer Token
@@ -44,17 +61,7 @@ namespace Clutch.API.Providers.Registry
                 return RegistryManifestModel.Null;
             }
 
-            // Construct the API request
-            _restClientFactory.InstantiateClient("https://registry-1.docker.io");
-            RestRequest restRequest = new($"/v2/{parts[0]}/{parts[1]}/manifests/{request.Tag}");
-            restRequest.Method = Method.Get;
-            restRequest.AddHeader("Accept", "application/vnd.docker.distribution.manifest.v2+json");
-            restRequest.AddHeader("Authorization", $"Bearer {rawToken.token}");
-
-            // Send the request
-            RestResponse? response = await _restClientFactory.ExecuteAsync(restRequest);
-
-            return ValidateAndDeserializeResponse(response);
+            return rawToken;
         }
     }
 }

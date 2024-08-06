@@ -44,17 +44,24 @@
                 new RegistryProviderBase(
                     serviceProvider.GetRequiredService<IRestClientFactory>(),
                     serviceProvider.GetRequiredService<ILogger<RegistryProviderBase>>(),
-                    serviceProvider.GetRequiredService<IOptions<AppSettings>>()
+                    serviceProvider.GetRequiredService<IConfiguration>()
                 ));
             builder.Services.AddTransient<IRegistryProvider, DockerRegistryProvider>(serviceProvider =>
                 new DockerRegistryProvider(
                     serviceProvider.GetRequiredService<IRestClientFactory>(),
                     serviceProvider.GetRequiredService<ILogger<DockerRegistryProvider>>(),
-                    serviceProvider.GetRequiredService<IOptions<AppSettings>>()
+                    serviceProvider.GetRequiredService<IConfiguration>()
+                ));
+            builder.Services.AddTransient<IRegistryProvider, AzureRegistryProvider>(serviceProvider =>
+                new AzureRegistryProvider(
+                    serviceProvider.GetRequiredService<IRestClientFactory>(),
+                    serviceProvider.GetRequiredService<ILogger<AzureRegistryProvider>>(),
+                    serviceProvider.GetRequiredService<IConfiguration>()
                 ));
             builder.Services.AddTransient<IRegistryProviderFactory, RegistryProviderFactory>();
 
             // Cache Provider
+            // Note that we get the IConnectionMultiplexer from the RedisClient DI
             builder.Services.AddTransient<ICacheProvider<ContainerImageModel>>(serviceProvider =>
                 new CacheProvider<ContainerImageModel>(
                     serviceProvider.GetRequiredService<IConnectionMultiplexer>(),

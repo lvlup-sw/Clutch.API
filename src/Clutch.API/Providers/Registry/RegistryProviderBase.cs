@@ -4,12 +4,12 @@ using RestSharp;
 namespace Clutch.API.Providers.Registry
 {
     // Implements GHCR
-    public class RegistryProviderBase(IRestClientFactory restClientFactory, ILogger logger, IOptions<AppSettings> settings) : IRegistryProvider, IDisposable
+    public class RegistryProviderBase(IRestClientFactory restClientFactory, ILogger logger, IConfiguration configuration) : IRegistryProvider, IDisposable
     {
         private readonly ILogger _logger = logger;
-        private readonly AppSettings _settings = settings.Value;
+        private readonly IConfiguration _configuration = configuration;
         private IRestClientFactory _restClientFactory = restClientFactory;
-        private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(settings.Value.GithubPAT ?? string.Empty));
+        private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(configuration.GetConnectionString("GithubPAT") ?? string.Empty));
 
         public virtual async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {
