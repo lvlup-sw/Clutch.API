@@ -33,6 +33,7 @@ jobs:
     - name: Build & Push Container
       run: |
         echo "Build image and push to ${{ vars.REGISTRY_LOGIN_SERVER }}"
+        cd src/Clutch.API
 
         echo "Building the container..."
         docker build -t ${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }} .
