@@ -19,10 +19,9 @@ namespace Clutch.API.Providers.Registry
         private readonly IConfiguration _configuration = configuration;
         private IRestClientFactory _restClientFactory = restClientFactory;
         // Azure auth
-        private readonly string tenantId = configuration["Azure:AzureTenantId"] ?? string.Empty;
         private readonly string azureClientId = configuration["Azure:AzureClientId"] ?? string.Empty;
         private readonly string azureClientSecret = configuration["Secrets:AzureClientSecret"] ?? string.Empty;
-        private readonly string azureScope = configuration["Azure:AzureScope"] ?? string.Empty;
+        private readonly string azureService = configuration["Azure:AzureService"] ?? string.Empty;
 
         public override async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {
@@ -31,7 +30,6 @@ namespace Clutch.API.Providers.Registry
 
             // Construct the API request
             _restClientFactory.InstantiateClient("https://containerimagesregistry.azurecr.io");
-            // This should be correct, but it's hard to say without pushing an image first
             RestRequest restRequest = new($"/v2/{parts[0]}/{parts[1]}/manifests/{request.Tag}");
             restRequest.Method = Method.Get;
             restRequest.AddHeader("Accept", "application/vnd.docker.distribution.manifest.v2+json");
@@ -48,14 +46,12 @@ namespace Clutch.API.Providers.Registry
             dynamic rawToken;
 
             // Get the Access Token
-            _restClientFactory.InstantiateClient("https://login.microsoftonline.com");
-            RestRequest authRequest = new($"/{tenantId}/oauth2/v2.0/token");
-            authRequest.Method = Method.Post;
-            authRequest.AddHeader("Content-Type", "application/x-www-form-urlencoded");
-            authRequest.AddParameter("grant_type", "client_credentials");
-            authRequest.AddParameter("client_id", azureClientId);
-            authRequest.AddParameter("client_secret", azureClientSecret);
-            authRequest.AddParameter("scope", azureScope);
+            _restClientFactory.InstantiateClient($"https://{azureService}");
+            RestRequest authRequest = new($"/oauth2/token");
+            authRequest.Method = Method.Get;
+            authRequest.AddParameter("service", azureService);
+            authRequest.AddParameter("scope", $"repository:{parts[0]}/{parts[1]}:pull,push");
+            authRequest.AddHeader("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{azureClientId}:{azureClientSecret}")));
 
             RestResponse? authResponse = await _restClientFactory.ExecuteAsync(authRequest);
             if (authResponse is null)
