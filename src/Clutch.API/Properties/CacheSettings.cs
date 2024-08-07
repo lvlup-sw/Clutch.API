@@ -35,10 +35,5 @@ namespace Clutch.API.Properties
         /// Set to true to use In-Memory Caching.
         /// </summary>
         public bool UseMemoryCache { get; set; }
-
-        /// <summary>
-        /// Connection String used to connect to the Distributed Cache (ex Elasticache, Redis, etc).
-        /// </summary>
-        public required string ConnectionString { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Clutch.API.Models.Image;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Clutch.API.Database.Context
 {
@@ -13,14 +12,6 @@ namespace Clutch.API.Database.Context
 
             builder.ToTable("container_images");
             builder.HasIndex(c => new { c.ImageID, c.RepositoryId }).IsUnique();
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlite("DataSource=:memory:");
-            }
         }
     }
 }

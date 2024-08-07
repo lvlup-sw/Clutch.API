@@ -1,13 +1,8 @@
-﻿using Clutch.API.Models.Image;
-using Clutch.API.Models.Registry;
-using Clutch.API.Properties;
-using Clutch.API.Providers.Interfaces;
-using Microsoft.Extensions.Options;
-using RestSharp;
+﻿using RestSharp;
 
 namespace Clutch.API.Providers.Registry
 {
-    public class ArtifactoryRegistryProvider(IRestClientFactory restClientFactory, ILogger logger, IOptions<AppSettings> settings) : RegistryProviderBase(restClientFactory, logger, settings)
+    public class ArtifactoryRegistryProvider(IRestClientFactory restClientFactory, ILogger logger, IConfiguration configuration) : RegistryProviderBase(restClientFactory, logger, configuration)
     {
         public override async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {

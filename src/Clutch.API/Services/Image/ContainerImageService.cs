@@ -1,13 +1,4 @@
-﻿using Clutch.API.Models.Enums;
-using Clutch.API.Models.Image;
-using Clutch.API.Models.Registry;
-using Clutch.API.Properties;
-using Clutch.API.Providers.Interfaces;
-using Clutch.API.Services.Interfaces;
-using Clutch.API.Utilities;
-using Microsoft.Extensions.Options;
-
-// Service Responsibilities:
+﻿// Service Responsibilities:
 // - "Business logic" for image management.
 // - CacheProvider interaction for Redis caching.
 // - Interacting with the Github API to trigger builds.
@@ -117,7 +108,7 @@ namespace Clutch.API.Services.Image
                     RepositoryId = $"{request.Repository}:{request.Tag}",
                     Repository = request.Repository,
                     Tag = request.Tag,
-                    BuildDate = DateTime.Now,
+                    BuildDate = DateTime.UtcNow,
                     RegistryType = request.RegistryType,
                     Status = StatusEnum.Available,
                     Version = version

@@ -1,6 +1,4 @@
-﻿using Clutch.API.Models.Image;
-
-namespace Clutch.API.Providers.Interfaces
+﻿namespace Clutch.API.Providers.Interfaces
 {
     public interface IContainerImageProvider : IRealProvider<ContainerImageModel>
     {

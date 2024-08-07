@@ -1,12 +1,4 @@
-﻿using Clutch.API.Models.Image;
-using Clutch.API.Properties;
-using Clutch.API.Providers.Interfaces;
-using Clutch.API.Repositories.Interfaces;
-using Microsoft.Extensions.Options;
-using Polly;
-using Polly.Wrap;
-
-// Provider Responsibilities:
+﻿// Provider Responsibilities:
 // - Interacting with the Repositories to perform operations against the database.
 // - DOES NOT directly manipulate the database; that is the repository's job.
 namespace Clutch.API.Providers.Image

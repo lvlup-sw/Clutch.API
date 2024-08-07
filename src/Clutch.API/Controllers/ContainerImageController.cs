@@ -1,10 +1,5 @@
 ﻿using AutoMapper;
-using Clutch.API.Controllers.Filters;
-using Clutch.API.Models.Image;
-using Clutch.API.Models.Registry;
-using Clutch.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
 
 // TODO:
 // - Batch requests for images
