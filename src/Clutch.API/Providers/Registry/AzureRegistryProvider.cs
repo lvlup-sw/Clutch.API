@@ -19,22 +19,23 @@ namespace Clutch.API.Providers.Registry
         private readonly IConfiguration _configuration = configuration;
         private IRestClientFactory _restClientFactory = restClientFactory;
         // Azure auth
-        private readonly string tenantId = Convert.ToBase64String(Encoding.UTF8.GetBytes(configuration["Azure:AzureTenantId"] ?? string.Empty));
-        private readonly string azureClientId = Convert.ToBase64String(Encoding.UTF8.GetBytes(configuration["Azure:AzureClientId"] ?? string.Empty));
-        private readonly string azureClientSecret = Convert.ToBase64String(Encoding.UTF8.GetBytes(configuration["Secrets:AzureClientSecret"] ?? string.Empty));
-        private readonly string azureScope = Convert.ToBase64String(Encoding.UTF8.GetBytes(configuration["Azure:AzureScope"] ?? string.Empty));
+        private readonly string tenantId = configuration["Azure:AzureTenantId"] ?? string.Empty;
+        private readonly string azureClientId = configuration["Azure:AzureClientId"] ?? string.Empty;
+        private readonly string azureClientSecret = configuration["Secrets:AzureClientSecret"] ?? string.Empty;
+        private readonly string azureScope = configuration["Azure:AzureScope"] ?? string.Empty;
 
         public override async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {
             string[] parts = request.Repository.Split('/');
-            dynamic azureToken = GetToken(parts);
+            dynamic azureToken = await GetToken(parts);
 
             // Construct the API request
-            _restClientFactory.InstantiateClient("https://registry-1.docker.io");
+            _restClientFactory.InstantiateClient("https://containerimagesregistry.azurecr.io");
+            // This should be correct, but it's hard to say without pushing an image first
             RestRequest restRequest = new($"/v2/{parts[0]}/{parts[1]}/manifests/{request.Tag}");
             restRequest.Method = Method.Get;
             restRequest.AddHeader("Accept", "application/vnd.docker.distribution.manifest.v2+json");
-            restRequest.AddHeader("Authorization", $"Bearer {azureToken}");
+            restRequest.AddHeader("Authorization", $"Bearer {azureToken.access_token}");
 
             // Send the request
             RestResponse? response = await _restClientFactory.ExecuteAsync(restRequest);

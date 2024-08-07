@@ -27,19 +27,8 @@
                 options.DisableRetry = true;
             });
 
-            // Factories and Providers
+            // Registry Factory & Providers
             builder.Services.AddSingleton<IRestClientFactory, RestClientFactory>();
-            builder.Services.AddTransient<IContainerImageRepository, ContainerImageRepository>(serviceProvider =>
-                new ContainerImageRepository(
-                    serviceProvider.GetRequiredService<ContainerImageContext>(),
-                    serviceProvider.GetRequiredService<ILogger<ContainerImageRepository>>()
-                ));
-            builder.Services.AddTransient<IContainerImageProvider, ContainerImageProvider>(serviceProvider =>
-                new ContainerImageProvider(
-                    serviceProvider.GetRequiredService<IContainerImageRepository>(),
-                    serviceProvider.GetRequiredService<ILogger<ContainerImageProvider>>(),
-                    serviceProvider.GetRequiredService<IOptions<AppSettings>>()
-                ));
             builder.Services.AddTransient<IRegistryProvider, RegistryProviderBase>(serviceProvider =>
                 new RegistryProviderBase(
                     serviceProvider.GetRequiredService<IRestClientFactory>(),
@@ -70,7 +59,18 @@
                     serviceProvider.GetRequiredService<ILogger<CacheProvider<ContainerImageModel>>>()
                 ));
 
-            // Container Image Service
+            // Container Image
+            builder.Services.AddTransient<IContainerImageRepository, ContainerImageRepository>(serviceProvider =>
+                new ContainerImageRepository(
+                    serviceProvider.GetRequiredService<ContainerImageContext>(),
+                    serviceProvider.GetRequiredService<ILogger<ContainerImageRepository>>()
+                ));
+            builder.Services.AddTransient<IContainerImageProvider, ContainerImageProvider>(serviceProvider =>
+                new ContainerImageProvider(
+                    serviceProvider.GetRequiredService<IContainerImageRepository>(),
+                    serviceProvider.GetRequiredService<ILogger<ContainerImageProvider>>(),
+                    serviceProvider.GetRequiredService<IOptions<AppSettings>>()
+                ));
             builder.Services.AddTransient<IContainerImageService, ContainerImageService>(serviceProvider =>
                 new ContainerImageService(
                     serviceProvider.GetRequiredService<ICacheProvider<ContainerImageModel>>(),

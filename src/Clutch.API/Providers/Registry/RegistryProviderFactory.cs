@@ -11,8 +11,8 @@ namespace Clutch.API.Providers.Registry
 
             object instance = (success && provider is not null) switch
             {
-                true  => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetLogger(provider), GetSettings()),
-                false => ActivatorUtilities.CreateInstance(_serviceProvider, typeof(RegistryProviderBase), GetLogger(typeof(RegistryProviderBase)), GetSettings())
+                true  => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetLogger(provider), GetConfiguration()),
+                false => ActivatorUtilities.CreateInstance(_serviceProvider, typeof(RegistryProviderBase), GetLogger(typeof(RegistryProviderBase)), GetConfiguration())
             };
 
             return instance as IRegistryProvider;
@@ -34,6 +34,6 @@ namespace Clutch.API.Providers.Registry
 
         private ILogger GetLogger(Type provider) => _serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(provider.Name);
 
-        private IOptions<AppSettings> GetSettings() => _serviceProvider.GetRequiredService<IOptions<AppSettings>>();
+        private IConfiguration GetConfiguration() => _serviceProvider.GetRequiredService<IConfiguration>();
     }
 }
