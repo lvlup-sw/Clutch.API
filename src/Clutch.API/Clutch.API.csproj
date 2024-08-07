@@ -6,8 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>a7c9add1-ac15-40a4-a7b1-746a737c21fc</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>.</DockerfileContext>
-    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <DockerfileContext>..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,8 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting" Version="8.1.0" />
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.1.0" />
     <PackageReference Include="Aspire.Hosting.Azure.PostgreSQL" Version="8.1.0" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="8.1.0" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="8.1.0" />

@@ -3,6 +3,10 @@ name: Build and Push to ACR
 on:
   workflow_dispatch:
 
+env:
+  REPOSITORY_NAME: lvlup-sw/clutchapi
+  REPOSITORY_TAG: aspire-dev  
+
 jobs:
   docker_build_push_acr:
     name: 'Docker Build and Push to ACR'
@@ -22,13 +26,23 @@ jobs:
     - name: 'Docker Login'
       uses: azure/docker-login@v2
       with:
-        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        login-server: ${{ vars.REGISTRY_LOGIN_SERVER }}
         username: ${{ secrets.REGISTRY_CLIENTID }}
         password: ${{ secrets.REGISTRY_CLIENTSECRET }}
 
-    - name: Build the frontend image and push it to ACR
-      uses: docker/build-push-action@v5
-      with:
-        push: true
-        tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/lvlup-sw/clutchapi:aspire-dev
-        file: src/Clutch.API/Dockerfile
+    - name: Build & Push Container
+      run: |
+        echo "Build image and push to ${{ vars.REGISTRY_LOGIN_SERVER }}"
+        cd src/
+
+        echo "Building the container..."
+        docker build -t ${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }} .
+        echo
+
+        echo "Tagging for ACR..."
+        docker tag ${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }} ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}
+        echo
+
+        echo "Push image to ACR"
+        docker push ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}
+        echo

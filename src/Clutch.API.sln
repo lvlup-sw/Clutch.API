@@ -3,17 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API", "src\Clutch.API\Clutch.API.csproj", "{A6C08F0C-B416-4112-9833-1DCFBE363CB7}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{72FF7C7D-DD49-4618-AFC2-B373DB9D402B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API", "Clutch.API\Clutch.API.csproj", "{A6C08F0C-B416-4112-9833-1DCFBE363CB7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6DC64DE9-9368-4766-ACFE-07AD2E933D3A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API.Tests", "src\Clutch.API.Tests\Clutch.API.Tests.csproj", "{A2487890-545B-4CD9-A201-71D7D8D5AB9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API.Tests", "Clutch.API.Tests\Clutch.API.Tests.csproj", "{A2487890-545B-4CD9-A201-71D7D8D5AB9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clutch.API.AppHost", "src\Clutch.API.AppHost\Clutch.API.AppHost.csproj", "{4F5AFC11-262D-40BB-8905-ABC31BBA255D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API.AppHost", "Clutch.API.AppHost\Clutch.API.AppHost.csproj", "{4F5AFC11-262D-40BB-8905-ABC31BBA255D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API.ServiceDefaults", "src\Clutch.API.ServiceDefaults\Clutch.API.ServiceDefaults.csproj", "{EE171D1A-B5F3-49E6-A6DD-3A3C38C77484}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clutch.API.ServiceDefaults", "Clutch.API.ServiceDefaults\Clutch.API.ServiceDefaults.csproj", "{EE171D1A-B5F3-49E6-A6DD-3A3C38C77484}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{48C7D79A-7426-40D5-B0E4-E5142BDDD136}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,10 +45,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{A6C08F0C-B416-4112-9833-1DCFBE363CB7} = {72FF7C7D-DD49-4618-AFC2-B373DB9D402B}
 		{A2487890-545B-4CD9-A201-71D7D8D5AB9A} = {6DC64DE9-9368-4766-ACFE-07AD2E933D3A}
-		{4F5AFC11-262D-40BB-8905-ABC31BBA255D} = {72FF7C7D-DD49-4618-AFC2-B373DB9D402B}
-		{EE171D1A-B5F3-49E6-A6DD-3A3C38C77484} = {72FF7C7D-DD49-4618-AFC2-B373DB9D402B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {960B6F72-A9F5-4339-AD6E-32FAB60FE487}
