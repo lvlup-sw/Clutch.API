@@ -31,10 +31,20 @@ namespace Clutch.API.Services.Image
                 return new ContainerImageResponseData(false, ContainerImageModel.Null, RegistryManifestModel.Null);
             }
 
+            // This is primarily handling the case where we have an image in the DB
+            // But it is not available in the container registry; either because it
+            // is still building, deprecated, etc
+            // We send a 202 with a message describing this situation
+            if (image.Status is not StatusEnum.Available)
+            {
+                _logger.LogWarning("Image found but is not available.");
+                return new ContainerImageResponseData(false, image, RegistryManifestModel.Null);
+            }
+
             // Check the registry and construct the RegistryManifest
             // We utilize a Using block since the registry factory
             // creates an instance of the class we require, which we
-            // need to dispose afterwards.
+            // need to dispose of afterwards.
             using (IRegistryProvider? registryProvider = _registryProviderFactory.CreateRegistryProvider(request.RegistryType))
             {
                 if (registryProvider is null)

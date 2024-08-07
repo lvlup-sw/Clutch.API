@@ -1,18 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RestSharp;
-using Azure.Provisioning.ResourceManager;
-using Azure.Core;
-using Amazon.Runtime.Internal;
-using Google.Apis.Auth.OAuth2;
 
 namespace Clutch.API.Providers.Registry
 {
-    // Process:
-    // Obtain tenant id, client id, and client secret to generate tokens
-    // We may use service principal to generate these secrets
-    // Then we can use the ACR REST api to generate tokens and send a request
-
     public class AzureRegistryProvider(IRestClientFactory restClientFactory, ILogger logger, IConfiguration configuration) : RegistryProviderBase(restClientFactory, logger, configuration)
     {
         private readonly ILogger _logger = logger;

@@ -3,8 +3,7 @@
     public enum StatusEnum
     {
         Invalid = -1,
-        Unavailable = 0,
-        Available = 1,
-        Building = 2
+        Available = 0,
+        Building = 1
     }
 }
