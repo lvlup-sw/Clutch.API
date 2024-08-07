@@ -22,7 +22,7 @@ jobs:
     - name: 'Docker Login'
       uses: azure/docker-login@v2
       with:
-        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        login-server: ${{ vars.REGISTRY_LOGIN_SERVER }}
         username: ${{ secrets.REGISTRY_CLIENTID }}
         password: ${{ secrets.REGISTRY_CLIENTSECRET }}
 
