@@ -3,6 +3,10 @@
     /// <summary>
     /// An interface for the Cache Provider.
     /// </summary>
+    /// <remarks>
+    /// The main benefit of this class is how it tightly couples
+    /// the database and cache, ensuring synchronous behavior.
+    /// </remarks>
     public interface ICacheProvider<T> where T : class
     {
         /// <summary>

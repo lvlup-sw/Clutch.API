@@ -1,9 +1,8 @@
 ﻿using Clutch.API.Models.Enums;
-using Clutch.API.Properties;
 using Clutch.API.Providers.Registry;
 using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
 using RestSharp;
@@ -12,19 +11,29 @@ using Clutch.API.Models.Registry;
 
 namespace Clutch.API.Tests
 {
+    // TODO:
+    // - Add tests for Azure provider
+    // - Fix broken tests; failing because multiple ExecuteAsync calls are made
+    // but only one variety is Mocked
     [TestClass]
     public class RegistryProviderTests
     {
         private Mock<ILogger> _mockLogger;
-        private IOptions<AppSettings> _mockSettings;
+        private Mock<IConfiguration> _mockConfiguration;
         private Mock<IRestClientFactory> _mockRestClientFactory;
 
         [TestInitialize]
         public void Setup()
         {
             _mockLogger = new Mock<ILogger>();
-            _mockSettings = Options.Create(new AppSettings { GithubPAT = "fake_pat", DockerPAT = "fake_pat" });
+            _mockConfiguration = new Mock<IConfiguration>();
             _mockRestClientFactory = new Mock<IRestClientFactory>();
+
+            /*
+            _mockConfiguration.Setup(c => c.GetSection(It.IsAny<string>()).Value)
+                  .Returns("your_test_connection_string");
+            _mockConfiguration.Setup(c => c[It.IsAny<string>()]).Returns("dummy-string"); 
+            */
         }
 
         [TestCleanup]
@@ -43,8 +52,10 @@ namespace Clutch.API.Tests
             var responseContent = JsonConvert.SerializeObject(TestUtils.GetRegistryManifestModel());
             _mockRestClientFactory.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new RestResponse { StatusCode = HttpStatusCode.OK, Content = responseContent });
+            _mockConfiguration.Setup(c => c.GetSection(It.IsAny<string>()).Value)
+                  .Returns("your_test_connection_string");
 
-            var provider = new RegistryProviderBase(_mockRestClientFactory.Object, _mockLogger.Object, _mockSettings);
+            var provider = new RegistryProviderBase(_mockRestClientFactory.Object, _mockLogger.Object, _mockConfiguration.Object);
             var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
 
             // Act
@@ -64,8 +75,10 @@ namespace Clutch.API.Tests
             // Arrange
             _mockRestClientFactory.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new RestResponse { StatusCode = HttpStatusCode.NotFound, Content = null });
+            _mockConfiguration.Setup(c => c.GetSection(It.IsAny<string>()).Value)
+                  .Returns("your_test_connection_string");
 
-            var provider = new RegistryProviderBase(_mockRestClientFactory.Object, _mockLogger.Object, _mockSettings);
+            var provider = new RegistryProviderBase(_mockRestClientFactory.Object, _mockLogger.Object, _mockConfiguration.Object);
             var request = TestUtils.GetContainerImageRequest("lvlup-sw/clutchapi", "dev", RegistryType.Local);
 
             // Act
@@ -87,8 +100,10 @@ namespace Clutch.API.Tests
             var responseContent = JsonConvert.SerializeObject(TestUtils.GetRegistryManifestModel());
             _mockRestClientFactory.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new RestResponse { StatusCode = HttpStatusCode.OK, Content = responseContent });
+            _mockConfiguration.Setup(c => c.GetSection(It.IsAny<string>()).Value)
+                  .Returns("your_test_connection_string");
 
-            var provider = new DockerRegistryProvider(_mockRestClientFactory.Object, _mockLogger.Object, _mockSettings);
+            var provider = new DockerRegistryProvider(_mockRestClientFactory.Object, _mockLogger.Object, _mockConfiguration.Object);
             var request = TestUtils.GetContainerImageRequest("joedwards32/cs2", "latest", RegistryType.Docker);
 
             // Act
@@ -108,8 +123,10 @@ namespace Clutch.API.Tests
             // Arrange
             _mockRestClientFactory.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new RestResponse { StatusCode = HttpStatusCode.NotFound, Content = null });
+            _mockConfiguration.Setup(c => c.GetSection(It.IsAny<string>()).Value)
+                  .Returns("your_test_connection_string");
 
-            var provider = new DockerRegistryProvider(_mockRestClientFactory.Object, _mockLogger.Object, _mockSettings);
+            var provider = new DockerRegistryProvider(_mockRestClientFactory.Object, _mockLogger.Object, _mockConfiguration.Object);
             var request = TestUtils.GetContainerImageRequest("joedwards32/cs2", "latest", RegistryType.Docker);
 
             // Act
@@ -130,8 +147,10 @@ namespace Clutch.API.Tests
             // Arrange
             _mockRestClientFactory.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new RestResponse { StatusCode = HttpStatusCode.OK, Content = "INVALID" });
+            _mockConfiguration.Setup(c => c.GetSection(It.IsAny<string>()).Value)
+                  .Returns("your_test_connection_string");
 
-            var provider = new DockerRegistryProvider(_mockRestClientFactory.Object, _mockLogger.Object, _mockSettings);
+            var provider = new DockerRegistryProvider(_mockRestClientFactory.Object, _mockLogger.Object, _mockConfiguration.Object);
             var request = TestUtils.GetContainerImageRequest("joedwards32/cs2", "latest", RegistryType.Docker);
 
             // Act

@@ -83,7 +83,14 @@ namespace Clutch.API.Services.Image
             }
 
             // If we have a valid model, try to set in the database
-            return await _cacheProvider.SetInCacheAsync(cacheKey, image);
+            bool success = await _cacheProvider.SetInCacheAsync(cacheKey, image);
+
+            if (!success) return false;
+
+            // Now we want to publish an event. To ensure loose coupling,
+            // we will delegate this responsibility to an event publisher.
+
+            return success;
         }
 
         public async Task<bool> DeleteImageAsync(ContainerImageRequest request, string version)

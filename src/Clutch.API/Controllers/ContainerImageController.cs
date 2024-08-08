@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 // TODO:
 // - Batch requests for images
-// - Authorization with JWT
 namespace Clutch.API.Controllers
 {
     [Route("[controller]")]
@@ -18,6 +17,7 @@ namespace Clutch.API.Controllers
         [ValidateRequest]
         [HandleExceptions]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -111,6 +111,6 @@ namespace Clutch.API.Controllers
             }
         }
 
-        private static string GetAssemblyVersion() => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
+        private static string GetAssemblyVersion() => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
     }
 }

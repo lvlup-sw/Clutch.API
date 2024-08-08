@@ -1,0 +1,33 @@
+# This action will listen to events emitted by the API
+# For now, to build images we will pull from DockerHub
+
+name: Image Events
+
+on:
+  repository_dispatch: # This will trigger the workflow when you send a repository_dispatch event from your .NET Web API
+
+jobs:
+  handle_event:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      - name: Extract Event Data
+        id: extract_event
+        run: |
+          echo "repositoryName=${{ github.event.client_payload.repositoryName }}" >> $GITHUB_OUTPUT
+          echo "tag=${{ github.event.client_payload.tag }}" >> $GITHUB_OUTPUT
+          echo "registryType=${{ github.event.client_payload.registryType }}" >> $GITHUB_OUTPUT
+
+      - name: Build Image (if ImageBuildRequested)
+        if: github.event.action == 'ImageBuildRequested'
+        # Use the appropriate Docker build action here
+        # and reference the outputs from the previous step
+        # E.g.: 
+        # run: docker build -t ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} .
+
+      - name: Delete Image (if ImageDeleteRequested)
+        if: github.event.action == 'ImageDeleteRequested'
+        # Use the appropriate action or script to delete the image
+        # Reference the outputs from the extract_event step
