@@ -69,7 +69,8 @@ namespace Clutch.API.Extensions
             builder.Services.AddSingleton<IEventPublisher, ServiceBusEventPublisher>(serviceProvider =>
                 new ServiceBusEventPublisher(
                     serviceProvider.GetRequiredService<ServiceBusClient>(),
-                    builder.Configuration["AzureQueueName"] ?? string.Empty
+                    builder.Configuration["AzureQueueName"] ?? string.Empty,
+                    builder.Configuration["AzureDLQueueName"] ?? string.Empty
                 ));
 
             // Container Image
