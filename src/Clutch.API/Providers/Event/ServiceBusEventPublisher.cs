@@ -89,48 +89,64 @@ namespace Clutch.API.Providers.Event
             }
         }
 
-        private AsyncPolicyWrap<HttpResponseMessage> CreatePolicy() // Adjust return type if needed
+        // Polly retry, circuitbreaker, and fallback for resiliency
+        private AsyncPolicyWrap<HttpResponseMessage> CreatePolicy()
         {
             // Retry Policy
             var retryPolicy = Policy<HttpResponseMessage>
                 .Handle<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.ServiceCommunicationProblem)
                 .OrResult(r => !r.IsSuccessStatusCode) // Retry on non-success HTTP status codes from Azure Service Bus
                 .WaitAndRetryAsync(
-                    retryCount: _settings.RetryCount, 
-                    sleepDurationProvider: retryAttempt => _settings.UseExponentialBackoff 
-                        ? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) 
-                        : TimeSpan.FromSeconds(_settings.RetryInterval) + TimeSpan.FromMilliseconds(new Random().Next(0, 100)),
+                    retryCount: _settings.RetryCount,
+                    // Exponential backoff or fixed interval with jitter
+                    sleepDurationProvider: retryAttempt => _settings.UseExponentialBackoff
+                        ? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
+                        : TimeSpan.FromSeconds(_settings.RetryInterval)
+                            + TimeSpan.FromMilliseconds(new Random().Next(0, 100)),
                     onRetry: (outcome, timespan, retryCount, context) =>
                     {
                         _logger.LogInformation($"Retry {retryCount} of {_settings.RetryCount} after {timespan.TotalSeconds} seconds due to: {outcome.Exception?.Message ?? outcome.Result.ReasonPhrase}");
                     });
 
-            // Circuit Breaker Policy
-            var circuitBreakerPolicy = Policy<HttpResponseMessage>
+            // Circuit Breaker Policy with Exponential Backoff
+            var circuitBreakerPolicy = Policy
                 .Handle<ServiceBusException>()
-                .OrResult(r => !r.IsSuccessStatusCode) 
-                .CircuitBreakerAsync(
-                    exceptionsAllowedBeforeBreaking: 5, 
+                .Or<TimeoutException>()
+                .Or<TaskCanceledException>()
+                .AdvancedCircuitBreakerAsync(
+                    failureThreshold: 0.5, // 50% failure rate
+                    samplingDuration: TimeSpan.FromSeconds(30), // Evaluate failures over 30 seconds
+                    minimumThroughput: 10, // Minimum 10 calls before tripping
                     durationOfBreak: TimeSpan.FromMinutes(1),
                     onBreak: (outcome, breakDelay) =>
                     {
-                        _logger.LogError($"Circuit broken for {breakDelay.TotalSeconds} seconds due to: {outcome.Exception?.Message ?? outcome.Result.ReasonPhrase}");
+                        try
+                        {
+                            _logger.LogError(
+                                "Circuit breaker opened for {breakDelay} seconds due to: {exceptionMessage}",
+                                breakDelay.TotalSeconds,
+                                outcome.Message
+                            );
+                        }
+                        catch (Exception unexpectedException)
+                        {
+                            _logger.LogError(unexpectedException, "An error occurred during circuit breaker 'onBreak' handling.");
+                        }
                     },
                     onReset: () => _logger.LogInformation("Circuit Reset"),
                     onHalfOpen: () => _logger.LogInformation("Circuit Half-Open"));
 
-            // Fallback Policy (Optional, but recommended)
-            var fallbackPolicy = Policy<HttpResponseMessage>
+            // Fallback Policy
+            var fallbackPolicy = Policy
                 .Handle<BrokenCircuitException>()
                 .FallbackAsync(
-                    fallbackAction: _ => Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.ServiceUnavailable)), // Or a default response
-                    onFallbackAsync: (outcome, context) =>
+                    fallbackAction: _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)),
+                    onFallbackAsync: (outcome) =>
                     {
                         _logger.LogError("Fallback executed due to broken circuit.");
                         return Task.CompletedTask;
                     });
 
-            // Combine policies (order matters!)
             return fallbackPolicy.WrapAsync(circuitBreakerPolicy.WrapAsync(retryPolicy));
         }
     }
