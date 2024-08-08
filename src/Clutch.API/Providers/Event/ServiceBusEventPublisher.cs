@@ -20,7 +20,7 @@ namespace Clutch.API.Providers.Event
         private readonly EventPublisherSettings _settings;
         private readonly ILogger _logger;
         private readonly TimeSpan _messageTimeToLive;
-        private readonly AsyncPolicyWrap<HttpResponseMessage> _retryPolicy;
+        private readonly AsyncPolicyWrap<HttpResponseMessage> _policy;
 
         public ServiceBusEventPublisher(ServiceBusClient client, string queueName, string dlqName, IOptions<EventPublisherSettings> settings, ILogger logger)
         {
@@ -36,7 +36,7 @@ namespace Clutch.API.Providers.Event
             _settings = settings.Value;
             _logger = logger;
             _messageTimeToLive = TimeSpan.FromHours(24);
-            _retryPolicy = CreatePolicy();
+            _policy = CreatePolicy();
         }
 
         public async Task<bool> PublishEventAsync(string eventName, ContainerImageModel image)
@@ -53,40 +53,122 @@ namespace Clutch.API.Providers.Event
                 TimeToLive = _messageTimeToLive
             };
 
+            if (!string.IsNullOrEmpty(image.Repository))
+            {
+                message.ApplicationProperties.Add("Repository", image.Repository);
+            }
+
+            // Execute the API operation
             try
             {
-                //await _retryPolicy.ExecuteAsync(async () => await sender.SendMessageAsync(message));
+                var result = await _policy.ExecuteAsync(async (ctx) =>
+                {
+                    _logger.LogDebug("Attempting to publish event '{eventName}' to Service Bus.", eventName);
+
+                    try
+                    {
+                        await sender.SendMessageAsync(message);
+                        // Note that since this is a fire and forget operation
+                        // we return an 200 status code as long as there were
+                        // no exceptions during the call
+                        return new HttpResponseMessage(HttpStatusCode.OK);
+                    }
+                    catch (Exception innerEx)
+                    {
+                        _logger.LogError(innerEx.GetBaseException(), "Error sending message to Service Bus.");
+                        // Re-throw to let Polly handle retries/fallback
+                        throw;
+                    }
+                }, new Context("ServiceBus.PublishEventAsync"){{ "EventName", eventName }});
+
+                return result.IsSuccessStatusCode;
             }
-            catch (ServiceBusException ex)
+            catch (Exception ex)
             {
-                // Log or handle the exception (Polly has already retried)
+                _logger.LogError(ex, "Failed to publish event after retries and fallback.");
+                return false;
             }
-
-
-
-            return true;
         }
 
+        // Currently we discard events that did not occur due to Transient errors.
+        // In the future, we may want to instead upload those problematic events
+        // to a database/storage for further analysis. Additional refinements
+        // could involve introducing more logging/metrics for observability.
         public async Task ProcessDeadLetterQueueAsync()
         {
-            await using var receiver = _client.CreateReceiver(_dlqName);
+            await using var receiver = _client.CreateReceiver(_dlqName, new ServiceBusReceiverOptions { ReceiveMode = ServiceBusReceiveMode.PeekLock });
 
             while (true)
             {
                 ServiceBusReceivedMessage receivedMessage = await receiver.ReceiveMessageAsync();
 
-                if (receivedMessage != null)
+                if (receivedMessage is not null)
                 {
-                    // Process the dead-lettered message
-                    // ... (your logic here)
-                    await receiver.CompleteMessageAsync(receivedMessage); // Remove from DLQ after processing
+                    try
+                    {
+                        // Deserialize and Log the Message
+                        var messageBody = receivedMessage.Body.ToString();
+                        var deadLetterReason = receivedMessage.DeadLetterReason;
+                        var deadLetterErrorDescription = receivedMessage.DeadLetterErrorDescription;
+
+                        _logger.LogWarning("Processing dead-lettered message. Reason: {reason}, Description: {description}, Body: {body}",
+                            deadLetterReason, deadLetterErrorDescription, messageBody);
+
+                        // Check for Transient Error and Retry
+                        if (IsTransientError(deadLetterReason))
+                        {
+                            var eventData = JsonSerializer.Deserialize<Event>(messageBody);
+
+                            if (eventData is null)
+                            {
+                                _logger.LogError("Failed to deserialize dead-lettered message. Body: {body}", messageBody);
+                                continue;
+                            }
+
+                            // Retry with exponential backoff
+                            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, receivedMessage.DeliveryCount)));
+
+                            var success = await PublishEventAsync(eventData.EventName, eventData.EventData);
+                            if (success)
+                            {
+                                _logger.LogInformation("Successfully re-published dead-lettered event '{eventName}'.", eventData.EventName);
+                            }
+                            else
+                            {
+                                _logger.LogError("Failed to re-publish dead-lettered event '{eventName}'.", eventData.EventName);
+                                // Consider additional handling or storage for persistent failures after retries
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogError("Discarding dead-lettered message with non-transient failure. Reason: {reason}, Description: {description}",
+                                deadLetterReason, deadLetterErrorDescription);
+                        }
+
+                        // Complete the Message (Remove from DLQ)
+                        await receiver.CompleteMessageAsync(receivedMessage);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error processing dead-lettered message. Message will be abandoned.");
+                        await receiver.AbandonMessageAsync(receivedMessage);
+                    }
                 }
                 else
                 {
-                    // Optional: Wait for a period before checking again (e.g., Task.Delay(TimeSpan.FromSeconds(10)))
-                    break; // No more messages in the DLQ
+                    // No more messages, introduce a delay before checking again
+                    await Task.Delay(TimeSpan.FromSeconds(10));
                 }
             }
+        }
+
+        // Helper method to identify transient errors
+        private bool IsTransientError(string deadLetterReason)
+        {
+            // These are mostly placeholder patterns and will need
+            // to be verified after the Service Bus is provisioned
+            var transientReasons = new[] { "Timeout", "ServerBusy", "ConnectionLost" };
+            return transientReasons.Contains(deadLetterReason);
         }
 
         // Polly retry, circuitbreaker, and fallback for resiliency
@@ -94,7 +176,7 @@ namespace Clutch.API.Providers.Event
         {
             // Retry Policy
             var retryPolicy = Policy<HttpResponseMessage>
-                .Handle<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.ServiceCommunicationProblem)
+                .Handle<ServiceBusException>(ex => ex.Reason is ServiceBusFailureReason.ServiceCommunicationProblem)
                 .OrResult(r => !r.IsSuccessStatusCode) // Retry on non-success HTTP status codes from Azure Service Bus
                 .WaitAndRetryAsync(
                     retryCount: _settings.RetryCount,
