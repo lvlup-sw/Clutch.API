@@ -4,7 +4,7 @@
 name: Image Events
 
 on:
-  repository_dispatch: # This will trigger the workflow when you send a repository_dispatch event from your .NET Web API
+  workflow_dispatch: # Use this trigger instead of repository_dispatch
 
 jobs:
   handle_event:
@@ -12,22 +12,22 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        
+
+      - name: Receive Message from Azure Service Bus
+        uses: azure/servicebus-actions@v1 # Use this action for Azure Service Bus integration
+        with:
+          connection_string: ${{ secrets.AZURE_SERVICE_BUS_CONNECTION_STRING }} 
+          queue_or_topic_name: ${{ secrets.AZURE_SERVICE_BUS_TOPIC_NAME }} # Or queue name
+          # Set properties based on your message structure
+          # For example:
+          # value_filter: '$.EventName == "ImageBuildRequested"'
+          
       - name: Extract Event Data
         id: extract_event
         run: |
-          echo "repositoryName=${{ github.event.client_payload.repositoryName }}" >> $GITHUB_OUTPUT
-          echo "tag=${{ github.event.client_payload.tag }}" >> $GITHUB_OUTPUT
-          echo "registryType=${{ github.event.client_payload.registryType }}" >> $GITHUB_OUTPUT
+          # Extract the data from the message body received from Service Bus
+          echo "repositoryName=${{ fromJson(steps.receive_message.outputs.message).EventData.repositoryName }}" >> $GITHUB_OUTPUT
+          echo "tag=${{ fromJson(steps.receive_message.outputs.message).EventData.tag }}" >> $GITHUB_OUTPUT
+          echo "registryType=${{ fromJson(steps.receive_message.outputs.message).EventData.registryType }}" >> $GITHUB_OUTPUT
 
-      - name: Build Image (if ImageBuildRequested)
-        if: github.event.action == 'ImageBuildRequested'
-        # Use the appropriate Docker build action here
-        # and reference the outputs from the previous step
-        # E.g.: 
-        # run: docker build -t ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} .
-
-      - name: Delete Image (if ImageDeleteRequested)
-        if: github.event.action == 'ImageDeleteRequested'
-        # Use the appropriate action or script to delete the image
-        # Reference the outputs from the extract_event step
+      # ... (Your build and delete steps remain the same)

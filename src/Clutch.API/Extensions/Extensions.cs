@@ -1,4 +1,9 @@
-﻿namespace Clutch.API.Extensions
+﻿using Azure.Messaging.ServiceBus;
+using Azure.Provisioning;
+using Clutch.API.Providers.Event;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Clutch.API.Extensions
 {
     internal static class Extensions
     {
@@ -57,6 +62,14 @@
                     serviceProvider.GetRequiredService<IContainerImageProvider>(),
                     serviceProvider.GetRequiredService<IOptions<CacheSettings>>(),
                     serviceProvider.GetRequiredService<ILogger<CacheProvider<ContainerImageModel>>>()
+                ));
+
+            // Azure Service Bus
+            builder.Services.AddSingleton(new ServiceBusClient(builder.Configuration.GetConnectionString("AzureServiceBus")));
+            builder.Services.AddSingleton<IEventPublisher, ServiceBusEventPublisher>(serviceProvider =>
+                new ServiceBusEventPublisher(
+                    serviceProvider.GetRequiredService<ServiceBusClient>(),
+                    builder.Configuration["AzureQueueName"] ?? string.Empty
                 ));
 
             // Container Image
