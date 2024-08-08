@@ -92,6 +92,7 @@ namespace Clutch.API.Extensions
                     serviceProvider.GetRequiredService<ICacheProvider<ContainerImageModel>>(),
                     serviceProvider.GetRequiredService<IContainerImageProvider>(),
                     serviceProvider.GetRequiredService<IRegistryProviderFactory>(),
+                    serviceProvider.GetRequiredService<IEventPublisher>(),
                     serviceProvider.GetRequiredService<ILogger<ContainerImageService>>(),
                     serviceProvider.GetRequiredService<IOptions<AppSettings>>()
                 ));
@@ -116,6 +117,7 @@ namespace Clutch.API.Extensions
         public static void AddApplicationLogging(this WebApplicationBuilder builder)
         {
             // Refactor to configure OpenTelemetry with Aspire
+            // We should also be adding filters based on Env
             builder.Logging.AddConsole();
             builder.Logging.AddFilter("Microsoft", LogLevel.Information);
             builder.Logging.AddFilter("System", LogLevel.Information);

@@ -3,13 +3,16 @@
 // - CacheProvider interaction for Redis caching.
 // - Interacting with the Github API to trigger builds.
 // - Interacting with the Container Registry.
+using static System.Net.Mime.MediaTypeNames;
+
 namespace Clutch.API.Services.Image
 {
-    public class ContainerImageService(ICacheProvider<ContainerImageModel> cacheProvider, IContainerImageProvider imageProvider, IRegistryProviderFactory registryProviderFactory, ILogger logger, IOptions<AppSettings> settings) : IContainerImageService
+    public class ContainerImageService(ICacheProvider<ContainerImageModel> cacheProvider, IContainerImageProvider imageProvider,IRegistryProviderFactory registryProviderFactory, IEventPublisher eventPublisher, ILogger logger, IOptions<AppSettings> settings) : IContainerImageService
     {
         private readonly ICacheProvider<ContainerImageModel> _cacheProvider = cacheProvider;
         private readonly IContainerImageProvider _imageProvider = imageProvider;
         private readonly IRegistryProviderFactory _registryProviderFactory = registryProviderFactory;
+        private readonly IEventPublisher _eventPublisher = eventPublisher;
         private readonly ILogger _logger = logger;
         private readonly AppSettings _settings = settings.Value;
 
@@ -85,12 +88,23 @@ namespace Clutch.API.Services.Image
             // If we have a valid model, try to set in the database
             bool success = await _cacheProvider.SetInCacheAsync(cacheKey, image);
 
-            if (!success) return false;
+            if (!success)
+            {
+                _logger.LogError("Failed to set image in DB and/or Cache.");
+                return false;
+            }
 
-            // Now we want to publish an event. To ensure loose coupling,
-            // we will delegate this responsibility to an event publisher.
+            // Now that we have the image set in the DB & Cache, we publish an event
+            // requesting a build to be generated. This will be sent to AZB and
+            // consumed by our CI/CD pipeline.
+            bool eventPublished = await _eventPublisher.PublishEventAsync("BuildRequested", image);
 
-            return success;
+            if (!eventPublished)
+            {
+                _logger.LogError("Failed to publish event for image: {image.RepositoryId}.", image.RepositoryId);
+            }
+
+            return eventPublished;
         }
 
         public async Task<bool> DeleteImageAsync(ContainerImageRequest request, string version)
@@ -103,7 +117,27 @@ namespace Clutch.API.Services.Image
                 return false;
             }
 
-            return await _cacheProvider.RemoveFromCacheAsync(cacheKey);
+            // If we have a valid model, try to delete from the database
+            bool success = await _cacheProvider.RemoveFromCacheAsync(cacheKey);
+
+            if (!success)
+            {
+                _logger.LogError("Failed to delete image from DB and/or Cache.");
+                return false;
+            }
+
+            // Now that we have the image deleted from the DB & Cache, we publish an event
+            // requesting the image to be deleted from the registry. This will be sent to
+            // AZB and consumed by our CI/CD pipeline.
+            ContainerImageModel image = ConstructImageModel(request, version);
+            bool eventPublished = await _eventPublisher.PublishEventAsync("DeleteRequested", image);
+
+            if (!eventPublished)
+            {
+                _logger.LogError("Failed to publish event for image: {image.RepositoryId}.", image.RepositoryId);
+            }
+
+            return eventPublished;
         }
 
         public async Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync()

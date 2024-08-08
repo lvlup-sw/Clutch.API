@@ -4,12 +4,10 @@ using Polly.CircuitBreaker;
 using Azure.Messaging.ServiceBus;
 
 // TODO:
-// - DI
-// - PublishEventAsync
 // - Unit Tests
 // This class will publish events to Azure Service Bus
 // Github Actions Workflow will subscribe to those events
-// and perform the needed actions
+// and perform the needed actions (ex building images)
 namespace Clutch.API.Providers.Event
 {
     public class ServiceBusEventPublisher : IEventPublisher
@@ -163,7 +161,7 @@ namespace Clutch.API.Providers.Event
         }
 
         // Helper method to identify transient errors
-        private bool IsTransientError(string deadLetterReason)
+        private static bool IsTransientError(string deadLetterReason)
         {
             // These are mostly placeholder patterns and will need
             // to be verified after the Service Bus is provisioned

@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
+// TODO:
+// - Update unit tests to include new EventPublisher class
 namespace Clutch.API.Tests
 {
     [TestClass]
@@ -16,6 +18,7 @@ namespace Clutch.API.Tests
         private Mock<ICacheProvider<ContainerImageModel>> _mockCacheProvider;
         private Mock<IContainerImageProvider> _mockImageProvider;
         private Mock<IRegistryProviderFactory> _mockRegistryProviderFactory;
+        private Mock<IEventPublisher> _mockEventPublisher;
         private Mock<ILogger> _mockLogger;
         private IOptions<AppSettings> _settings;
         private ContainerImageService _service;
@@ -26,6 +29,7 @@ namespace Clutch.API.Tests
             _mockCacheProvider = new Mock<ICacheProvider<ContainerImageModel>>();
             _mockImageProvider = new Mock<IContainerImageProvider>();
             _mockRegistryProviderFactory = new Mock<IRegistryProviderFactory>();
+            _mockEventPublisher = new Mock<IEventPublisher>();
             _mockLogger = new Mock<ILogger>();
             _settings = Options.Create(new AppSettings
             {
@@ -36,7 +40,8 @@ namespace Clutch.API.Tests
             });
             _service = new (_mockCacheProvider.Object, 
                             _mockImageProvider.Object, 
-                            _mockRegistryProviderFactory.Object, 
+                            _mockRegistryProviderFactory.Object,
+                            _mockEventPublisher.Object,
                             _mockLogger.Object, _settings);
         }
 
