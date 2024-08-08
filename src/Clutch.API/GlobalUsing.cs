@@ -13,6 +13,7 @@ global using Clutch.API.Models.Enums;
 global using Clutch.API.Models.Image;
 global using Clutch.API.Models.Registry;
 global using Clutch.API.Properties;
+global using Clutch.API.Providers.Event;
 global using Clutch.API.Providers.Image;
 global using Clutch.API.Providers.Interfaces;
 global using Clutch.API.Providers.Registry;
@@ -23,14 +24,7 @@ global using Clutch.API.Services.Interfaces;
 global using Clutch.API.Utilities;
 
 // External libraries
-// Caching-related libs can probably be localized
-global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Options;
-global using Microsoft.OpenApi.Models;
-global using Polly;
-global using Polly.Wrap;
-global using StackExchange.Redis;
-// ^^ all of these
 global using System.Net;
 global using System.Reflection;
 global using System.Text;

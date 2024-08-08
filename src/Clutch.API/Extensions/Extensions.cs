@@ -1,7 +1,6 @@
 ﻿using Azure.Messaging.ServiceBus;
-using Azure.Provisioning;
-using Clutch.API.Providers.Event;
-using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
+using Microsoft.OpenApi.Models;
 
 namespace Clutch.API.Extensions
 {
@@ -18,6 +17,7 @@ namespace Clutch.API.Extensions
             // Options
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
             builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
+            builder.Services.Configure<EventPublisherSettings>(builder.Configuration.GetSection("EventPublisherSettings"));
             builder.Services.AddOptions();
 
             // Logging
@@ -70,7 +70,9 @@ namespace Clutch.API.Extensions
                 new ServiceBusEventPublisher(
                     serviceProvider.GetRequiredService<ServiceBusClient>(),
                     builder.Configuration["AzureQueueName"] ?? string.Empty,
-                    builder.Configuration["AzureDLQueueName"] ?? string.Empty
+                    builder.Configuration["AzureDLQueueName"] ?? string.Empty,
+                    serviceProvider.GetRequiredService<IOptions<EventPublisherSettings>>(),
+                    serviceProvider.GetRequiredService<ILogger<ServiceBusEventPublisher>>()
                 ));
 
             // Container Image

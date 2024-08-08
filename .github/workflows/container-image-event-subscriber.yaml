@@ -1,5 +1,6 @@
 # This action will listen to events emitted by the API
 # For now, to build images we will pull from DockerHub
+# https://github.com/marketplace?query=Azure
 
 name: Image Events
 
@@ -13,8 +14,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # There is no action for Service Bus; we will have to
+      # use CLI commands with the azure-cli-action package
       - name: Receive Message from Azure Service Bus
-        uses: azure/servicebus-actions@v1 # Use this action for Azure Service Bus integration
+        uses: azure/servicebus-actions@v1 # DNE
         with:
           connection_string: ${{ secrets.AZURE_SERVICE_BUS_CONNECTION_STRING }} 
           queue_or_topic_name: ${{ secrets.AZURE_SERVICE_BUS_TOPIC_NAME }} # Or queue name

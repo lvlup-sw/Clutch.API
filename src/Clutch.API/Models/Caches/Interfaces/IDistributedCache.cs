@@ -1,4 +1,6 @@
-﻿namespace CacheProvider.Caches.Interfaces
+﻿using StackExchange.Redis;
+
+namespace CacheProvider.Caches.Interfaces
 {
     /// <summary>
     /// A cache interface for caching arbitrary objects.

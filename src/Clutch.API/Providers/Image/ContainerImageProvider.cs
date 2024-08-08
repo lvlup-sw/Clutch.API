@@ -1,4 +1,7 @@
-﻿// Provider Responsibilities:
+﻿using Polly;
+using Polly.Wrap;
+
+// Provider Responsibilities:
 // - Interacting with the Repositories to perform operations against the database.
 // - DOES NOT directly manipulate the database; that is the repository's job.
 namespace Clutch.API.Providers.Image

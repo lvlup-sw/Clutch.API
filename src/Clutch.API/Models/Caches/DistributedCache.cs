@@ -1,4 +1,9 @@
-﻿namespace CacheProvider.Caches
+﻿using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Memory;
+using Polly.Wrap;
+using Polly;
+
+namespace CacheProvider.Caches
 {
     /// <summary>
     /// An implementation of <see cref="ConnectionMultiplexer"/> which uses the <see cref="IDistributedCache"/> interface as a base. Polly is integrated overtop for handling exceptions and retries.
