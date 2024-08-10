@@ -8,7 +8,7 @@ Clutch.API is a .NET 8 web API designed to fetch, build, and store container ima
 
 ### Future Vision:
 
-Clutch.API will evolve into a suite of microservices facilitating the seamless deployment of Kubernetes-managed containers. The primary use case is currently gaming servers, with potential expansion to general business applications.
+Clutch.API will evolve into a suite of microservices facilitating the seamless deployment of Kubernetes-managed workloads. The primary use case is currently gaming servers, with potential expansion to general business applications.
 
 ## What is Clutch.API's Stack?
 
