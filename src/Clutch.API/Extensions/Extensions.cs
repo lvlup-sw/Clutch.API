@@ -1,6 +1,9 @@
 ﻿using Azure.Messaging.ServiceBus;
 using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 
 namespace Clutch.API.Extensions
 {
@@ -13,6 +16,25 @@ namespace Clutch.API.Extensions
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
+
+            // Load in Secrets from Azure
+            builder.Configuration.AddAzureKeyVault(
+                new SecretClient(
+                    new Uri($"https://{builder.Configuration["AzureKeyVault"]}.vault.azure.net/"),
+                    new DefaultAzureCredential()
+                ),
+                new KeyVaultSecretManager()
+            );
+
+            builder.Configuration.AddAzureAppConfiguration(options =>
+            {
+                options.Connect(builder.Configuration.GetConnectionString("AzureAppConfiguration"))
+                    .ConfigureKeyVault(kv =>
+                    {
+                        kv.SetCredential(new DefaultAzureCredential());
+
+                    });
+            });
 
             // Options
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -117,7 +139,11 @@ namespace Clutch.API.Extensions
         public static void AddApplicationLogging(this WebApplicationBuilder builder)
         {
             // Refactor to configure OpenTelemetry with Aspire
-            // We should also be adding filters based on Env
+            // since OpenTelemetry is natively supported, we just
+            // need to consider the structure of the logs before
+            // exporting them to Azure Monitor Application Insights
+            // We should also be adding filters based on Env; ie
+            // debug level for Dev, and information level for prod/qa
             builder.Logging.AddConsole();
             builder.Logging.AddFilter("Microsoft", LogLevel.Information);
             builder.Logging.AddFilter("System", LogLevel.Information);

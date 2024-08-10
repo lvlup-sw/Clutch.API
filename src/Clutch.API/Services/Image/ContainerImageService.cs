@@ -161,6 +161,8 @@ namespace Clutch.API.Services.Image
                     Tag = request.Tag,
                     BuildDate = DateTime.UtcNow,
                     RegistryType = request.RegistryType,
+                    // Status is important; may need to revisit
+                    // depending on CI/CD impl...
                     Status = StatusEnum.Available,
                     Version = version
                 };
