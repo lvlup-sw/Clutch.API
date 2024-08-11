@@ -1,7 +1,4 @@
-﻿using CacheProvider.Caches;
-using CacheProvider.Providers;
-
-namespace Clutch.API.Properties
+﻿namespace Clutch.API.Properties
 {
     /// <summary>
     /// Cache settings for <see cref="DistributedCache"/>.

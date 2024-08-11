@@ -1,4 +1,11 @@
-﻿namespace Clutch.API.Extensions
+﻿using Azure.Messaging.ServiceBus;
+using StackExchange.Redis;
+using Microsoft.OpenApi.Models;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+
+namespace Clutch.API.Extensions
 {
     internal static class Extensions
     {
@@ -10,9 +17,29 @@
                 .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 
+            // Load in Secrets from Azure
+            builder.Configuration.AddAzureKeyVault(
+                new SecretClient(
+                    new Uri($"https://{builder.Configuration["AzureKeyVault"]}.vault.azure.net/"),
+                    new DefaultAzureCredential()
+                ),
+                new KeyVaultSecretManager()
+            );
+
+            builder.Configuration.AddAzureAppConfiguration(options =>
+            {
+                options.Connect(builder.Configuration.GetConnectionString("AzureAppConfiguration"))
+                    .ConfigureKeyVault(kv =>
+                    {
+                        kv.SetCredential(new DefaultAzureCredential());
+
+                    });
+            });
+
             // Options
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
             builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
+            builder.Services.Configure<EventPublisherSettings>(builder.Configuration.GetSection("EventPublisherSettings"));
             builder.Services.AddOptions();
 
             // Logging
@@ -59,6 +86,17 @@
                     serviceProvider.GetRequiredService<ILogger<CacheProvider<ContainerImageModel>>>()
                 ));
 
+            // Azure Service Bus
+            builder.Services.AddSingleton(new ServiceBusClient(builder.Configuration.GetConnectionString("AzureServiceBus")));
+            builder.Services.AddSingleton<IEventPublisher, ServiceBusEventPublisher>(serviceProvider =>
+                new ServiceBusEventPublisher(
+                    serviceProvider.GetRequiredService<ServiceBusClient>(),
+                    builder.Configuration["AzureQueueName"] ?? string.Empty,
+                    builder.Configuration["AzureDLQueueName"] ?? string.Empty,
+                    serviceProvider.GetRequiredService<IOptions<EventPublisherSettings>>(),
+                    serviceProvider.GetRequiredService<ILogger<ServiceBusEventPublisher>>()
+                ));
+
             // Container Image
             builder.Services.AddTransient<IContainerImageRepository, ContainerImageRepository>(serviceProvider =>
                 new ContainerImageRepository(
@@ -76,6 +114,7 @@
                     serviceProvider.GetRequiredService<ICacheProvider<ContainerImageModel>>(),
                     serviceProvider.GetRequiredService<IContainerImageProvider>(),
                     serviceProvider.GetRequiredService<IRegistryProviderFactory>(),
+                    serviceProvider.GetRequiredService<IEventPublisher>(),
                     serviceProvider.GetRequiredService<ILogger<ContainerImageService>>(),
                     serviceProvider.GetRequiredService<IOptions<AppSettings>>()
                 ));
@@ -100,6 +139,11 @@
         public static void AddApplicationLogging(this WebApplicationBuilder builder)
         {
             // Refactor to configure OpenTelemetry with Aspire
+            // since OpenTelemetry is natively supported, we just
+            // need to consider the structure of the logs before
+            // exporting them to Azure Monitor Application Insights
+            // We should also be adding filters based on Env; ie
+            // debug level for Dev, and information level for prod/qa
             builder.Logging.AddConsole();
             builder.Logging.AddFilter("Microsoft", LogLevel.Information);
             builder.Logging.AddFilter("System", LogLevel.Information);

@@ -1,0 +1,94 @@
+# This action will listen to events emitted by the API
+# For now, to build images we will pull from DockerHub
+# https://github.com/marketplace?query=Azure
+
+# Control Flow:
+# 1. Receive event from ASB
+# 2. Extract image data from event
+# 3. Check to see if image is in ACR already
+# 4. If not, pull down from Docker Hub and build
+# 5. Upload image to ACR
+
+name: Image Events
+
+on:
+  workflow_dispatch:
+
+jobs:
+  handle_event:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} 
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Receive Message from Azure Service Bus
+        id: receive_message 
+        run: |
+          az servicebus topic subscription receive \
+            --subscription-name <your-subscription-name> \
+            --topic-name ${{ secrets.AZURE_SERVICE_BUS_TOPIC_NAME }} \
+            --namespace-name <your-service-bus-namespace> \
+            --output json > message.json
+
+      - name: Extract Event Data
+        id: extract_event
+        run: |
+          echo "eventName=$(jq -r '.body.EventName' message.json)" >> $GITHUB_OUTPUT
+          echo "repositoryName=$(jq -r '.body.EventData.repositoryName' message.json)" >> $GITHUB_OUTPUT
+          echo "tag=$(jq -r '.body.EventData.tag' message.json)" >> $GITHUB_OUTPUT
+          echo "baseImageName=$(jq -r '.body.EventData.baseImageName' message.json)" >> $GITHUB_OUTPUT 
+
+      - name: Check if Image Exists in ACR
+        id: check_image
+        run: |
+          exists=$(az acr repository show-manifests \
+            --name <your-acr-name> \
+            --repository ${{ steps.extract_event.outputs.repositoryName }} \
+            --query "[?tags[0]=='${{ steps.extract_event.outputs.tag }}'].digest" \
+            --output tsv)
+
+          if [ -z "$exists" ]; then
+            echo "imageExists=false" >> $GITHUB_OUTPUT
+          else
+            echo "imageExists=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and Push Image (if ImageBuildRequested and not exists)
+        if: steps.extract_event.outputs.eventName == 'ImageBuildRequested' && steps.check_image.outputs.imageExists == 'false'
+        run: |
+          docker pull ${{ steps.extract_event.outputs.baseImageName }} 
+
+          docker build -t ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} \
+            --build-arg BASE_IMAGE=${{ steps.extract_event.outputs.baseImageName }} . 
+
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          registry: https://index.docker.io/v1/ 
+          username: ${{ secrets.DOCKERHUB_USERNAME }} 
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Log in to Azure Container Registry
+        uses: azure/acr-login@v1
+
+      - name: Tag and Push to ACR
+        run: |
+          docker tag ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} <your-acr-name>.azurecr.io/${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }}
+          docker push <your-acr-name>.azurecr.io/${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }}
+
+      - name: Delete Image
+        if: steps.extract_event.outputs.eventName == 'ImageDeleteRequested'
+        run: |
+          az acr repository delete \
+            --name <your-acr-name> \ 
+            --image ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} 

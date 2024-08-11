@@ -15,7 +15,7 @@ namespace Clutch.API.Utilities
         /// <param name="prefix">The prefix to be prepended.</param>
         /// <param name="seed">The seed for this algorithm.</param>
         /// <returns><see cref="string"/></returns>
-        public static string GenerateCacheKey<T>(T obj, string prefix = "1.0.0", uint seed = 0)
+        public static string GenerateCacheKey<T>(T obj, string prefix = "1.0.0.0", uint seed = 0)
         {
             // Serialize the object
             ReadOnlySpan<byte> serializedObj = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(obj)).AsSpan();

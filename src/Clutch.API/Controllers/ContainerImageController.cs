@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 // TODO:
 // - Batch requests for images
-// - Authorization with JWT
 namespace Clutch.API.Controllers
 {
     [Route("[controller]")]
@@ -18,6 +17,7 @@ namespace Clutch.API.Controllers
         [ValidateRequest]
         [HandleExceptions]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -27,13 +27,16 @@ namespace Clutch.API.Controllers
         {
             var containerImageResponseData = await _service.GetImageAsync(request, GetAssemblyVersion());
 
-            return ValidateResponse(containerImageResponseData)
-                ? Ok(new ContainerImageResponse(
-                    containerImageResponseData.Success,
-                    _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel),
-                    _mapper.Map<RegistryManifest>(containerImageResponseData.RegistryManifestModel)
-                ))
-                : NotFound();
+            return ValidResponse(containerImageResponseData) switch
+            {
+                true => Ok
+                    (new ContainerImageResponse(
+                        containerImageResponseData.Success,
+                        _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel),
+                        _mapper.Map<RegistryManifest>(containerImageResponseData.RegistryManifestModel)
+                    )),
+                false => HandleFailureCases(containerImageResponseData)
+            };
         }
 
         [HttpPut("SetImage/")]
@@ -84,7 +87,7 @@ namespace Clutch.API.Controllers
             return Ok(_mapper.Map<List<ContainerImage>>(containerImageModels));
         }
 
-        private static bool ValidateResponse(ContainerImageResponseData containerImageResponseData)
+        private static bool ValidResponse(ContainerImageResponseData containerImageResponseData)
         {
             return containerImageResponseData is not null
                 && containerImageResponseData.Success
@@ -92,6 +95,22 @@ namespace Clutch.API.Controllers
                 && containerImageResponseData.RegistryManifestModel.HasValue;
         }
 
-        private static string GetAssemblyVersion() => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0";
+        private ActionResult HandleFailureCases(ContainerImageResponseData containerImageResponseData)
+        {
+            if (!containerImageResponseData.ContainerImageModel.HasValue) return NotFound();
+            else
+            {
+                var resp = new
+                {
+                    status = $"The container image manifest is not available at this time: {containerImageResponseData.ContainerImageModel.Status}",
+                    success = false,
+                    image = _mapper.Map<ContainerImage>(containerImageResponseData.ContainerImageModel)
+                };
+
+                return Accepted(resp);
+            }
+        }
+
+        private static string GetAssemblyVersion() => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
     }
 }

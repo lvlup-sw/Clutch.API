@@ -1,4 +1,6 @@
 ﻿using MemCache = Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Memory;
+using StackExchange.Redis;
 
 namespace CacheProvider.Providers
 {

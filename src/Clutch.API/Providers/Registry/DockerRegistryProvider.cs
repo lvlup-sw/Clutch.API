@@ -29,7 +29,7 @@ namespace Clutch.API.Providers.Registry
             return ValidateAndDeserializeResponse(response);
         }
 
-        private async Task<dynamic> GetToken(string[] parts)
+        internal async Task<dynamic> GetToken(string[] parts)
         {
             dynamic rawToken;
 

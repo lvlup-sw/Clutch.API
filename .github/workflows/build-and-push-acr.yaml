@@ -43,6 +43,6 @@ jobs:
         docker tag ${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }} ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}
         echo
 
-        echo "Push image to ACR"
+        echo "Pushing image to ACR..."
         docker push ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}
         echo

@@ -1,9 +1,8 @@
-﻿using Clutch.API.Models.Enums;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 // This is our actual Database model, and what we use to perform our operations.
-// We do not directly use ContainerImageVersion to limit visibility into our application.
+// We do not directly use ContainerImage to limit visibility into our application.
 // This protects us from over-posting attacks.
 // We have two indexes: ImageId and RepositoryId.
 // Ideally we use ImageId where possible.
