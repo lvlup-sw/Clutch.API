@@ -16,9 +16,9 @@ on:
   repository_dispatch:
 
 # Only allow one instance running at a time
-concurrency:
-  group: 'service-bus-processing' 
-  cancel-in-progress: false 
+#concurrency:
+#  group: 'service-bus-processing' 
+#  cancel-in-progress: false 
 # Since we are only ever updating 1-2 values
 # at a time, this may not be necessary. We
 # would need to consider how to handle concurrent
@@ -31,35 +31,34 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      # Custom action which emits
+      # parsed event as an output
+      - name: Receive Message from Azure Service Bus
+        id: receive_message
+        uses: ./actions/receive-event-from-asb
+        with:
+          connectionString: ${{ secrets.AZURE_SERVICE_BUS_CONNECTION_STRING }}
+          queueName: ${{ vars.AZURE_SERVICE_BUS_QUEUE_NAME }}
+
+      - name: Extract Event Data
+        id: extract_event
+        run: |
+          echo "eventName=${{ steps.receive_message.outputs.eventName }}" >> $GITHUB_OUTPUT
+          echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repositoryId')" >> $GITHUB_OUTPUT
+          echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.tag')" >> $GITHUB_OUTPUT
+          echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repository')" >> $GITHUB_OUTPUT
+
       - name: Azure login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Install jq
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-
-      ## Replace with Custom Action
-      - name: Receive Message from Azure Service Bus
-        id: receive_message 
-        run: |
-          az servicebus topic subscription receive \
-            --subscription-name <your-subscription-name> \
-            --topic-name ${{ secrets.AZURE_SERVICE_BUS_TOPIC_NAME }} \
-            --namespace-name <your-service-bus-namespace> \
-            --output json > message.json
-
-      - name: Extract Event Data
-        id: extract_event
-        run: |
-          echo "eventName=$(jq -r '.body.EventName' message.json)" >> $GITHUB_OUTPUT
-          echo "repositoryName=$(jq -r '.body.EventData.repositoryName' message.json)" >> $GITHUB_OUTPUT
-          echo "tag=$(jq -r '.body.EventData.tag' message.json)" >> $GITHUB_OUTPUT
-          echo "baseImageName=$(jq -r '.body.EventData.baseImageName' message.json)" >> $GITHUB_OUTPUT 
 
       - name: Check if Image Exists in ACR
         id: check_image
@@ -76,14 +75,8 @@ jobs:
             echo "imageExists=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build and Push Image (if ImageBuildRequested and not exists)
-        if: steps.extract_event.outputs.eventName == 'ImageBuildRequested' && steps.check_image.outputs.imageExists == 'false'
-        run: |
-          docker pull ${{ steps.extract_event.outputs.baseImageName }} 
-
-          docker build -t ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} \
-            --build-arg BASE_IMAGE=${{ steps.extract_event.outputs.baseImageName }} . 
-
+      ### Good up until here ###
+      # Review the credentials + action here
       - name: Log in to registry
         uses: docker/login-action@v2
         with:
@@ -91,16 +84,30 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }} 
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+      # This looks right but will need validation
+      - name: Build and Push Image (if BuildRequested and not exists)
+        if: steps.extract_event.outputs.eventName == 'BuildRequested' && steps.check_image.outputs.imageExists == 'false'
+        run: |
+          docker pull ${{ steps.extract_event.outputs.baseImageName }} 
+
+          docker build -t ${{ steps.extract_event.outputs.baseImageName }}:${{ steps.extract_event.outputs.tag }} \
+            --build-arg BASE_IMAGE=${{ steps.extract_event.outputs.baseImageName }} . 
+
+      # Is this the right action?
       - name: Log in to Azure Container Registry
         uses: azure/acr-login@v1
 
+      # Review this
       - name: Tag and Push to ACR
         run: |
           docker tag ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} <your-acr-name>.azurecr.io/${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }}
           docker push <your-acr-name>.azurecr.io/${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }}
 
+      # - name: Call Azure Function to Update Database      
+
+      # WIP
       - name: Delete Image
-        if: steps.extract_event.outputs.eventName == 'ImageDeleteRequested'
+        if: steps.extract_event.outputs.eventName == 'DeleteRequested'
         run: |
           az acr repository delete \
             --name <your-acr-name> \ 

@@ -1,16 +1,16 @@
-// Since the Azure CLI bizarrely does not
-// support direct message reception, I
-// created a custom github action using
-// Azure Service Bus client library :)
+// We use this action to fetch
+// events from Azure Service Bus
+// since the CLI bizarrely doesn't
+// support event reception.
 
-const { ServiceBusClient } = require("@azure/service-bus");
+const { ServiceBusClient } = require('@azure/service-bus');
 const core = require('@actions/core');
 
 async function main() {
     try {
         // Get inputs from the workflow
-        const connectionString = core.getInput("connectionString");
-        const queueName = core.getInput("queueName");
+        const connectionString = core.getInput('connectionString');
+        const queueName = core.getInput('queueName');
 
         // Set as secret to mask in logs
         core.setSecret(connectionString);
@@ -19,27 +19,27 @@ async function main() {
         const sbClient = new ServiceBusClient(connectionString);
         const receiver = sbClient.createReceiver(queueName);
 
-        // Receive a message
-        const messages = await receiver.receiveMessages(1);
+        // Receive a message (wait for max 5s)
+        const messages = await receiver.receiveMessages(1, { maxWaitTimeInMs: 5000 });
 
         if (messages.length > 0) {
             const message = messages[0];
 
-            // Parse the message body (assuming it's JSON)
+            // Parse the message body
             const messageBody = JSON.parse(message.body);
 
             // Extract event name and data
             const eventName = messageBody.eventName;
-            const eventData = messageBody.data;
+            const eventData = messageBody.eventData;
 
             // Set outputs for the workflow
-            core.setOutput("eventName", eventName);
-            core.setOutput("eventData", JSON.stringify(eventData));
+            core.setOutput('eventName', eventName);
+            core.setOutput('eventData', JSON.stringify(eventData));
 
             // Complete the message
             await receiver.completeMessage(message);
         } else {
-            core.info("No messages received.");
+            core.info('No messages received.');
         }
 
         // Close the receiver and client
