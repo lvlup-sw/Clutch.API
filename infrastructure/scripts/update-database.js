@@ -1,3 +1,8 @@
+// This function is called by our CI/CD
+// pipeline after processing a SET/DEL
+// request. It updates the Status and
+// BuildDate values in our db table.
+
 const { Client } = require('pg');
 
 // Define the specific table to update (replace with your actual table name)
