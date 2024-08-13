@@ -103,6 +103,6 @@ jobs:
 
       - name: Trigger Azure Function to Update Database
         run: |
-          curl -X POST "https://${{ vars.AZURE_DATABASE_FUNCTION_NAME }}.azurewebsites.net/api/${{ vars.AZURE_DATABASE_FUNCTION_NAME }}?code=${{ secrets.FUNCTION_KEY }}" \
+          curl -X POST "https://${{ vars.AZURE_DATABASE_FUNCTION_NAME }}.azurewebsites.net/api/${{ vars.AZURE_DATABASE_FUNCTION_NAME }}?code=${{ secrets.AZURE_FUNCTION_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"${{ steps.extract_event.outputs.repositoryName }}":"0"}'

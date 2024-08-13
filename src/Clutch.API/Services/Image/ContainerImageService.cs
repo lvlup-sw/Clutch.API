@@ -100,7 +100,7 @@ namespace Clutch.API.Services.Image
 
             if (!eventPublished)
             {
-                _logger.LogError("Failed to publish event for image: {image.RepositoryId}.", image.RepositoryId);
+                _logger.LogError("Failed to publish SET event for image: {image.RepositoryId}.", image.RepositoryId);
             }
 
             return eventPublished;
@@ -133,7 +133,7 @@ namespace Clutch.API.Services.Image
 
             if (!eventPublished)
             {
-                _logger.LogError("Failed to publish event for image: {image.RepositoryId}.", image.RepositoryId);
+                _logger.LogError("Failed to publish DEL event for image: {image.RepositoryId}.", image.RepositoryId);
             }
 
             return eventPublished;

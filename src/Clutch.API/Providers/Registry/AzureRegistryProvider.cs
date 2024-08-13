@@ -19,6 +19,7 @@ namespace Clutch.API.Providers.Registry
             dynamic azureToken = await GetToken(parts);
 
             // Construct the API request
+            // We should make this an appsetting
             _restClientFactory.InstantiateClient("https://containerimagesregistry.azurecr.io");
             RestRequest restRequest = new($"/v2/{parts[0]}/{parts[1]}/manifests/{request.Tag}");
             restRequest.Method = Method.Get;

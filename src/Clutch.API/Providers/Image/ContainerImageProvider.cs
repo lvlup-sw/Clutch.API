@@ -6,8 +6,8 @@ using Polly.Wrap;
 // - DOES NOT directly manipulate the database; that is the repository's job.
 namespace Clutch.API.Providers.Image
 {
-    // In the future, we will add other repository interfaces to this class.
-    // For now, we only have the ContainerImagerepository class so this acts
+    // In the future, we may add other repository interfaces to this class.
+    // For now, we only have the ContainerImageRepository class so this acts
     // as a pass-through with polly decorations.
     public class ContainerImageProvider : IContainerImageProvider
     {
