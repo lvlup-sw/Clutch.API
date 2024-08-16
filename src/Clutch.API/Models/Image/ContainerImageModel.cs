@@ -52,7 +52,9 @@ namespace Clutch.API.Models.Image
                 if (string.IsNullOrEmpty(Tag)) return true;
                 if (BuildDate == DateTime.MinValue) return true;
                 if (RegistryType == RegistryType.Invalid) return true;
-                if (Status == StatusEnum.Unavailable) return true;
+                // Removed this check since we do not
+                // track invalid Status types anymore
+                //if (Status == StatusEnum.Unavailable) return true;
                 if (string.IsNullOrEmpty(Version)) return true;
                 return false;
             }

@@ -183,8 +183,8 @@ namespace Clutch.API.Extensions
             foreach (var secret in connectionStrings.GetChildren())
             {
                 if (secret.Key is not "AzureKeyVault"
-                    || secret.Key is not "ContainerImageDb"
-                    || secret.Key is not "Redis")
+                    && secret.Key is not "ContainerImageDb"
+                    && secret.Key is not "Redis")
                 {
                     secret.Value = builder.Configuration[secret.Key];
                 }

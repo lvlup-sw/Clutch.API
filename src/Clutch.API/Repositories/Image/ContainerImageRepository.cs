@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Azure.Amqp.Framing;
+using Microsoft.EntityFrameworkCore;
 
 // Repository Responsibilities:
 // - Directly manipulate the database.
@@ -62,16 +63,39 @@ namespace Clutch.API.Repositories.Image
 
         public async Task<bool> SetImageAsync(ContainerImageModel newImage)
         {
-            if (!newImage.HasValue) return false;
+            // Auto-incrementing keys are always 0
+            if (!newImage.HasValue || newImage.ImageID != 0) return false;
 
             try
             {
-                // Auto-incrementing keys are always 0
-                if (!newImage.HasValue || newImage.ImageID != 0) return false;
+                _logger.LogDebug("Setting image in the DB.");
 
-                _logger.LogDebug("Adding new image to the DB.");
-                _context.ContainerImages.Add(newImage);
-                int entries = await _context.SaveChangesAsync();
+                // Update existing image if it exists
+                // We specify each property explicitly
+                // because we can't modify ImageId
+                int entries = await _context.ContainerImages
+                    .Where(img => img.RepositoryId == newImage.RepositoryId)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(p => p.RepositoryId, newImage.RepositoryId)
+                        .SetProperty(p => p.Repository, newImage.Repository)
+                        .SetProperty(p => p.Tag, newImage.Tag)
+                        .SetProperty(p => p.BuildDate, newImage.BuildDate)
+                        .SetProperty(p => p.RegistryType, newImage.RegistryType)
+                        .SetProperty(p => p.Status, newImage.Status)
+                        .SetProperty(p => p.Version, newImage.Version)
+                    );
+
+                // Ideally we could do something like this
+                // but EF Core doesn't allow Indexes to be
+                // modified whatsoever, even temporarily
+                //_context.Entry(existingImage).CurrentValues.SetValues(newImage);
+
+                // If entries = 0, it means the image didn't exist
+                if (entries == 0)
+                {
+                    _context.ContainerImages.Add(newImage);
+                    entries = await _context.SaveChangesAsync();
+                }
 
                 return entries > 0;
             }
