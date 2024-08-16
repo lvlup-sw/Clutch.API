@@ -24,7 +24,7 @@ namespace Clutch.API.Providers.Event
         {
             ArgumentNullException.ThrowIfNull(client);
             ArgumentNullException.ThrowIfNullOrEmpty(queueName);
-            ArgumentNullException.ThrowIfNullOrEmpty(dlqName);
+            //ArgumentNullException.ThrowIfNullOrEmpty(dlqName);
             ArgumentNullException.ThrowIfNull(settings);
             ArgumentNullException.ThrowIfNull(logger);
 

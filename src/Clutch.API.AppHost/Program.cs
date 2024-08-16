@@ -16,6 +16,13 @@ var postgres = (builder.Environment.IsProduction()) switch
     false => builder.AddPostgres("postgres")
 };
 
+/*
+// Service registration
+var secrets = builder.ExecutionContext.IsPublishMode
+    ? builder.AddAzureKeyVault("secrets")
+    : builder.AddConnectionString("secrets");
+*/
+
 // This is not actually creating a database
 // It is creating a CONNECTION STRING for a database
 // The provisioning is still required to happen before runtime

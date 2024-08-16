@@ -20,21 +20,32 @@ namespace Clutch.API.Extensions
             // Load in Secrets from Azure
             builder.Configuration.AddAzureKeyVault(
                 new SecretClient(
-                    new Uri($"https://{builder.Configuration["AzureKeyVault"]}.vault.azure.net/"),
+                    new Uri($"https://{builder.Configuration["Azure:AzureKeyVault"]}.vault.azure.net/"),
                     new DefaultAzureCredential()
                 ),
                 new KeyVaultSecretManager()
             );
 
+            // Bind Secrets if necessary
+            if (builder.Environment.IsProduction())
+            {
+                builder.BindProductionSecrets();
+            }
+            
+
+            /* Uncomment to load in App Configuration
+             * Note we do not load in secrets here and
+             * it is solely used for feature management
+            // App Configuration (feature flags)
             builder.Configuration.AddAzureAppConfiguration(options =>
             {
                 options.Connect(builder.Configuration.GetConnectionString("AzureAppConfiguration"))
                     .ConfigureKeyVault(kv =>
                     {
                         kv.SetCredential(new DefaultAzureCredential());
-
                     });
             });
+            */
 
             // Options
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -91,8 +102,8 @@ namespace Clutch.API.Extensions
             builder.Services.AddSingleton<IEventPublisher, ServiceBusEventPublisher>(serviceProvider =>
                 new ServiceBusEventPublisher(
                     serviceProvider.GetRequiredService<ServiceBusClient>(),
-                    builder.Configuration["AzureQueueName"] ?? string.Empty,
-                    builder.Configuration["AzureDLQueueName"] ?? string.Empty,
+                    builder.Configuration["Azure:AzureQueueName"] ?? string.Empty,
+                    builder.Configuration["Azure:AzureDLQueueName"] ?? string.Empty,
                     serviceProvider.GetRequiredService<IOptions<EventPublisherSettings>>(),
                     serviceProvider.GetRequiredService<ILogger<ServiceBusEventPublisher>>()
                 ));
@@ -148,6 +159,15 @@ namespace Clutch.API.Extensions
             builder.Logging.AddFilter("Microsoft", LogLevel.Information);
             builder.Logging.AddFilter("System", LogLevel.Information);
             builder.Logging.AddFilter("Clutch", LogLevel.Information);
+        }
+
+        // Add more as needed
+        private static void BindProductionSecrets(this IHostApplicationBuilder builder)
+        {
+            builder.Configuration["ConnectionStrings:containerImageDb"] = builder.Configuration["DatabaseConnectionString"];
+            builder.Configuration["ConnectionStrings:Redis"] = builder.Configuration["RedisConnectionString"];
+            builder.Configuration["Secrets:AcrClientSecret"] = builder.Configuration["AcrTokenSecret"];
+            builder.Configuration["ConnectionStrings:AzureServiceBus"] = builder.Configuration["ServiceBusConnectionString"];
         }
     }
 }
