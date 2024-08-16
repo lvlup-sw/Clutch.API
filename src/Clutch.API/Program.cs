@@ -30,12 +30,6 @@ else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-    // We need to seed the local db
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<ContainerImageContext>();
-        context.Database.Migrate();
-    }
 }
 
 // Add Swagger page

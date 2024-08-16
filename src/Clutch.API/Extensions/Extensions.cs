@@ -26,12 +26,15 @@ namespace Clutch.API.Extensions
                 new KeyVaultSecretManager()
             );
 
-            // Bind Secrets if necessary
+            // Bind Secrets to appsettings depending on Env
             if (builder.Environment.IsProduction())
             {
                 builder.BindProductionSecrets();
             }
-            
+            else
+            {
+                builder.BindDevelopmentSecrets();
+            }
 
             /* Uncomment to load in App Configuration
              * Note we do not load in secrets here and
@@ -60,7 +63,7 @@ namespace Clutch.API.Extensions
             builder.AddRedisClient("Redis");
 
             // Database Context
-            builder.AddNpgsqlDbContext<ContainerImageContext>("containerImageDb", options =>
+            builder.AddNpgsqlDbContext<ContainerImageContext>("ContainerImageDb", options =>
             {   // We explicitly handle retries ourselves
                 options.DisableRetry = true;
             });
@@ -161,13 +164,31 @@ namespace Clutch.API.Extensions
             builder.Logging.AddFilter("Clutch", LogLevel.Information);
         }
 
-        // Add more as needed
+        // Unfortunately we need these extension methods
+        // to bind the values retrieved from Azure KeyVault
+        // to the ConnectionStrings section of our appsettings
         private static void BindProductionSecrets(this IHostApplicationBuilder builder)
         {
-            builder.Configuration["ConnectionStrings:containerImageDb"] = builder.Configuration["DatabaseConnectionString"];
-            builder.Configuration["ConnectionStrings:Redis"] = builder.Configuration["RedisConnectionString"];
-            builder.Configuration["Secrets:AcrClientSecret"] = builder.Configuration["AcrTokenSecret"];
-            builder.Configuration["ConnectionStrings:AzureServiceBus"] = builder.Configuration["ServiceBusConnectionString"];
+            var connectionStrings = builder.Configuration.GetSection("ConnectionStrings");
+            foreach (var secret in connectionStrings.GetChildren())
+            {
+                if (secret.Key is not "AzureKeyVault")
+                    secret.Value = builder.Configuration[secret.Key];
+            }
+        }
+
+        private static void BindDevelopmentSecrets(this IHostApplicationBuilder builder)
+        {
+            var connectionStrings = builder.Configuration.GetSection("ConnectionStrings");
+            foreach (var secret in connectionStrings.GetChildren())
+            {
+                if (secret.Key is not "AzureKeyVault"
+                    || secret.Key is not "ContainerImageDb"
+                    || secret.Key is not "Redis")
+                {
+                    secret.Value = builder.Configuration[secret.Key];
+                }
+            }
         }
     }
 }

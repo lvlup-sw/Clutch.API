@@ -1,9 +1,34 @@
 using Microsoft.Extensions.Hosting;
+using Clutch.API.AppHost;
+
+// Note that this is setting up the ORCHESTRATION
+// If we have external resources already provisioned
+// (ie for Prod env) we need to point the AppHost
+// to those resources, otherwise it will provision
+// them locally as containers
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Add secrets from Azure KeyVault
+builder.Configuration.AddAzureKeyVaultSecrets("AzureKeyVault");
+
+// We need to bind the secrets to the correct
+// configuration section depending on Environment
+if (builder.Environment.IsProduction())
+{
+    builder.BindProductionSecrets();
+}
+else
+{
+    builder.BindDevelopmentSecrets();
+}
+
 // Add our redis cache and postgres DB to management
-var redis = builder.AddRedis("redis");
+var redis = (builder.Environment.IsProduction()) switch
+{
+    true  => builder.AddConnectionString("Redis"),
+    false => builder.AddRedis("Redis")
+};
 
 // We change the configuration depending on env
 // It is also possible to specify the exact image to use:
@@ -11,24 +36,20 @@ var redis = builder.AddRedis("redis");
 // .WithImageTag
 var postgres = (builder.Environment.IsProduction()) switch
 {
-    true  => builder.AddPostgres("postgres")
-                    .PublishAsAzurePostgresFlexibleServer(),
-    false => builder.AddPostgres("postgres")
+    true  => builder.AddConnectionString("ContainerImageDb"),
+    false => builder.AddPostgres("Postgres")
+                    .PublishAsAzurePostgresFlexibleServer()
 };
-
-/*
-// Service registration
-var secrets = builder.ExecutionContext.IsPublishMode
-    ? builder.AddAzureKeyVault("secrets")
-    : builder.AddConnectionString("secrets");
-*/
 
 // This is not actually creating a database
 // It is creating a CONNECTION STRING for a database
 // The provisioning is still required to happen before runtime
 // We accomplish this by using EF Core migrations at startup
-var containerImageDb = postgres.AddDatabase("containerImageDb");
+var containerImageDb = (postgres is IResourceBuilder<PostgresServerResource> server)
+    ? server.AddDatabase("ContainerImageDb")
+    : postgres;
 
+// Add projects to Aspire management
 builder.AddProject<Projects.Clutch_API>("clutch-api")
     .WithReference(redis)
     .WithReference(containerImageDb);
