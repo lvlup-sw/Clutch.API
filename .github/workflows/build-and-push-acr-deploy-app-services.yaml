@@ -63,5 +63,5 @@ jobs:
     - name: Deploy Container to App Services
       uses: azure/webapps-deploy@v3
       with:
-        app-name: 'Clutch.API'
+        app-name: 'clutch-api'
         images: '${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}'
