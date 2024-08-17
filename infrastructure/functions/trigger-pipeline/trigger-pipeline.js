@@ -14,12 +14,12 @@ module.exports = async function (context, mySbMsg) {
 
         // Make a POST request to the GitHub Webhook
         const response = await fetch(
-            'https://api.github.com/repos/{owner}/{repo}/dispatches', // Replace with your actual repository details
+            'https://api.github.com/repos/lvlup-sw/Clutch.API/dispatches', 
             {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/vnd.github.v3+json',
-                    'Authorization': `token ${process.env.GITHUB_WEBHOOK_SECRET}`, // Use your GitHub secret token
+                    'Authorization': `token ${process.env.GITHUB_PAT}`, // Use the retrieved secret
                 },
                 body: JSON.stringify({
                     'event_type': eventName,

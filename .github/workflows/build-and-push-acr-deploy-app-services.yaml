@@ -5,8 +5,10 @@ on:
 
 env:
   REPOSITORY_NAME: lvlup-sw/clutchapi
-  REPOSITORY_TAG: aspire-dev  
 
+permissions:
+  id-token: write
+  contents: read
 jobs:
   docker_build_push_acr:
     name: 'Docker Build and Push to ACR'
@@ -22,6 +24,10 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
+
+    - name: Get tags
+      run: |
+        echo "REPOSITORY_TAG=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV      
  
     - name: 'Login via Azure CLI'
       uses: azure/login@v2
@@ -54,7 +60,8 @@ jobs:
         docker push ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}
         echo
 
-    - uses: azure/webapps-deploy@v3
+    - name: Deploy Container to App Services
+      uses: azure/webapps-deploy@v3
       with:
         app-name: 'clutch-api'
         images: '${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}'
