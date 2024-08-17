@@ -57,4 +57,4 @@ jobs:
     - uses: azure/webapps-deploy@v3
       with:
         app-name: 'clutch-api'
-        images: '${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}
+        images: '${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.REPOSITORY_NAME }}:${{ env.REPOSITORY_TAG }}'
