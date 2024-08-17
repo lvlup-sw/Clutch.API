@@ -7,6 +7,9 @@ env:
   REPOSITORY_NAME: lvlup-sw/clutchapi
   REPOSITORY_TAG: aspire-dev  
 
+permissions:
+  id-token: write
+  contents: read
 jobs:
   docker_build_push_acr:
     name: 'Docker Build and Push to ACR'
