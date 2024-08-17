@@ -1,0 +1,12 @@
+{
+    "name": "trigger-pipeline",
+    "version": "1.0.0",
+    "description": "Azure Function to trigger CI/CD workflow via GitHub webhook",
+    "main": "trigger-pipeline.js",
+    "scripts": {
+      "start": "func start"
+    },
+    "dependencies": {
+      "node-fetch": "^3.3.2"
+    }
+  }
