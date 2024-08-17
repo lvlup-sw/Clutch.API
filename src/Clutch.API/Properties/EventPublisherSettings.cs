@@ -16,5 +16,10 @@
         /// Set to true to use exponential backoff for operation retries.
         /// </summary>
         public bool UseExponentialBackoff { get; set; }
+
+        /// <summary>
+        /// Event TTL in hours.
+        /// </summary>
+        public double TimeToLive { get; set; }
     }
 }
