@@ -2,6 +2,15 @@
 {
     internal static class Extensions
     {
+        // AFAIK there is no other easier/cleaner way to
+        // bind secrets to my appsettings ConnectionStrings
+        // since Azure KeyVault entries are imported as-is:
+        // key-value pairs, e.g. "AzureClientSecret". So I
+        // have to directly bind the entries to the section
+        // I want. If KeyVault allowed for non-alphanumeric
+        // characters (':'), then I could bind them implicitly
+        // as a natural result of the import.
+
         public static void BindProductionSecrets(this IDistributedApplicationBuilder builder)
         {
             var connectionStrings = builder.Configuration.GetSection("ConnectionStrings");
