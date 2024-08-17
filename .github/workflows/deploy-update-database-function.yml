@@ -11,7 +11,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: 'update-database'
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: './infrastructure/scripts/'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './infrastructure/functions/update-database/'
   NODE_VERSION: '16.x'
 
 jobs:
@@ -42,4 +42,4 @@ jobs:
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+        publish-profile: ${{ secrets.UPDATE_DATABASE_PUBLISH_PROFILE }}
