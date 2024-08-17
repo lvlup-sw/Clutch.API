@@ -3,7 +3,6 @@
 // - CacheProvider interaction for Redis caching.
 // - Interacting with the Github API to trigger builds.
 // - Interacting with the Container Registry.
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Clutch.API.Services.Image
 {
@@ -101,7 +100,7 @@ namespace Clutch.API.Services.Image
 
             if (!eventPublished)
             {
-                _logger.LogError("Failed to publish event for image: {image.RepositoryId}.", image.RepositoryId);
+                _logger.LogError("Failed to publish SET event for image: {image.RepositoryId}.", image.RepositoryId);
             }
 
             return eventPublished;
@@ -134,7 +133,7 @@ namespace Clutch.API.Services.Image
 
             if (!eventPublished)
             {
-                _logger.LogError("Failed to publish event for image: {image.RepositoryId}.", image.RepositoryId);
+                _logger.LogError("Failed to publish DEL event for image: {image.RepositoryId}.", image.RepositoryId);
             }
 
             return eventPublished;
@@ -161,9 +160,7 @@ namespace Clutch.API.Services.Image
                     Tag = request.Tag,
                     BuildDate = DateTime.UtcNow,
                     RegistryType = request.RegistryType,
-                    // Status is important; may need to revisit
-                    // depending on CI/CD impl...
-                    Status = StatusEnum.Available,
+                    Status = StatusEnum.Unavailable,
                     Version = version
                 };
             }

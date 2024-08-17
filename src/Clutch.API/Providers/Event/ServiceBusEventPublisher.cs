@@ -24,7 +24,7 @@ namespace Clutch.API.Providers.Event
         {
             ArgumentNullException.ThrowIfNull(client);
             ArgumentNullException.ThrowIfNullOrEmpty(queueName);
-            ArgumentNullException.ThrowIfNullOrEmpty(dlqName);
+            //ArgumentNullException.ThrowIfNullOrEmpty(dlqName);
             ArgumentNullException.ThrowIfNull(settings);
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -33,7 +33,7 @@ namespace Clutch.API.Providers.Event
             _dlqName = dlqName;
             _settings = settings.Value;
             _logger = logger;
-            _messageTimeToLive = TimeSpan.FromHours(24);
+            _messageTimeToLive = TimeSpan.FromHours(_settings.TimeToLive);
             _policy = CreatePolicy();
         }
 
@@ -44,16 +44,15 @@ namespace Clutch.API.Providers.Event
             var message = new ServiceBusMessage(
                 JsonSerializer.Serialize(new
                 {
-                    EventName = eventName,
                     EventData = image
                 }))
             {
                 TimeToLive = _messageTimeToLive
             };
 
-            if (!string.IsNullOrEmpty(image.Repository))
+            if (!string.IsNullOrEmpty(eventName))
             {
-                message.ApplicationProperties.Add("Repository", image.Repository);
+                message.ApplicationProperties.Add("EventName", eventName);
             }
 
             // Execute the API operation
@@ -217,7 +216,7 @@ namespace Clutch.API.Providers.Event
                     onHalfOpen: () => _logger.LogInformation("Circuit Half-Open"));
 
             // Fallback Policy
-            var fallbackPolicy = Policy
+            var fallbackPolicy = Policy<HttpResponseMessage>
                 .Handle<BrokenCircuitException>()
                 .FallbackAsync(
                     fallbackAction: _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)),

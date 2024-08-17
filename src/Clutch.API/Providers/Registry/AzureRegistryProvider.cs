@@ -10,8 +10,8 @@ namespace Clutch.API.Providers.Registry
         private IRestClientFactory _restClientFactory = restClientFactory;
         // Azure auth
         private readonly string azureClientId = configuration["Azure:AzureClientId"] ?? string.Empty;
-        private readonly string azureClientSecret = configuration["Secrets:AzureClientSecret"] ?? string.Empty;
         private readonly string azureService = configuration["Azure:AzureService"] ?? string.Empty;
+        private readonly string azureClientSecret = configuration.GetConnectionString("AzureClientSecret") ?? string.Empty;
 
         public override async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {
@@ -19,6 +19,7 @@ namespace Clutch.API.Providers.Registry
             dynamic azureToken = await GetToken(parts);
 
             // Construct the API request
+            // We should make this an appsetting
             _restClientFactory.InstantiateClient("https://containerimagesregistry.azurecr.io");
             RestRequest restRequest = new($"/v2/{parts[0]}/{parts[1]}/manifests/{request.Tag}");
             restRequest.Method = Method.Get;

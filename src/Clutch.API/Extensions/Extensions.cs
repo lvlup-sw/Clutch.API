@@ -20,21 +20,35 @@ namespace Clutch.API.Extensions
             // Load in Secrets from Azure
             builder.Configuration.AddAzureKeyVault(
                 new SecretClient(
-                    new Uri($"https://{builder.Configuration["AzureKeyVault"]}.vault.azure.net/"),
+                    new Uri($"https://{builder.Configuration["Azure:AzureKeyVault"]}.vault.azure.net/"),
                     new DefaultAzureCredential()
                 ),
                 new KeyVaultSecretManager()
             );
 
+            // Bind Secrets to appsettings depending on Env
+            if (builder.Environment.IsProduction())
+            {
+                builder.BindProductionSecrets();
+            }
+            else
+            {
+                builder.BindDevelopmentSecrets();
+            }
+
+            /* Uncomment to load in App Configuration
+             * Note we do not load in secrets here and
+             * it is solely used for feature management
+            // App Configuration (feature flags)
             builder.Configuration.AddAzureAppConfiguration(options =>
             {
                 options.Connect(builder.Configuration.GetConnectionString("AzureAppConfiguration"))
                     .ConfigureKeyVault(kv =>
                     {
                         kv.SetCredential(new DefaultAzureCredential());
-
                     });
             });
+            */
 
             // Options
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -49,7 +63,7 @@ namespace Clutch.API.Extensions
             builder.AddRedisClient("Redis");
 
             // Database Context
-            builder.AddNpgsqlDbContext<ContainerImageContext>("containerImageDb", options =>
+            builder.AddNpgsqlDbContext<ContainerImageContext>("ContainerImageDb", options =>
             {   // We explicitly handle retries ourselves
                 options.DisableRetry = true;
             });
@@ -91,8 +105,8 @@ namespace Clutch.API.Extensions
             builder.Services.AddSingleton<IEventPublisher, ServiceBusEventPublisher>(serviceProvider =>
                 new ServiceBusEventPublisher(
                     serviceProvider.GetRequiredService<ServiceBusClient>(),
-                    builder.Configuration["AzureQueueName"] ?? string.Empty,
-                    builder.Configuration["AzureDLQueueName"] ?? string.Empty,
+                    builder.Configuration["Azure:AzureQueueName"] ?? string.Empty,
+                    builder.Configuration["Azure:AzureDLQueueName"] ?? string.Empty,
                     serviceProvider.GetRequiredService<IOptions<EventPublisherSettings>>(),
                     serviceProvider.GetRequiredService<ILogger<ServiceBusEventPublisher>>()
                 ));
@@ -132,22 +146,39 @@ namespace Clutch.API.Extensions
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
+            // Healthcheck configuration
+            builder.Services.AddRequestTimeouts();
+            builder.Services.AddOutputCache();
+
             // Memory Cache
             builder.Services.AddMemoryCache();
         }
 
-        public static void AddApplicationLogging(this WebApplicationBuilder builder)
+        // Unfortunately we need these extension methods
+        // to bind the values retrieved from Azure KeyVault
+        // to the ConnectionStrings section of our appsettings
+        private static void BindProductionSecrets(this IHostApplicationBuilder builder)
         {
-            // Refactor to configure OpenTelemetry with Aspire
-            // since OpenTelemetry is natively supported, we just
-            // need to consider the structure of the logs before
-            // exporting them to Azure Monitor Application Insights
-            // We should also be adding filters based on Env; ie
-            // debug level for Dev, and information level for prod/qa
-            builder.Logging.AddConsole();
-            builder.Logging.AddFilter("Microsoft", LogLevel.Information);
-            builder.Logging.AddFilter("System", LogLevel.Information);
-            builder.Logging.AddFilter("Clutch", LogLevel.Information);
+            var connectionStrings = builder.Configuration.GetSection("ConnectionStrings");
+            foreach (var secret in connectionStrings.GetChildren())
+            {
+                if (secret.Key is not "AzureKeyVault")
+                    secret.Value = builder.Configuration[secret.Key];
+            }
+        }
+
+        private static void BindDevelopmentSecrets(this IHostApplicationBuilder builder)
+        {
+            var connectionStrings = builder.Configuration.GetSection("ConnectionStrings");
+            foreach (var secret in connectionStrings.GetChildren())
+            {
+                if (secret.Key is not "AzureKeyVault"
+                    && secret.Key is not "ContainerImageDb"
+                    && secret.Key is not "Redis")
+                {
+                    secret.Value = builder.Configuration[secret.Key];
+                }
+            }
         }
     }
 }

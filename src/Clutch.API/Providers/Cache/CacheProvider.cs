@@ -135,11 +135,11 @@ namespace CacheProvider.Providers
                 bool providerResult = await _realProvider.SetAsync(data);
                 if (providerResult)
                 {
-                    _logger.LogDebug("Entry with key {key} removed from data source.", key);
+                    _logger.LogDebug("Entry with key {key} added to data source.", key);
                 }
                 else
                 {
-                    _logger.LogError("Failed to remove entry with key {key} from data source.", key);
+                    _logger.LogError("Failed to add entry with key {key} from data source.", key);
                 }
 
                 return cacheResult && providerResult;
