@@ -146,22 +146,12 @@ namespace Clutch.API.Extensions
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
+            // Healthcheck configuration
+            builder.Services.AddRequestTimeouts();
+            builder.Services.AddOutputCache();
+
             // Memory Cache
             builder.Services.AddMemoryCache();
-        }
-
-        public static void AddApplicationLogging(this WebApplicationBuilder builder)
-        {
-            // Refactor to configure OpenTelemetry with Aspire
-            // since OpenTelemetry is natively supported, we just
-            // need to consider the structure of the logs before
-            // exporting them to Azure Monitor Application Insights
-            // We should also be adding filters based on Env; ie
-            // debug level for Dev, and information level for prod/qa
-            builder.Logging.AddConsole();
-            builder.Logging.AddFilter("Microsoft", LogLevel.Information);
-            builder.Logging.AddFilter("System", LogLevel.Information);
-            builder.Logging.AddFilter("Clutch", LogLevel.Information);
         }
 
         // Unfortunately we need these extension methods

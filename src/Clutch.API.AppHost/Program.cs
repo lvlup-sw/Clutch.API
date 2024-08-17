@@ -23,14 +23,28 @@ else
     builder.BindDevelopmentSecrets();
 }
 
-// Add our redis cache and postgres DB to management
+// Add our redis cache to management
+// Prod connects remotely to a resource
+// while Dev creates a local container
 var redis = (builder.Environment.IsProduction()) switch
 {
     true  => builder.AddConnectionString("Redis"),
     false => builder.AddRedis("Redis")
 };
 
-// We change the configuration depending on env
+// Add our app insights to management
+// Prod connects remotely to a resource
+// while Dev creates a local container
+var insights = (builder.Environment.IsProduction()) switch
+{
+    true  => builder.AddConnectionString("AzureAppInsights", 
+                     "APPLICATIONINSIGHTS_CONNECTION_STRING"),
+    false => builder.AddAzureApplicationInsights("AzureAppInsights")
+};
+
+// Add our postgresql database to management
+// Prod connects remotely to a resource
+// while Dev creates a local container
 // It is also possible to specify the exact image to use:
 // .WithImage
 // .WithImageTag
@@ -50,8 +64,10 @@ var containerImageDb = (postgres is IResourceBuilder<PostgresServerResource> ser
     : postgres;
 
 // Add projects to Aspire management
+// with references to the resources
 builder.AddProject<Projects.Clutch_API>("clutch-api")
     .WithReference(redis)
+    .WithReference(insights)
     .WithReference(containerImageDb);
 
 builder.Build().Run();

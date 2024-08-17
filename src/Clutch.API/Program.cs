@@ -6,9 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Aspire service defaults
 builder.AddServiceDefaults();
 
-// Extension methods to DI services + logging
+// Extension method to DI services
 builder.AddApplicationServices();
-builder.AddApplicationLogging();
 
 // Build the application
 var app = builder.Build();
@@ -44,6 +43,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
+app.UseRequestTimeouts();
+app.UseOutputCache();
 
 // Setup ContainerImageController route
 app.MapControllerRoute(
