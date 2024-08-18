@@ -19,9 +19,6 @@ async function main() {
       const operation = core.getInput('operation', { required: true });
       const updateValue = core.getInput('update_value', { required: true });
 
-      // Set as secret to mask in logs
-      core.setSecret(connectionString);
-
       // Create a PostgreSQL client
       const client = new Client({
         user: db_user,
