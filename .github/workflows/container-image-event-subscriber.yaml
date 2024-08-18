@@ -137,20 +137,9 @@ jobs:
           fi
 
       - name: Send POST Request to Update Database
-        uses: actions/http-client@v3
+        uses: fjogeleit/http-request-action@v1
         with:
           url: ${{ secrets.UPDATE_DATABASE_WEBHOOK }}
           method: POST
-          headers:
-            Content-Type: application/json
-          body: |
-            {
-              "Operation": ${{ steps.get_operation.outputs.operation }},
-              "RepositoryId": ${{ steps.extract_event.outputs.repositoryId }},
-              "Repository": ${{ steps.extract_event.outputs.repository }},
-              "Tag": ${{ steps.extract_event.outputs.Tag }}
-              "BuildDate": ${{ steps.extract_event.outputs.BuildDate }},
-              "RegistryType": ${{ steps.extract_event.outputs.RegistryType }}
-              "Status": 0
-              "Version": ${{ steps.extract_event.outputs.Version }}
-            }
+          customHeaders: '{"Content-Type": "application/json"}'
+          data: '{ "Operation": ${{ steps.get_operation.outputs.operation }}, "RepositoryId": ${{ steps.extract_event.outputs.repositoryId }}, "Repository": ${{ steps.extract_event.outputs.repository }}, "Tag": ${{ steps.extract_event.outputs.Tag }}, "BuildDate": ${{ steps.extract_event.outputs.BuildDate }}, "RegistryType": ${{ steps.extract_event.outputs.RegistryType }}, "Status": 0, "Version": ${{ steps.extract_event.outputs.Version }} }'
