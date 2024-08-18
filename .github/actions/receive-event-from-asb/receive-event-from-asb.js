@@ -25,8 +25,8 @@ async function main() {
         if (messages.length > 0) {
             const message = messages[0];
 
-            core.info(message.properties);
-            core.info(message.body);
+            core.info(JSON.stringify(message.properties));
+            core.info(JSON.stringify(message.body));
 
             // Extract event name and data
             const eventName = message.properties.eventName;
