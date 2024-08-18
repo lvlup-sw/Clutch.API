@@ -3,7 +3,7 @@
 // since the CLI bizarrely doesn't
 // support event reception.
 
-const client = require('@azure/service-bus');
+const { ServiceBusClient } = require('@azure/service-bus');
 const core = require('@actions/core');
 
 async function main() {
@@ -16,7 +16,7 @@ async function main() {
         core.setSecret(connectionString);
 
         // Create a Service Bus client
-        const sbClient = new client.ServiceBusClient(connectionString);
+        const sbClient = new ServiceBusClient(connectionString);
         const receiver = sbClient.createReceiver(queueName);
 
         // Receive a message (wait for max 20s)
@@ -25,12 +25,9 @@ async function main() {
         if (messages.length > 0) {
             const message = messages[0];
 
-            // Parse the message body
-            const messageBody = JSON.parse(message.body);
-
             // Extract event name and data
-            const eventName = messageBody.eventName;
-            const eventData = messageBody.eventData;
+            const eventName = message.body.eventName;
+            const eventData = message.body.eventData;
 
             // Set outputs for the workflow
             core.setOutput('eventName', eventName);
