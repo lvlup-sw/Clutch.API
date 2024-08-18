@@ -15,6 +15,9 @@ async function main() {
       const operation = core.getInput('operation', { required: true });
       const updateValue = core.getInput('update_value', { required: true });
       
+      // Set as secret to mask in logs
+      core.setSecret(connectionString);
+
       // Create a PostgreSQL client
       const client = new Client({
         connectionString: connectionString
@@ -40,8 +43,10 @@ async function main() {
 
       // Execute operation
       if (operation.toLowerCase() === 'update') {
+        core.info(`Executing Update query: ${updateQuery}`)
         result = await client.query(updateQuery, values);
       } else if (operation.toLowerCase() === 'delete') {
+        core.info(`Executing Delete query: ${deleteQuery}`)
         result = await client.query(deleteQuery, values);
       }
 

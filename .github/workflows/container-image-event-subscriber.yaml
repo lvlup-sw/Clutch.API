@@ -56,7 +56,6 @@ jobs:
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
-          set -x
           event_name="${{ steps.extract_event.outputs.eventName }}"
 
           if [ "$event_name" == "BuildRequested" ]; then
@@ -92,7 +91,6 @@ jobs:
       - name: Build and Push Image
         if: ${{ steps.get_operation.outputs.operation == 'update' }}
         run: |
-          echo "${{ steps.get_operation.outputs.operation }}" | hexdump -C
           docker pull ${{ steps.extract_event.outputs.repositoryName }}
           docker tag ${{ steps.extract_event.outputs.repositoryName }} ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ steps.extract_event.outputs.repositoryName }}
 
