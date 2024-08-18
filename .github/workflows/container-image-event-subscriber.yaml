@@ -59,17 +59,14 @@ jobs:
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
-          echo "${{ steps.extract_event.outputs.eventName }}"
-          echo "${{ steps.extract_event.outputs.repositoryName }}"
-          echo "${{ steps.extract_event.outputs.registryType }}"
-          actualEventName=$(echo '${{ steps.extract_event.outputs.eventName }}' | jq -r '.EventName')
+          eventName=$(echo '${{ steps.extract_event.outputs.eventName }}')
           
-          if [ "$actualEventName" == "BuildRequested" ]; then
+          if [ "$eventName" == "BuildRequested" ]; then
             echo "operation=update" >> $GITHUB_OUTPUT
-          elif [ "$actualEventName" == "DeleteRequested" ]; then
+          elif [ "$eventName" == "DeleteRequested" ]; then
             echo "operation=delete" >> $GITHUB_OUTPUT
           else
-            echo "::error::Invalid eventName: $actualEventName"
+            echo "::error::Invalid eventName: $eventName"
             exit 1
           fi
 
