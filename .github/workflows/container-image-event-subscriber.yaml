@@ -14,6 +14,9 @@ name: Image Event Listener
 on: # Trigger via Logic App
   repository_dispatch:
 
+env:
+  REGISTRY_NAME: ContainerImageRegistryDev  
+
 permissions:
   id-token: write
   contents: read
@@ -75,7 +78,7 @@ jobs:
         id: check_image
         run: |
           exists=$(az acr repository show-manifests \
-            --name <your-acr-name> \
+            --name ${{ env.REGISTRY_NAME }}
             --repository ${{ steps.extract_event.outputs.repositoryName }} \
             --query "[?tags[0]=='${{ steps.extract_event.outputs.tag }}'].digest" \
             --output tsv)
