@@ -3,8 +3,8 @@
 // request. It updates the Status and
 // BuildDate values in our db table.
 
-import { Client } from 'pg';
-import { getInput, setOutput, setFailed } from '@actions/core'; 
+const { Client } = require('pg');
+const { getInput, setOutput, setFailed } = require('@actions/core'); 
 
 async function run() {
   try {
@@ -51,15 +51,15 @@ async function run() {
       throw new Error(`No rows were edited in table ${tableToUpdate}. Check if the index exists.`);
     }
 
-    core.info(`Successfull ${operation} operation for row ${indexToUpdate} in table ${tableToUpdate}`);
+    info(`Successfull ${operation} operation for row ${indexToUpdate} in table ${tableToUpdate}`);
     setOutput('result', true);
 
     // Release the connection
     await client.end();
 
   } catch (error) {
-    core.error(error.message);
-    setFailed('Exiting with error: ${error}');
+    error(error.message);
+    setFailed(`Exiting with error: ${error}`);
     setOutput('result', false);
   }
 }

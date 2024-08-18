@@ -31,16 +31,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Install jq
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
+          npm install @azure/service-bus
+          npm install @actions/core
 
       # Custom action which emits
       # parsed event as an output
       - name: Receive Message from Azure Service Bus
         id: receive_message
-        uses: ./actions/receive-event-from-asb/
+        uses: ./.github/actions/receive-event-from-asb
         with:
           connectionString: ${{ secrets.AZURE_SERVICE_BUS_CONNECTION_STRING }}
           queueName: ${{ vars.AZURE_SERVICE_BUS_QUEUE_NAME }}
@@ -111,7 +113,7 @@ jobs:
 
       - name: Update Database
         id: update_db
-        uses: ./actions/update-database/
+        uses: ./.github/actions/update-database
         with:
           postgresql_connection_string: ${{ secrets.POSTGRESQL_CONNECTION_STRING }}
           table_to_update: 'container_images'
