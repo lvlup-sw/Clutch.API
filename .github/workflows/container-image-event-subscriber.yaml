@@ -61,7 +61,6 @@ jobs:
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
-          # Extract just the EventName value using jq
           extractedEventName=$(echo '${{ steps.extract_event.outputs.eventName }}' | jq -r '.EventName')
 
           if [ "$extractedEventName" == "BuildRequested" ]; then
