@@ -55,11 +55,11 @@ jobs:
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
-          eventName=$(echo "${{ steps.extract_event.outputs.eventName }}")
-          
-          if [ "$eventName" == "BuildRequested" ]; then
+          if [ ${{ steps.extract_event.outputs.eventName }} == "BuildRequested" ]; then
+            echo "Build Requested"
             echo "operation=update" >> $GITHUB_OUTPUT
-          elif [ "$eventName" == "DeleteRequested" ]; then
+          elif [ ${{ steps.extract_event.outputs.eventName }} == "DeleteRequested" ]; then
+            echo "Delete Requested"
             echo "operation=delete" >> $GITHUB_OUTPUT
           else
             echo "::error::Invalid eventName: $eventName"
