@@ -141,4 +141,4 @@ jobs:
         with:
           url: '${{ secrets.UPDATE_DATABASE_WEBHOOK }}'
           method: 'POST'
-          data: '{ "Operation": "${{ steps.get_operation.outputs.operation }}", "RepositoryId": "${{ steps.extract_event.outputs.repositoryId }}", "Repository": "${{ steps.extract_event.outputs.repository }}", "Tag": "${{ steps.extract_event.outputs.Tag }}", "BuildDate": ${{ steps.extract_event.outputs.BuildDate }}, "RegistryType": ${{ steps.extract_event.outputs.RegistryType }}, "Status": 0, "Version": "${{ steps.extract_event.outputs.Version }}" }'
+          data: '{ "Operation": "${{ steps.get_operation.outputs.operation }}", "RepositoryId": "${{ steps.extract_event.outputs.repositoryId }}", "Repository": "${{ steps.extract_event.outputs.repository }}", "Tag": "${{ steps.extract_event.outputs.Tag }}", "BuildDate": "${{ steps.extract_event.outputs.BuildDate }}", "RegistryType": "${{ steps.extract_event.outputs.RegistryType }}", "Status": "0", "Version": "${{ steps.extract_event.outputs.Version }}" }'
