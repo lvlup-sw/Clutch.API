@@ -14,8 +14,6 @@ async function main() {
       const indexToUpdate = core.getInput('index_to_update', { required: true });
       const operation = core.getInput('operation', { required: true });
       const updateValue = core.getInput('update_value', { required: true });
-      
-      core.info(connectionString);
 
       // Set as secret to mask in logs
       core.setSecret(connectionString);
