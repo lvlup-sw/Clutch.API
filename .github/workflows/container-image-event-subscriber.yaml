@@ -53,6 +53,18 @@ jobs:
           echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.tag')" >> $GITHUB_OUTPUT
           echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repository')" >> $GITHUB_OUTPUT
 
+      - name: Set Requested Operation Based on Event
+        id: get_operation
+        run: |
+          if [ "${{ steps.extract_event.outputs.eventName }}" == "BuildRequested" ]; then
+            echo "operation=update" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.extract_event.outputs.eventName }}" == "DeleteRequested" ]; then
+            echo "operation=delete" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Invalid eventName: ${{ steps.extract_event.outputs.eventName }}"
+            exit 1
+          fi
+
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -83,9 +95,6 @@ jobs:
           username: ${{ secrets.AZURE_CLIENT_ID }}
           password: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-      # SET OR DEL FLOW
-      # Need DEL conditional
-
       # Validate this
       - name: Build and Push Image (if BuildRequested and not exists)
         if: steps.extract_event.outputs.eventName == 'BuildRequested' && steps.check_image.outputs.imageExists == 'false'
@@ -105,11 +114,8 @@ jobs:
         id: update_db
         uses: ./actions/update-database
         with:
+          postgresql_connection_string: ${{ secrets.POSTGRESQL_CONNECTION_STRING }}
           table_to_update: 'container_images'
           index_to_update: ${{ steps.extract_event.outputs.repositoryName }}
-          new_value: '1'
-          postgresql_connection_string: ${{ secrets.POSTGRESQL_CONNECTION_STRING }}
-
-      - name: Check Result
-        if: steps.update_db.outputs.result == 'false'
-        run: exit 1 # Fail the workflow     
+          operation: ${{ steps.get_operation.outputs.operation }}
+          update_value: '0' 

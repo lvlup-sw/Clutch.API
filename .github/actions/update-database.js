@@ -4,20 +4,17 @@
 // BuildDate values in our db table.
 
 import { Client } from 'pg';
-import { getInput, setOutput, setFailed } from '@actions/core';
-
-// Define the specific table to update (replace with your actual table name)
-const TABLE_TO_UPDATE = getInput('table_to_update', { required: true }); 
+import { getInput, setOutput, setFailed } from '@actions/core'; 
 
 async function run() {
   try {
     // Get required inputs from the Action's YAML file
-    const indexToUpdate = getInput('index_to_update', { required: true });
-    const newValue = getInput('new_value', { required: true });
-
-    // Get PostgreSQL connection details securely from GitHub secrets
     const connectionString = getInput('postgresql_connection_string', { required: true });
-
+    const tableToUpdate = getInput('table_to_update', { required: true });
+    const indexToUpdate = getInput('index_to_update', { required: true });
+    const operation = getInput('operation', { required: true });
+    const updateValue = getInput('update_value', { required: true });
+    
     // Create a PostgreSQL client
     const client = new Client({
       connectionString: connectionString,
@@ -27,22 +24,34 @@ async function run() {
     // Connect to the database
     await client.connect();
 
-    // Construct and execute the SQL UPDATE query
+    // Construct and execute the SQL queries
     const updateQuery = `
-        UPDATE ${TABLE_TO_UPDATE}
+        UPDATE ${tableToUpdate}
         SET Status = $1
         WHERE RepositoryId = $2; 
     `;
 
-    const values = [newValue, indexToUpdate];
-    const result = await client.query(updateQuery, values);
+    const deleteQuery = `
+        DELETE FROM ${tableToUpdate}
+        WHERE RepositoryId = $2; 
+    `;
 
-    // Check if any rows were affected
-    if (result.rowCount === 0) {
-      throw new Error(`No rows were updated in table ${TABLE_TO_UPDATE}. Check if the index exists.`);
+    const values = [updateValue, indexToUpdate];
+    let result = null;
+
+    // Execute operation
+    if (operation.toLowerCase() === 'update') {
+      result = await client.query(updateQuery, values);
+    } else if (operation.toLowerCase() === 'delete') {
+      result = await client.query(deleteQuery, values);
     }
 
-    core.info(`Successfully updated Status to ${newValue} for row ${indexToUpdate} in table ${TABLE_TO_UPDATE}`);
+    // Check if any rows were affected
+    if (result == null || result.rowCount === 0) {
+      throw new Error(`No rows were edited in table ${tableToUpdate}. Check if the index exists.`);
+    }
+
+    core.info(`Successfull ${operation} operation for row ${indexToUpdate} in table ${tableToUpdate}`);
     setOutput('result', true);
 
     // Release the connection
@@ -50,6 +59,7 @@ async function run() {
 
   } catch (error) {
     core.error(error.message);
+    setFailed('Exiting with error: ${error}');
     setOutput('result', false);
   }
 }
