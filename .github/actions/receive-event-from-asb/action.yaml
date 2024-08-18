@@ -1,0 +1,17 @@
+name: 'Receive Azure Service Bus Event'
+description: 'Receives an event from an Azure Service Bus queue'
+inputs:
+  connectionString:
+    description: 'The connection string for your Azure Service Bus namespace'
+    required: true
+  queueName:
+    description: 'The name of the queue to receive the event from'
+    required: true
+outputs:
+  eventName:
+    description: 'The name of the received event'
+  eventData:
+    description: 'The data associated with the received event (JSON stringified)'
+runs:
+  using: 'node20'
+  main: 'receive-event-from-asb.js'

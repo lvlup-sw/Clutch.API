@@ -1,0 +1,24 @@
+name: 'Azure PostgreSQL Update or Delete'
+description: 'Updates or deletes a row in an Azure PostgreSQL database based on the provided operation'
+inputs:
+  postgresql_connection_string:
+    description: 'The connection string for your Azure PostgreSQL database'
+    required: true
+  table_to_update:
+    description: 'The name of the table to update or delete from'
+    required: true
+  index_to_update:
+    description: 'The value of the RepositoryId column to identify the row to update or delete'
+    required: true
+  operation:
+    description: 'The operation to perform: "update" or "delete"'
+    required: true
+  update_value:
+    description: 'The new value for the "Status" column (only required for "update" operation)'
+    required: false
+outputs:
+  result:
+    description: 'Indicates whether the operation was successful (true) or not (false)'
+runs:
+  using: 'node20'
+  main: 'update-database.js'
