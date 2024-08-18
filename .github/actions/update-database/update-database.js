@@ -60,6 +60,7 @@ async function run() {
       core.error(error.message);
       core.setFailed(`Exiting with error: ${error}`);
       core.setOutput('result', false);
+      process.exit(1);
   }
 }
 

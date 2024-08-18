@@ -45,6 +45,7 @@ async function main() {
     } catch (error) {
         core.error(error.message);
         core.setFailed(`Exiting with error: ${error}`);
+        process.exit(1);
     }
 }
 
