@@ -79,7 +79,7 @@ jobs:
         run: |
           exists=$(az acr repository show-manifests \
             --name ${{ env.REGISTRY_NAME }}
-            --repository ${{ steps.extract_event.outputs.repositoryName }} \
+            --repository ${{ steps.extract_event.outputs.baseImageName }} \
             --query "[?tags[0]=='${{ steps.extract_event.outputs.tag }}'].digest" \
             --output tsv)
 
