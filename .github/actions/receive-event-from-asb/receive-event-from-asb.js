@@ -3,21 +3,10 @@
 // since the CLI bizarrely doesn't
 // support event reception.
 
-const { execSync } = require('child_process');
 const { ServiceBusClient } = require('@azure/service-bus');
 const { getInput, setSecret, setOutput, info, setFailed } = require('@actions/core');
 
 async function main() {
-    // Resolve dependencies
-    try {
-        require.resolve('@azure/service-bus'); // Check if the module is already available
-    } catch (error) {
-        // If not, install it
-        console.log('Installing dependencies...');
-        execSync('npm install @azure/service-bus', { cwd: __dirname, stdio: 'inherit' }); 
-        console.log('Dependencies installed successfully!');
-    }
-    
     try {
         // Get inputs from the workflow
         const connectionString = getInput('connectionString');
