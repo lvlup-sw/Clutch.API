@@ -66,6 +66,8 @@ jobs:
             exit 1
           fi
 
+          echo "Operation set to: $operation"
+
       #- name: Check if Image Exists in ACR
       #  id: check_image
       #  run: |
@@ -113,14 +115,14 @@ jobs:
         run:  |
           digest=$(az acr repository show-manifests \
             --name ${{ env.AZURE_CONTAINER_REGISTRY_NAME }} \ 
-            --repository ${{ steps.extract_event.outputs.repositoryName }} \
+            --repository ${{ steps.extract_event.outputs.baseImageName }} \
             --query "[?tags[0]=='${{ steps.extract_event.outputs.tag }}'].digest" \
             --output tsv)
 
           if [ -n "$digest" ]; then 
             az acr repository delete-manifest \
               --name ${{ env.AZURE_CONTAINER_REGISTRY_NAME }} \
-              --repository ${{ steps.extract_event.outputs.repositoryName }} \
+              --repository ${{ steps.extract_event.outputs.baseImageName }} \
               --manifest $digest 
           else
             echo "::warning::Image with tag ${{ steps.extract_event.outputs.tag }} not found in ${{ steps.extract_event.outputs.repositoryName }}."
