@@ -26,8 +26,8 @@ async function main() {
             const message = messages[0];
 
             // Extract event name and data
-            const eventName = message.properties.EventName;
-            const eventData = message.body.EventData;
+            const eventName = message.properties.eventName;
+            const eventData = message.body.eventData;
 
             // Set outputs for the workflow
             core.info(`Setting eventName output to ${eventName}`)
