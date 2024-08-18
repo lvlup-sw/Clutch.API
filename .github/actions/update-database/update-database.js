@@ -59,7 +59,7 @@ async function run() {
 
   } catch (error) {
     core.error(error.message);
-    setFailed('Exiting with error: ${error}');
+    setFailed(`Exiting with error: ${error}`);
     setOutput('result', false);
   }
 }

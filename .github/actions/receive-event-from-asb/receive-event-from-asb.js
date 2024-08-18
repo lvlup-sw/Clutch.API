@@ -19,8 +19,8 @@ async function main() {
         const sbClient = new ServiceBusClient(connectionString);
         const receiver = sbClient.createReceiver(queueName);
 
-        // Receive a message (wait for max 5s)
-        const messages = await receiver.receiveMessages(1, { maxWaitTimeInMs: 5000 });
+        // Receive a message (wait for max 20s)
+        const messages = await receiver.receiveMessages(1, { maxWaitTimeInMs: 20000 });
 
         if (messages.length > 0) {
             const message = messages[0];
@@ -46,7 +46,8 @@ async function main() {
         await receiver.close();
         await sbClient.close();
     } catch (error) {
-        setFailed(error.message);
+        core.error(error.message);
+        setFailed(`Exiting with error: ${error}`);
     }
 }
 
