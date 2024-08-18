@@ -33,7 +33,6 @@ jobs:
           sudo apt-get install -y jq
           npm install @azure/service-bus
           npm install @actions/core
-          npm install pg
 
       # Custom action which emits
       # parsed event as an output
@@ -136,6 +135,7 @@ jobs:
             echo "::warning::Image with tag ${{ steps.extract_event.outputs.tag }} not found in ${{ steps.extract_event.outputs.repositoryId }}."
           fi
 
+      # This triggers a Logic App connector
       - name: Send POST Request to Update Database
         uses: fjogeleit/http-request-action@v1
         with:
