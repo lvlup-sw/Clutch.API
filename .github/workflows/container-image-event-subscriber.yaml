@@ -114,14 +114,14 @@ jobs:
         if: contains(${{ steps.get_operation.outputs.operation }}, 'delete')
         run:  |
           digest=$(az acr repository show-manifests \
-            --name ${{ env.REGISTRY_NAME: }} \ 
+            --name ${{ env.REGISTRY_NAME }} \ 
             --repository ${{ steps.extract_event.outputs.baseImageName }} \
             --query "[?tags[0]=='${{ steps.extract_event.outputs.tag }}'].digest" \
             --output tsv)
 
           if [ -n "$digest" ]; then 
             az acr repository delete-manifest \
-              --name ${{ env.REGISTRY_NAME: }} \
+              --name ${{ env.REGISTRY_NAME }} \
               --repository ${{ steps.extract_event.outputs.baseImageName }} \
               --manifest $digest 
           else
