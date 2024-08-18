@@ -4,21 +4,20 @@
 // BuildDate values in our db table.
 
 const { Client } = require('pg');
-const { getInput, setOutput, setFailed } = require('@actions/core'); 
+const core = require('@actions/core'); 
 
 async function run() {
   try {
     // Get required inputs from the Action's YAML file
-    const connectionString = getInput('postgresql_connection_string', { required: true });
-    const tableToUpdate = getInput('table_to_update', { required: true });
-    const indexToUpdate = getInput('index_to_update', { required: true });
-    const operation = getInput('operation', { required: true });
-    const updateValue = getInput('update_value', { required: true });
+    const connectionString = core.getInput('postgresql_connection_string', { required: true });
+    const tableToUpdate = core.getInput('table_to_update', { required: true });
+    const indexToUpdate = core.getInput('index_to_update', { required: true });
+    const operation = core.getInput('operation', { required: true });
+    const updateValue = core.getInput('update_value', { required: true });
     
     // Create a PostgreSQL client
     const client = new Client({
-      connectionString: connectionString,
-      ssl: { rejectUnauthorized: false } 
+      connectionString: connectionString
     });
 
     // Connect to the database
@@ -51,16 +50,16 @@ async function run() {
       throw new Error(`No rows were edited in table ${tableToUpdate}. Check if the index exists.`);
     }
 
-    info(`Successfull ${operation} operation for row ${indexToUpdate} in table ${tableToUpdate}`);
-    setOutput('result', true);
+    core.info(`Successfull ${operation} operation for row ${indexToUpdate} in table ${tableToUpdate}`);
+    core.setOutput('result', true);
 
     // Release the connection
     await client.end();
 
   } catch (error) {
-      error(error.message);
-      setFailed(`Exiting with error: ${error}`);
-      setOutput('result', false);
+      core.error(error.message);
+      core.setFailed(`Exiting with error: ${error}`);
+      core.setOutput('result', false);
   }
 }
 

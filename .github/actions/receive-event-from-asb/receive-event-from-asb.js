@@ -3,20 +3,20 @@
 // since the CLI bizarrely doesn't
 // support event reception.
 
-const { ServiceBusClient } = require('@azure/service-bus');
-const { getInput, setSecret, setOutput, info, setFailed } = require('@actions/core');
+const client = require('@azure/service-bus');
+const core = require('@actions/core');
 
 async function main() {
     try {
         // Get inputs from the workflow
-        const connectionString = getInput('connectionString');
-        const queueName = getInput('queueName');
+        const connectionString = core.getInput('connectionString');
+        const queueName = core.getInput('queueName');
 
         // Set as secret to mask in logs
-        setSecret(connectionString);
+        core.setSecret(connectionString);
 
         // Create a Service Bus client
-        const sbClient = new ServiceBusClient(connectionString);
+        const sbClient = new client.ServiceBusClient(connectionString);
         const receiver = sbClient.createReceiver(queueName);
 
         // Receive a message (wait for max 20s)
@@ -33,21 +33,21 @@ async function main() {
             const eventData = messageBody.eventData;
 
             // Set outputs for the workflow
-            setOutput('eventName', eventName);
-            setOutput('eventData', JSON.stringify(eventData));
+            core.setOutput('eventName', eventName);
+            core.setOutput('eventData', JSON.stringify(eventData));
 
             // Complete the message
             await receiver.completeMessage(message);
         } else {
-            info('No messages received.');
+            core.info('No messages received.');
         }
 
         // Close the receiver and client
         await receiver.close();
         await sbClient.close();
     } catch (error) {
-        error(error.message);
-        setFailed(`Exiting with error: ${error}`);
+        core.error(error.message);
+        core.setFailed(`Exiting with error: ${error}`);
     }
 }
 
