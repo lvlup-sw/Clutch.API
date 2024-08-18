@@ -96,11 +96,10 @@ jobs:
           password: ${{ secrets.AZURE_CLIENT_SECRET }}
 
       # Validate this
-      - name: Build and Push Image (if BuildRequested and not exists)
+      - name: Build and Push Image
         if: steps.extract_event.outputs.eventName == 'BuildRequested' && steps.check_image.outputs.imageExists == 'false'
         run: |
-          docker pull ${{ steps.extract_event.outputs.baseImageName }} 
-
+          docker pull ${{ steps.extract_event.outputs.repositoryName }}
           docker build -t ${{ steps.extract_event.outputs.baseImageName }}:${{ steps.extract_event.outputs.tag }} \
             --build-arg BASE_IMAGE=${{ steps.extract_event.outputs.baseImageName }} . 
 
