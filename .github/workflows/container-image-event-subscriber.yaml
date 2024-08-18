@@ -55,6 +55,7 @@ jobs:
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
+          set -x
           event_name="${{ steps.extract_event.outputs.eventName }}"
 
           if [ "$event_name" == "BuildRequested" ]; then
@@ -88,14 +89,14 @@ jobs:
       #    fi
 
       - name: Build and Push Image
-        if: ${{ steps.get_operation.outputs.operation }} == 'update'
+        if: ${{ steps.get_operation.outputs.operation == 'update' }}
         run: |
           echo "${{ steps.get_operation.outputs.operation }}" | hexdump -C
           docker pull ${{ steps.extract_event.outputs.repositoryName }}
           docker tag ${{ steps.extract_event.outputs.repositoryName }} ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ steps.extract_event.outputs.repositoryName }}
 
       - name: Login to ACR
-        if: ${{ steps.get_operation.outputs.operation }} == 'update'
+        if: ${{ steps.get_operation.outputs.operation == 'update' }}
         uses: docker/login-action@v3
         with:
           registry: ${{ vars.REGISTRY_LOGIN_SERVER }}
@@ -103,12 +104,12 @@ jobs:
           password: ${{ secrets.AZURE_CLIENT_SECRET }}
 
       - name: Tag and Push to ACR
-        if: ${{ steps.get_operation.outputs.operation }} == 'update'
+        if: ${{ steps.get_operation.outputs.operation == 'update'}}
         run: |
           docker push ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ steps.extract_event.outputs.repositoryName }}            
 
       - name: Azure login
-        if: ${{ steps.get_operation.outputs.operation }} == 'delete'
+        if: ${{ steps.get_operation.outputs.operation == 'delete' }}
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -116,7 +117,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Delete Image
-        if: ${{ steps.get_operation.outputs.operation }} == 'delete'
+        if: ${{ steps.get_operation.outputs.operation == 'delete' }}
         run:  |
           digest=$(az acr repository show-manifests \
             --name ${{ env.REGISTRY_NAME }} \ 
