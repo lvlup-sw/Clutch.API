@@ -3,8 +3,8 @@
 // request. It updates the Status and
 // BuildDate values in our db table.
 
-import { Client } from 'pg';
-import { getInput, setOutput, setFailed } from '@actions/core'; 
+const { Client } = require('pg');
+const { getInput, setOutput, setFailed } = require('@actions/core'); 
 
 async function run() {
   try {

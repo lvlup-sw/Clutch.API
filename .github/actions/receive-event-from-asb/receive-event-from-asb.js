@@ -3,8 +3,8 @@
 // since the CLI bizarrely doesn't
 // support event reception.
 
-import { ServiceBusClient } from '@azure/service-bus';
-import { getInput, setSecret, setOutput, info, setFailed } from '@actions/core';
+const { ServiceBusClient } = require('@azure/service-bus');
+const { getInput, setSecret, setOutput, info, setFailed } = require('@actions/core');
 
 async function main() {
     try {
