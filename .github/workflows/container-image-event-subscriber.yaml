@@ -139,7 +139,7 @@ jobs:
       - name: Send POST Request to Update Database
         uses: actions/http-client@v3
         with:
-          url: ${{ secrets_UPDATE_DATABASE_WEBHOOK }}
+          url: ${{ secrets.UPDATE_DATABASE_WEBHOOK }}
           method: POST
           headers:
             Content-Type: application/json
