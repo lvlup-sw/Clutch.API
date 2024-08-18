@@ -50,9 +50,8 @@ jobs:
       - name: Extract Event Data
         id: extract_event
         run: |
-          echo "${{ steps.receive_message.outputs.eventName }}"
-          echo "${{ steps.receive_message.outputs.eventData }}"
-          echo "eventName=$(echo '${{ steps.receive_message.outputs.eventName }}' | jq -r 'keys[] | select(startswith("Diagnostic-Id")) | .[:-2] | join(",")') >> $GITHUB_OUTPUT
+          eventName=$(echo '${{ steps.receive_message.outputs.eventName }}' | cut -d',' -f1 | cut -d':' -f2 | tr -d ' ')
+          echo "eventName=$eventName" >> $GITHUB_OUTPUT        
           echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repositoryId')" >> $GITHUB_OUTPUT
           echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.tag')" >> $GITHUB_OUTPUT
           echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repository')" >> $GITHUB_OUTPUT
