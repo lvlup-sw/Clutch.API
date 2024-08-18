@@ -101,8 +101,15 @@ jobs:
           docker tag ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} <your-acr-name>.azurecr.io/${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }}
           docker push ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}/${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }}
 
-      - name: Trigger Azure Function to Update Database
-        run: |
-          curl -X POST "https://${{ vars.AZURE_DATABASE_FUNCTION_NAME }}.azurewebsites.net/api/${{ vars.AZURE_DATABASE_FUNCTION_NAME }}?code=${{ secrets.AZURE_FUNCTION_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{"${{ steps.extract_event.outputs.repositoryName }}":"0"}'
+      - name: Update Database
+        id: update_db
+        uses: ./actions/update-database
+        with:
+          table_to_update: 'container_images'
+          index_to_update: ${{ steps.extract_event.outputs.repositoryName }}
+          new_value: '1'
+          postgresql_connection_string: ${{ secrets.POSTGRESQL_CONNECTION_STRING }}
+
+      - name: Check Result
+        if: steps.update_db.outputs.result == 'false'
+        run: exit 1 # Fail the workflow     

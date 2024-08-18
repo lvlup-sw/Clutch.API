@@ -1,4 +1,4 @@
-name: Build and Deploy to Cloud Run
+name: z[Deprecated] Build and Deploy to Cloud Run
 
 on:
   workflow_dispatch:
