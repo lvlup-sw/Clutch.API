@@ -55,7 +55,7 @@ jobs:
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
-          eventName=$(echo '${{ steps.extract_event.outputs.eventName }}')
+          eventName=$(echo "${{ steps.extract_event.outputs.eventName }}")
           
           if [ "$eventName" == "BuildRequested" ]; then
             echo "operation=update" >> $GITHUB_OUTPUT
