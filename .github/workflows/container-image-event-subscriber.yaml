@@ -53,6 +53,18 @@ jobs:
           echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.tag')" >> $GITHUB_OUTPUT
           echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repository')" >> $GITHUB_OUTPUT
 
+      - name: Set Requested Operation Based on Event
+        id: get_operation
+        run: |
+          if [ "${{ steps.extract_event.outputs.eventName }}" == "BuildRequested" ]; then
+            echo "operation=update" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.extract_event.outputs.eventName }}" == "DeleteRequested" ]; then
+            echo "operation=delete" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Invalid eventName: ${{ steps.extract_event.outputs.eventName }}"
+            exit 1
+          fi
+
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -83,15 +95,11 @@ jobs:
           username: ${{ secrets.AZURE_CLIENT_ID }}
           password: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-      # SET OR DEL FLOW
-      # Need DEL conditional
-
       # Validate this
-      - name: Build and Push Image (if BuildRequested and not exists)
+      - name: Build and Push Image
         if: steps.extract_event.outputs.eventName == 'BuildRequested' && steps.check_image.outputs.imageExists == 'false'
         run: |
-          docker pull ${{ steps.extract_event.outputs.baseImageName }} 
-
+          docker pull ${{ steps.extract_event.outputs.repositoryName }}
           docker build -t ${{ steps.extract_event.outputs.baseImageName }}:${{ steps.extract_event.outputs.tag }} \
             --build-arg BASE_IMAGE=${{ steps.extract_event.outputs.baseImageName }} . 
 
@@ -101,8 +109,12 @@ jobs:
           docker tag ${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }} <your-acr-name>.azurecr.io/${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }}
           docker push ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}/${{ steps.extract_event.outputs.repositoryName }}:${{ steps.extract_event.outputs.tag }}
 
-      - name: Trigger Azure Function to Update Database
-        run: |
-          curl -X POST "https://${{ vars.AZURE_DATABASE_FUNCTION_NAME }}.azurewebsites.net/api/${{ vars.AZURE_DATABASE_FUNCTION_NAME }}?code=${{ secrets.AZURE_FUNCTION_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{"${{ steps.extract_event.outputs.repositoryName }}":"0"}'
+      - name: Update Database
+        id: update_db
+        uses: ./actions/update-database
+        with:
+          postgresql_connection_string: ${{ secrets.POSTGRESQL_CONNECTION_STRING }}
+          table_to_update: 'container_images'
+          index_to_update: ${{ steps.extract_event.outputs.repositoryName }}
+          operation: ${{ steps.get_operation.outputs.operation }}
+          update_value: '0' 
