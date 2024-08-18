@@ -50,12 +50,11 @@ jobs:
       - name: Extract Event Data
         id: extract_event
         run: |
-          eventName=$(echo '${{ steps.receive_message.outputs.eventName }}' | cut -d',' -f1 | cut -d':' -f2 | tr -d ' ')
-          echo "eventName=$eventName" >> $GITHUB_OUTPUT        
-          echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repositoryId')" >> $GITHUB_OUTPUT
-          echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.tag')" >> $GITHUB_OUTPUT
-          echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repository')" >> $GITHUB_OUTPUT
-          echo "registryType=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.registryType')" >> $GITHUB_OUTPUT
+          echo "eventName=$(echo '${{ steps.receive_message.outputs.eventName }}' | jq -r '.EventName')" >> $GITHUB_OUTPUT     
+          echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.RepositoryId')" >> $GITHUB_OUTPUT
+          echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r 'EventData.Tag')" >> $GITHUB_OUTPUT
+          echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.Repository')" >> $GITHUB_OUTPUT
+          echo "registryType=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.RegistryType')" >> $GITHUB_OUTPUT
 
       - name: Set Requested Operation Based on Event
         id: get_operation
