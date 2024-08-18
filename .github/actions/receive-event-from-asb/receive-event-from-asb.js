@@ -46,7 +46,7 @@ async function main() {
         await receiver.close();
         await sbClient.close();
     } catch (error) {
-        core.error(error.message);
+        error(error.message);
         setFailed(`Exiting with error: ${error}`);
     }
 }

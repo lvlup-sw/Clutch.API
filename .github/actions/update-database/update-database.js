@@ -58,9 +58,9 @@ async function run() {
     await client.end();
 
   } catch (error) {
-    error(error.message);
-    setFailed(`Exiting with error: ${error}`);
-    setOutput('result', false);
+      error(error.message);
+      setFailed(`Exiting with error: ${error}`);
+      setOutput('result', false);
   }
 }
 
