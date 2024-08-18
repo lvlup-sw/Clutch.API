@@ -48,10 +48,12 @@ jobs:
         id: extract_event
         run: |
           echo "eventName=$(echo '${{ steps.receive_message.outputs.eventName }}' | jq -r '.EventName')" >> $GITHUB_OUTPUT     
-          echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.RepositoryId')" >> $GITHUB_OUTPUT
+          echo "repositoryId=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.RepositoryId')" >> $GITHUB_OUTPUT
           echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.Tag')" >> $GITHUB_OUTPUT
           echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.Repository')" >> $GITHUB_OUTPUT
           echo "registryType=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.RegistryType')" >> $GITHUB_OUTPUT
+          echo "buildDate=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.BuildDate')" >> $GITHUB_OUTPUT
+          echo "version=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.Version')" >> $GITHUB_OUTPUT
 
       - name: Set Requested Operation Based on Event
         id: get_operation
@@ -91,8 +93,8 @@ jobs:
       - name: Build and Push Image
         if: ${{ steps.get_operation.outputs.operation == 'update' }}
         run: |
-          docker pull ${{ steps.extract_event.outputs.repositoryName }}
-          docker tag ${{ steps.extract_event.outputs.repositoryName }} ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ steps.extract_event.outputs.repositoryName }}
+          docker pull ${{ steps.extract_event.outputs.repositoryId }}
+          docker tag ${{ steps.extract_event.outputs.repositoryId }} ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ steps.extract_event.outputs.repositoryId }}
 
       - name: Login to ACR
         if: ${{ steps.get_operation.outputs.operation == 'update' }}
@@ -105,7 +107,7 @@ jobs:
       - name: Tag and Push to ACR
         if: ${{ steps.get_operation.outputs.operation == 'update'}}
         run: |
-          docker push ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ steps.extract_event.outputs.repositoryName }}            
+          docker push ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ steps.extract_event.outputs.repositoryId }}            
 
       - name: Azure login
         if: ${{ steps.get_operation.outputs.operation == 'delete' }}
@@ -115,6 +117,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # Validate this operation
       - name: Delete Image
         if: ${{ steps.get_operation.outputs.operation == 'delete' }}
         run:  |
@@ -130,19 +133,24 @@ jobs:
               --repository ${{ steps.extract_event.outputs.baseImageName }} \
               --manifest $digest 
           else
-            echo "::warning::Image with tag ${{ steps.extract_event.outputs.tag }} not found in ${{ steps.extract_event.outputs.repositoryName }}."
+            echo "::warning::Image with tag ${{ steps.extract_event.outputs.tag }} not found in ${{ steps.extract_event.outputs.repositoryId }}."
           fi
 
-      - name: Update Database
-        id: update_db
-        uses: ./.github/actions/update-database
+      - name: Send POST Request to Update Database
+        uses: actions/http-client@v3
         with:
-          db_user: ${{ secrets.DB_USER }}
-          db_password: ${{ secrets.DB_PASSWORD }}
-          db_host: ${{ vars.REGISTRY_LOGIN_SERVER }}
-          db_port: '5432'
-          db_name: 'postgres'
-          table_to_update: 'container_images'
-          index_to_update: ${{ steps.extract_event.outputs.repositoryName }}
-          operation: ${{ steps.get_operation.outputs.operation }}
-          update_value: '0' 
+          url: ${{ secrets_UPDATE_DATABASE_WEBHOOK }}
+          method: POST
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "Operation": ${{ steps.get_operation.outputs.operation }},
+              "RepositoryId": ${{ steps.extract_event.outputs.repositoryId }},
+              "Repository": ${{ steps.extract_event.outputs.repository }},
+              "Tag": ${{ steps.extract_event.outputs.Tag }}
+              "BuildDate": ${{ steps.extract_event.outputs.BuildDate }},
+              "RegistryType": ${{ steps.extract_event.outputs.RegistryType }}
+              "Status": 0
+              "Version": ${{ steps.extract_event.outputs.Version }}
+            }
