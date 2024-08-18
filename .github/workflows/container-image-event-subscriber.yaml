@@ -48,7 +48,7 @@ jobs:
         run: |
           echo "eventName=$(echo '${{ steps.receive_message.outputs.eventName }}' | jq -r '.EventName')" >> $GITHUB_OUTPUT     
           echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.RepositoryId')" >> $GITHUB_OUTPUT
-          echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r 'EventData.Tag')" >> $GITHUB_OUTPUT
+          echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.Tag')" >> $GITHUB_OUTPUT
           echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.Repository')" >> $GITHUB_OUTPUT
           echo "registryType=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.EventData.RegistryType')" >> $GITHUB_OUTPUT
 
