@@ -30,6 +30,8 @@ async function main() {
             const eventData = message.body.eventData;
 
             // Set outputs for the workflow
+            core.info(`Setting eventName output to ${eventName}`)
+            core.info(`Setting eventData output to ${eventData}`)
             core.setOutput('eventName', eventName);
             core.setOutput('eventData', JSON.stringify(eventData));
 

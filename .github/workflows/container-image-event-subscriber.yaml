@@ -50,6 +50,8 @@ jobs:
       - name: Extract Event Data
         id: extract_event
         run: |
+          echo "${{ steps.receive_message.outputs.eventName }}"
+          echo "${{ steps.receive_message.outputs.eventData }}"
           echo "eventName=${{ steps.receive_message.outputs.eventName }}" >> $GITHUB_OUTPUT
           echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repositoryId')" >> $GITHUB_OUTPUT
           echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.tag')" >> $GITHUB_OUTPUT
