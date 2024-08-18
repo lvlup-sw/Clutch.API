@@ -56,16 +56,20 @@ jobs:
           echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repositoryId')" >> $GITHUB_OUTPUT
           echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.tag')" >> $GITHUB_OUTPUT
           echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repository')" >> $GITHUB_OUTPUT
+          echo "registryType=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.registryType')" >> $GITHUB_OUTPUT
 
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
-          if [ "${{ steps.extract_event.outputs.eventName }}" == "BuildRequested" ]; then
+          # Extract just the EventName value using jq
+          extractedEventName=$(echo '${{ steps.extract_event.outputs.eventName }}' | jq -r '.EventName')
+
+          if [ "$extractedEventName" == "BuildRequested" ]; then
             echo "operation=update" >> $GITHUB_OUTPUT
-          elif [ "${{ steps.extract_event.outputs.eventName }}" == "DeleteRequested" ]; then
+          elif [ "$extractedEventName" == "DeleteRequested" ]; then
             echo "operation=delete" >> $GITHUB_OUTPUT
           else
-            echo "::error::Invalid eventName: ${{ steps.extract_event.outputs.eventName }}"
+            echo "::error::Invalid eventName: $extractedEventName"
             exit 1
           fi
 
