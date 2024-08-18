@@ -95,12 +95,31 @@ jobs:
           docker build -t ${{ steps.extract_event.outputs.repositoryName }} \
             --build-arg BASE_IMAGE=${{ steps.extract_event.outputs.baseImageName }} . 
 
+      - name: Azure login
+        if: ${{ steps.get_operation.outputs.operation }} == 'delete'      
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Delete Image
         if: ${{ steps.get_operation.outputs.operation }} == 'delete'
-        run: |
-          docker pull ${{ steps.extract_event.outputs.repositoryName }}
-          docker build -t ${{ steps.extract_event.outputs.repositoryName }} \
-            --build-arg BASE_IMAGE=${{ steps.extract_event.outputs.baseImageName }} . 
+        run:  |
+          digest=$(az acr repository show-manifests \
+            --name ${{ env.AZURE_CONTAINER_REGISTRY_NAME }} \ 
+            --repository ${{ steps.extract_event.outputs.repositoryName }} \
+            --query "[?tags[0]=='${{ steps.extract_event.outputs.tag }}'].digest" \
+            --output tsv)
+
+          if [ -n "$digest" ]; then 
+            az acr repository delete-manifest \
+              --name ${{ env.AZURE_CONTAINER_REGISTRY_NAME }} \
+              --repository ${{ steps.extract_event.outputs.repositoryName }} \
+              --manifest $digest 
+          else
+            echo "::warning::Image with tag ${{ steps.extract_event.outputs.tag }} not found in ${{ steps.extract_event.outputs.repositoryName }}."
+          fi
 
       # Validate this
       - name: Tag and Push to ACR
