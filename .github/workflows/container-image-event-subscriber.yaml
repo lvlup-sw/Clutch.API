@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "${{ steps.receive_message.outputs.eventName }}"
           echo "${{ steps.receive_message.outputs.eventData }}"
-          echo "eventName=${{ steps.receive_message.outputs.eventName }}" >> $GITHUB_OUTPUT
+          echo "eventName=$(echo '${{ steps.receive_message.outputs.eventName }}' | jq -r 'keys[] | select(startswith("Diagnostic-Id")) | .[:-2] | join(",")') >> $GITHUB_OUTPUT
           echo "repositoryName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repositoryId')" >> $GITHUB_OUTPUT
           echo "tag=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.tag')" >> $GITHUB_OUTPUT
           echo "baseImageName=$(echo '${{ steps.receive_message.outputs.eventData }}' | jq -r '.repository')" >> $GITHUB_OUTPUT
@@ -61,14 +61,14 @@ jobs:
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
-          extractedEventName=$(echo '${{ steps.extract_event.outputs.eventName }}' | jq -r '.EventName')
-
-          if [ "$extractedEventName" == "BuildRequested" ]; then
+          actualEventName=$(echo "$eventName" | cut -d':' -f1)
+          
+          if [ "$actualEventName" == "BuildRequested" ]; then
             echo "operation=update" >> $GITHUB_OUTPUT
-          elif [ "$extractedEventName" == "DeleteRequested" ]; then
+          elif [ "$actualEventName" == "DeleteRequested" ]; then
             echo "operation=delete" >> $GITHUB_OUTPUT
           else
-            echo "::error::Invalid eventName: $extractedEventName"
+            echo "::error::Invalid eventName: $actualEventName"
             exit 1
           fi
 

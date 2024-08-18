@@ -25,9 +25,6 @@ async function main() {
         if (messages.length > 0) {
             const message = messages[0];
 
-            core.info(JSON.stringify(message.applicationProperties));
-            core.info(JSON.stringify(message.body));
-
             // Extract event name and data
             const eventName = JSON.stringify(message.applicationProperties);
             const eventData = JSON.stringify(message.body);
@@ -41,7 +38,7 @@ async function main() {
             // Complete the message
             await receiver.completeMessage(message);
         } else {
-            core.info('No messages received.');
+            core.info('No events received.');
         }
 
         // Close the receiver and client
