@@ -11,19 +11,12 @@
 
 name: Image Event Listener
 
-# Trigger on Webhook
-on:
+on: # Trigger via Logic App
   repository_dispatch:
 
-# Only allow one instance running at a time
-#concurrency:
-#  group: 'service-bus-processing' 
-#  cancel-in-progress: false 
-# Since we are only ever updating 1-2 values
-# at a time, this may not be necessary. We
-# would need to consider how to handle concurrent
-# transactions (locks?) within the database.
-
+permissions:
+  id-token: write
+  contents: read
 jobs:
   handle_event:
     runs-on: ubuntu-latest
