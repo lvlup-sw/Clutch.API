@@ -55,18 +55,22 @@ jobs:
       - name: Set Requested Operation Based on Event
         id: get_operation
         run: |
-          if [ ${{ steps.extract_event.outputs.eventName }} == "BuildRequested" ]; then
+          event_name="${{ steps.extract_event.outputs.eventName }}"
+
+          if [ "$event_name" == "BuildRequested" ]; then
             echo "Build Requested"
-            echo "operation=update" >> $GITHUB_OUTPUT
-          elif [ ${{ steps.extract_event.outputs.eventName }} == "DeleteRequested" ]; then
+            operation="update"
+            echo "operation=$operation" >> $GITHUB_OUTPUT 
+          elif [ "$event_name" == "DeleteRequested" ]; then
             echo "Delete Requested"
-            echo "operation=delete" >> $GITHUB_OUTPUT
+            operation="delete"
+            echo "operation=$operation" >> $GITHUB_OUTPUT
           else
-            echo "::error::Invalid eventName: $eventName"
+            echo "::error::Invalid eventName: $event_name"  # Use the correct variable name
             exit 1
           fi
 
-          echo "Operation set to: $operation"
+          echo "Operation set to: $operation" 
 
       #- name: Check if Image Exists in ACR
       #  id: check_image
