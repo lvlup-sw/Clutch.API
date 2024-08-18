@@ -9,7 +9,11 @@ const core = require('@actions/core');
 async function main() {
   try {
       // Get required inputs from the Action's YAML file
-      const connectionString = core.getInput('postgresql_connection_string', { required: true });
+      const db_user = core.getInput('db_user', { required: true });
+      const db_password = core.getInput('db_password', { required: true });
+      const db_host = core.getInput('db_host', { required: true });
+      const db_port = core.getInput('db_port', { required: true });
+      const db_name = core.getInput('db_name', { required: true });
       const tableToUpdate = core.getInput('table_to_update', { required: true });
       const indexToUpdate = core.getInput('index_to_update', { required: true });
       const operation = core.getInput('operation', { required: true });
@@ -20,7 +24,11 @@ async function main() {
 
       // Create a PostgreSQL client
       const client = new Client({
-        connectionString: connectionString
+        user: db_user,
+        password: db_password,
+        host: db_host,
+        port: db_port,
+        database: db_name,
       });
 
       // Connect to the database

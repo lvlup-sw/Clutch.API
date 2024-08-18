@@ -137,7 +137,11 @@ jobs:
         id: update_db
         uses: ./.github/actions/update-database
         with:
-          postgresql_connection_string: ${{ secrets.POSTGRESQL_CONNECTION_STRING }}
+          db_user: ${{ secrets.DB_USER }}
+          db_password: ${{ secrets.DB_PASSWORD }}
+          db_host: ${{ vars.REGISTRY_LOGIN_SERVER }}
+          db_port: '5432'
+          db_name: 'postgres'
           table_to_update: 'container_images'
           index_to_update: ${{ steps.extract_event.outputs.repositoryName }}
           operation: ${{ steps.get_operation.outputs.operation }}
