@@ -25,11 +25,11 @@ async function main() {
         if (messages.length > 0) {
             const message = messages[0];
 
-            core.info(JSON.stringify(message.properties));
+            core.info(JSON.stringify(message.userProperties));
             core.info(JSON.stringify(message.body));
 
             // Extract event name and data
-            const eventName = message.properties.eventName;
+            const eventName = message.userProperties.eventName;
             const eventData = message.body.eventData;
 
             // Set outputs for the workflow
