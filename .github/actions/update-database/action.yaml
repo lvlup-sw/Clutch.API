@@ -1,8 +1,20 @@
 name: 'Azure PostgreSQL Update or Delete'
 description: 'Updates or deletes a row in an Azure PostgreSQL database based on the provided operation'
 inputs:
-  postgresql_connection_string:
-    description: 'The connection string for your Azure PostgreSQL database'
+  db_user:
+    description: 'Database username'
+    required: true
+  db_password:
+    description: 'Database password'
+    required: true
+  db_host:
+    description: 'Database host'
+    required: true
+  db_port:
+    description: 'Database port'
+    required: true
+  db_name:
+    description: 'Database name'
     required: true
   table_to_update:
     description: 'The name of the table to update or delete from'
