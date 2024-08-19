@@ -4,16 +4,16 @@
 // support event reception.
 
 const { ServiceBusClient } = require('@azure/service-bus');
-const { getInput, setSecret, setOutput, info, setFailed } = require('@actions/core');
+const core = require('@actions/core');
 
 async function main() {
     try {
         // Get inputs from the workflow
-        const connectionString = getInput('connectionString');
-        const queueName = getInput('queueName');
+        const connectionString = core.getInput('connectionString');
+        const queueName = core.getInput('queueName');
 
         // Set as secret to mask in logs
-        setSecret(connectionString);
+        core.setSecret(connectionString);
 
         // Create a Service Bus client
         const sbClient = new ServiceBusClient(connectionString);
@@ -25,29 +25,29 @@ async function main() {
         if (messages.length > 0) {
             const message = messages[0];
 
-            // Parse the message body
-            const messageBody = JSON.parse(message.body);
-
             // Extract event name and data
-            const eventName = messageBody.eventName;
-            const eventData = messageBody.eventData;
+            const eventName = JSON.stringify(message.applicationProperties);
+            const eventData = JSON.stringify(message.body);
 
             // Set outputs for the workflow
-            setOutput('eventName', eventName);
-            setOutput('eventData', JSON.stringify(eventData));
+            core.info(`Setting eventName output to ${eventName}`)
+            core.info(`Setting eventData output to ${eventData}`)
+            core.setOutput('eventName', eventName);
+            core.setOutput('eventData', eventData);
 
             // Complete the message
             await receiver.completeMessage(message);
         } else {
-            info('No messages received.');
+            core.info('No events received.');
         }
 
         // Close the receiver and client
         await receiver.close();
         await sbClient.close();
     } catch (error) {
-        error(error.message);
-        setFailed(`Exiting with error: ${error}`);
+        core.error(error.message);
+        core.setFailed(`Exiting with error: ${error}`);
+        process.exit(1);
     }
 }
 
