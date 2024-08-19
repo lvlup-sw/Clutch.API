@@ -1,0 +1,12 @@
+{
+    "name": "update-database",
+    "version": "1.0.0",
+    "description": "Azure Function to update database after CI/CD SET/DEL requests",
+    "main": "update-database.js",
+    "scripts": {
+      "start": "func start"
+    },
+    "dependencies": {
+      "pg": "^8.11.3"
+    }
+  }
