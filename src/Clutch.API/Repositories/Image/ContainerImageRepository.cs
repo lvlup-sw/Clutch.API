@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.Amqp.Framing;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 // Repository Responsibilities:
 // - Directly manipulate the database.
@@ -19,8 +18,8 @@ namespace Clutch.API.Repositories.Image
             {
                 _logger.LogDebug("Getting image from the DB.");
                 return await _context.ContainerImages
-                    .Where(img => img.ImageID == imageId)
-                    .FirstOrDefaultAsync() ?? ContainerImageModel.Null;
+                    .FirstOrDefaultAsync(img => img.ImageID == imageId)
+                    ?? ContainerImageModel.Null;
             }
             catch (Exception ex)
             {
@@ -37,8 +36,8 @@ namespace Clutch.API.Repositories.Image
             {
                 _logger.LogDebug("Getting image from the DB.");
                 return await _context.ContainerImages
-                    .Where(img => img.RepositoryId.Equals(repositoryId))
-                    .FirstOrDefaultAsync() ?? ContainerImageModel.Null;
+                    .FirstOrDefaultAsync(img => img.RepositoryId.Equals(repositoryId)) 
+                    ?? ContainerImageModel.Null;
             }
             catch (Exception ex)
             {
@@ -113,7 +112,9 @@ namespace Clutch.API.Repositories.Image
             try
             {
                 int entries = 0;
-                var imageToDelete = await _context.ContainerImages.FindAsync(imageId);
+                var imageToDelete = await _context.ContainerImages
+                    .FirstOrDefaultAsync(img => img.ImageID == imageId);
+
                 if (imageToDelete is not null)
                 {
                     _logger.LogDebug("Deleting image from the DB.");
