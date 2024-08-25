@@ -18,7 +18,7 @@
         "ASPNETCORE_ENVIRONMENT": "Production"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5000" // https://localhost:7102 for mac
+      "applicationUrl": "http://localhost:5001"
     },
     "IIS Express": {
       "commandName": "IISExpress",
