@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 // We do not directly use ContainerImage to limit visibility into our application.
 // This protects us from over-posting attacks.
 // We have two indexes: ImageId and RepositoryId.
-// Ideally we use ImageId where possible.
 namespace Clutch.API.Models.Image
 {
     [Index(nameof(RepositoryId), IsUnique = true)]

@@ -1,13 +1,13 @@
 ﻿using Polly;
 using Polly.Wrap;
 
-// Provider Responsibilities:
-// - Interacting with the Repositories to perform operations against the database.
+// Provider Layer:
+// - Interacts with the Repositories to perform operations against the database.
 // - DOES NOT directly manipulate the database; that is the repository's job.
 namespace Clutch.API.Providers.Image
 {
     // In the future, we may add other repository interfaces to this class.
-    // For now, we only have the ContainerImageRepository class so this acts
+    // For now, we only have the ContainerImageRepository so this acts
     // as a pass-through with polly decorations.
     public class ContainerImageProvider : IContainerImageProvider
     {
@@ -133,7 +133,7 @@ namespace Clutch.API.Providers.Image
         public async Task<bool> DeleteAsync(string key) => await DeleteFromDatabaseAsync(key);
 
         // CacheProvider method
-        public async Task<Dictionary<string, ContainerImageModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = default)
+        public async Task<Dictionary<string, ContainerImageBatchModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = default)
         {
             throw new NotImplementedException();
         }

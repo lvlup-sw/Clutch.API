@@ -1,6 +1,4 @@
-﻿using Clutch.API.Models.Enums;
-using Clutch.API.Models.Image;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Clutch.API.Controllers.Filters

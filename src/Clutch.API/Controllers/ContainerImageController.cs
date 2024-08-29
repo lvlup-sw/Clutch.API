@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
-// TODO:
-// - Batch requests for images
 namespace Clutch.API.Controllers
 {
     [Route("[controller]")]
@@ -75,6 +73,23 @@ namespace Clutch.API.Controllers
                 : NoContent();
         }
 
+        [HttpGet("GetImageBatch/")]
+        [ValidateRequest]
+        [HandleExceptions]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status504GatewayTimeout)]
+        public async Task<ActionResult<ContainerImageBatchResponse>> GetContainerImageBatch([FromQuery] ContainerImageBatchRequest batchRequest)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Obsolete]
+        [ExcludeFromDescription]
         [HttpGet("GetLatestImages/")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -100,6 +115,8 @@ namespace Clutch.API.Controllers
             if (!containerImageResponseData.ContainerImageModel.HasValue) return NotFound();
             else
             {
+                // Case when we've already processed the requested image
+                // but the build pipeline has not completed yet.
                 var resp = new
                 {
                     status = $"The container image manifest is not available at this time: {containerImageResponseData.ContainerImageModel.Status}",

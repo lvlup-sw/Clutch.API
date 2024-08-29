@@ -1,8 +1,6 @@
-﻿// Service Responsibilities:
-// - "Business logic" for image management.
-// - CacheProvider interaction for Redis caching.
-// - Interacting with the Github API to trigger builds.
-// - Interacting with the Container Registry.
+﻿// Service Layer:
+// - "Business logic" for our API.
+// - Interacts with all our Provider classes.
 
 namespace Clutch.API.Services.Image
 {

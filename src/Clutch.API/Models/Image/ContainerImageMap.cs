@@ -10,7 +10,8 @@ namespace Clutch.API.Models.Image
         public ContainerImageMap()
         {
             CreateMap<ContainerImageModel, ContainerImage>();
-            CreateMap<ContainerImage, ContainerImageModel>();
+            CreateMap<ContainerImage, ContainerImageModel>()
+                .ForMember(dest => dest.HasValue, opt => opt.Ignore());
         }
     }
 }
