@@ -123,7 +123,7 @@ namespace Clutch.API.Extensions
                     serviceProvider.GetRequiredService<ILogger<ContainerImageProvider>>(),
                     serviceProvider.GetRequiredService<IOptions<AppSettings>>()
                 ));
-            builder.Services.AddTransient<IContainerImageService, ContainerImageService>(serviceProvider =>
+            builder.Services.AddScoped<IContainerImageService, ContainerImageService>(serviceProvider =>
                 new ContainerImageService(
                     serviceProvider.GetRequiredService<ICacheProvider<ContainerImageModel>>(),
                     serviceProvider.GetRequiredService<IContainerImageProvider>(),
