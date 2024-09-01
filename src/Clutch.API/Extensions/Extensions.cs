@@ -4,6 +4,8 @@ using Microsoft.OpenApi.Models;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Newtonsoft.Json.Converters;
+using System.Text.Json.Serialization;
 
 namespace Clutch.API.Extensions
 {
@@ -143,7 +145,9 @@ namespace Clutch.API.Extensions
             });
 
             // Controllers and Endpoints
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(o => o.JsonSerializerOptions.Converters
+                    .Add(new JsonStringEnumConverter()));
             builder.Services.AddEndpointsApiExplorer();
 
             // Healthcheck configuration
