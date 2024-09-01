@@ -1,30 +1,29 @@
-// Need to modify to account for prod environment
 {
-  "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
     "https": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:17282;http://localhost:15071",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Production",
         "DOTNET_ENVIRONMENT": "Production",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21072",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22242"
-      }
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:17282;http://localhost:15071"
     },
     "http": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:15071",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Production",
         "DOTNET_ENVIRONMENT": "Production",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19089",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20111"
-      }
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:15071"
     }
-  }
+  },
+  "$schema": "https://json.schemastore.org/launchsettings.json"
 }
