@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using RestSharp;
+﻿using RestSharp;
+using System.Buffers;
 
 namespace Clutch.API.Providers.Registry
 {
-    public class DockerRegistryProvider(IRestClientFactory restClientFactory, ILogger logger, IConfiguration configuration) : RegistryProviderBase(restClientFactory, logger, configuration)
+    public class DockerRegistryProvider(IRestClientFactory restClientFactory, ArrayPool<byte> arrayPool, ILogger logger, IConfiguration configuration) : RegistryProviderBase(restClientFactory, logger, configuration)
     {
         private readonly ILogger _logger = logger;
         private readonly IConfiguration _configuration = configuration;
@@ -26,7 +26,7 @@ namespace Clutch.API.Providers.Registry
             // Send the request
             RestResponse? response = await _restClientFactory.ExecuteAsync(restRequest);
 
-            return ValidateAndDeserializeResponse(response);
+            return await ValidateAndDeserializeResponseAsync(response);
         }
 
         internal async Task<dynamic> GetToken(string[] parts)
@@ -52,7 +52,7 @@ namespace Clutch.API.Providers.Registry
 
             try
             {
-                rawToken = JsonConvert.DeserializeObject(authResponse.Content) ?? string.Empty;
+                rawToken = JsonSerializer.Deserialize<dynamic>(authResponse.Content) ?? string.Empty;
                 if (rawToken is string) throw new DeserializationException(authResponse, new("Deserialization returned null."));
             }
             catch (Exception ex)

@@ -1,8 +1,9 @@
 ﻿using RestSharp;
+using System.Buffers;
 
 namespace Clutch.API.Providers.Registry
 {
-    public class ArtifactoryRegistryProvider(IRestClientFactory restClientFactory, ILogger logger, IConfiguration configuration) : RegistryProviderBase(restClientFactory, logger, configuration)
+    public class ArtifactoryRegistryProvider(IRestClientFactory restClientFactory, ArrayPool<byte> arrayPool, ILogger logger, IConfiguration configuration) : RegistryProviderBase(restClientFactory, logger, configuration)
     {
         public override async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
         {

@@ -7,6 +7,7 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using System.Text.Json.Serialization;
 using DataFerry.Properties;
 using Microsoft.Extensions.DependencyInjection;
+using System.Buffers;
 
 namespace Clutch.API.Extensions
 {
@@ -71,23 +72,29 @@ namespace Clutch.API.Extensions
                 options.DisableRetry = true;
             });
 
+            // Add shared ArrayPool singleton
+            builder.Services.AddSingleton(StackArrayPool<byte>.Shared);
+
             // Registry Factory & Providers
             builder.Services.AddSingleton<IRestClientFactory, RestClientFactory>();
             builder.Services.AddTransient<IRegistryProvider, RegistryProviderBase>(serviceProvider =>
                 new RegistryProviderBase(
                     serviceProvider.GetRequiredService<IRestClientFactory>(),
+                    serviceProvider.GetRequiredService<StackArrayPool<byte>>(),
                     serviceProvider.GetRequiredService<ILogger<RegistryProviderBase>>(),
                     serviceProvider.GetRequiredService<IConfiguration>()
                 ));
             builder.Services.AddTransient<IRegistryProvider, DockerRegistryProvider>(serviceProvider =>
                 new DockerRegistryProvider(
                     serviceProvider.GetRequiredService<IRestClientFactory>(),
+                    serviceProvider.GetRequiredService<StackArrayPool<byte>>(),
                     serviceProvider.GetRequiredService<ILogger<DockerRegistryProvider>>(),
                     serviceProvider.GetRequiredService<IConfiguration>()
                 ));
             builder.Services.AddTransient<IRegistryProvider, AzureRegistryProvider>(serviceProvider =>
                 new AzureRegistryProvider(
                     serviceProvider.GetRequiredService<IRestClientFactory>(),
+                    serviceProvider.GetRequiredService<StackArrayPool<byte>>(),
                     serviceProvider.GetRequiredService<ILogger<AzureRegistryProvider>>(),
                     serviceProvider.GetRequiredService<IConfiguration>()
                 ));
@@ -99,6 +106,7 @@ namespace Clutch.API.Extensions
                 new CacheProvider<ContainerImageModel>(
                     serviceProvider.GetRequiredService<IConnectionMultiplexer>(),
                     serviceProvider.GetRequiredService<IContainerImageProvider>(),
+                    serviceProvider.GetRequiredService<StackArrayPool<byte>>(),
                     serviceProvider.GetRequiredService<IOptions<CacheSettings>>(),
                     serviceProvider.GetRequiredService<ILogger<CacheProvider<ContainerImageModel>>>()
                 ));

@@ -1,14 +1,16 @@
-using Newtonsoft.Json;
 using RestSharp;
+using System.Buffers;
+using System.Text;
 
 namespace Clutch.API.Providers.Registry
 {
     // Implements GHCR
-    public class RegistryProviderBase(IRestClientFactory restClientFactory, ILogger logger, IConfiguration configuration) : IRegistryProvider, IDisposable
+    public class RegistryProviderBase(IRestClientFactory restClientFactory, ArrayPool<byte> arrayPool, ILogger logger, IConfiguration configuration) : IRegistryProvider, IDisposable
     {
         private readonly ILogger _logger = logger;
         private readonly IConfiguration _configuration = configuration;
         private IRestClientFactory _restClientFactory = restClientFactory;
+        private readonly ArrayPool<byte> _arrayPool = arrayPool;
         private readonly string pat = Convert.ToBase64String(Encoding.UTF8.GetBytes(configuration.GetConnectionString("GithubPAT") ?? string.Empty));
 
         public virtual async Task<RegistryManifestModel> GetManifestAsync(ContainerImageRequest request)
@@ -24,11 +26,11 @@ namespace Clutch.API.Providers.Registry
             // Send the request
             RestResponse? response = await _restClientFactory.ExecuteAsync(restRequest);
 
-            return ValidateAndDeserializeResponse(response);
+            return await ValidateAndDeserializeResponseAsync(response);
         }
 
         // We can include protected helper methods here for common operations
-        protected RegistryManifestModel ValidateAndDeserializeResponse(RestResponse? response)
+        protected async Task<RegistryManifestModel> ValidateAndDeserializeResponseAsync(RestResponse? response)
         {
             if (response is null)
             {
@@ -41,9 +43,24 @@ namespace Clutch.API.Providers.Registry
                 return RegistryManifestModel.Null;
             }
 
+            // Estimate the size of the byte array needed
+            int estimatedSize = Encoding.UTF8.GetByteCount(response.Content);
+            byte[] rentedArray = _arrayPool is not null
+                ? _arrayPool.Rent(estimatedSize)
+                : new byte[estimatedSize];
+
             try
             {
-                return JsonConvert.DeserializeObject<RegistryManifestModel>(response.Content) ?? RegistryManifestModel.Null;
+                // Setup the stream
+                int bytesWritten = Encoding.UTF8.GetBytes(response.Content, 0, response.Content.Length, rentedArray, 0);
+                using var memoryStream = new MemoryStream(rentedArray, 0, bytesWritten);
+
+                // Deserialize
+                var result = await JsonSerializer.DeserializeAsync<RegistryManifestModel>(memoryStream);
+
+                if (result is not null) return result;
+
+                return RegistryManifestModel.Null;
             }
             catch (Exception ex)
             {

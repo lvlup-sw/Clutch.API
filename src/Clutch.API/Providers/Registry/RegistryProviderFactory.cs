@@ -1,3 +1,5 @@
+using System.Buffers;
+
 namespace Clutch.API.Providers.Registry
 {
     public class RegistryProviderFactory(IServiceProvider serviceProvider) : IRegistryProviderFactory
@@ -11,8 +13,8 @@ namespace Clutch.API.Providers.Registry
 
             object instance = (success && provider is not null) switch
             {
-                true  => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetLogger(provider), GetConfiguration()),
-                false => ActivatorUtilities.CreateInstance(_serviceProvider, typeof(RegistryProviderBase), GetLogger(typeof(RegistryProviderBase)), GetConfiguration())
+                true  => ActivatorUtilities.CreateInstance(_serviceProvider, provider, GetArrayPool(), GetLogger(provider), GetConfiguration()),
+                false => ActivatorUtilities.CreateInstance(_serviceProvider, typeof(RegistryProviderBase), GetArrayPool(), GetLogger(typeof(RegistryProviderBase)), GetConfiguration())
             };
 
             return instance as IRegistryProvider;
@@ -35,5 +37,7 @@ namespace Clutch.API.Providers.Registry
         private ILogger GetLogger(Type provider) => _serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(provider.Name);
 
         private IConfiguration GetConfiguration() => _serviceProvider.GetRequiredService<IConfiguration>();
+
+        private ArrayPool<byte> GetArrayPool() => _serviceProvider.GetRequiredService<ArrayPool<byte>>();
     }
 }
