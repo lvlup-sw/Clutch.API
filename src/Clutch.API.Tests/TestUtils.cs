@@ -1,11 +1,10 @@
 ﻿using Clutch.API.Models.Enums;
 using Clutch.API.Models.Image;
 using Clutch.API.Models.Registry;
-using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
-using Clutch.API.Utilities;
+using DataFerry.Utilities;
 
 namespace Clutch.API.Tests
 {

@@ -2,23 +2,24 @@
 
 namespace Clutch.API.Models.Image
 {
-    public class ContainerImage
+    // This is an immutable DTO and is what we return to the client
+    public record ContainerImage
     {
         [Required]
         [StringLength(255)]
-        public required string Repository { get; set; }
+        public required string Repository { get; init; }
 
         [Required]
         [StringLength(128)]
-        public required string Tag { get; set; }
+        public required string Tag { get; init; }
 
         [Required]
-        public DateTime BuildDate { get; set; }
+        public DateTime BuildDate { get; init; }
 
         [Required]
-        public RegistryType RegistryType { get; set; }
+        public RegistryType RegistryType { get; init; }
 
         [Required]
-        public StatusEnum Status { get; set; }
+        public StatusEnum Status { get; init; }
     }
 }

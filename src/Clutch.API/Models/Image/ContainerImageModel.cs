@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 // This is our actual Database model, and what we use to perform our operations.
 // We do not directly use ContainerImage to limit visibility into our application.
@@ -8,11 +9,13 @@ using System.ComponentModel.DataAnnotations;
 // Ideally we use ImageId where possible.
 namespace Clutch.API.Models.Image
 {
+    [Index(nameof(ImageID), IsUnique = true)]
     [Index(nameof(RepositoryId), IsUnique = true)]
     public class ContainerImageModel
     {
         [Key]
         [Required]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ImageID { get; set; } = 0;
 
         [Required]

@@ -14,7 +14,7 @@ namespace Clutch.API.Providers.Image
         private readonly IContainerImageRepository _repository;
         private readonly ILogger _logger;
         private readonly AppSettings _settings;
-        private readonly AsyncPolicyWrap<object> _policy;
+        public AsyncPolicyWrap<object> Policy { get; set; }
 
         public ContainerImageProvider(IContainerImageRepository repository, ILogger logger, IOptions<AppSettings> settings)
         {
@@ -25,14 +25,14 @@ namespace Clutch.API.Providers.Image
             _repository = repository;
             _logger = logger;
             _settings = settings.Value;
-            _policy = CreatePolicy();
+            Policy = GetDefaultPattern();
         }
 
         public async Task<ContainerImageModel?> GetImageAsync(int imageId)
         {
             if (imageId < 1) return null;
 
-            object result = await _policy.ExecuteAsync(async (context) =>
+            object result = await Policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to retrieve entry with ID {imageId} from database.", imageId);
                 ContainerImageModel data = await _repository.GetImageAsync(imageId);
@@ -50,7 +50,7 @@ namespace Clutch.API.Providers.Image
             string repositoryId = ExtractIdFromKey(key);
             if (string.IsNullOrEmpty(repositoryId)) return null;
 
-            object result = await _policy.ExecuteAsync(async (context) =>
+            object result = await Policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to retrieve entry with ref {repositoryId} from database.", repositoryId);
                 ContainerImageModel data = await _repository.GetImageAsync(repositoryId);
@@ -64,7 +64,7 @@ namespace Clutch.API.Providers.Image
 
         public async Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync()
         {
-            object result = await _policy.ExecuteAsync(async (context) =>
+            object result = await Policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to retrieve all entries from the database.");
                 var data = await _repository.GetLatestImagesAsync();
@@ -80,7 +80,7 @@ namespace Clutch.API.Providers.Image
         {
             if (!image.HasValue) return false;
 
-            object result = await _policy.ExecuteAsync(async (context) =>
+            object result = await Policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to set image in the database.");
                 return await _repository.SetImageAsync(image);
@@ -91,13 +91,13 @@ namespace Clutch.API.Providers.Image
                 : default;
         }
 
-        public async Task<bool> DeleteFromDatabaseAsync(string key)
+        public async Task<bool> DeleteImageAsync(string key)
         {
             // Extract repository and tag from key
             string repositoryId = ExtractIdFromKey(key);
             if (string.IsNullOrEmpty(repositoryId)) return false;
 
-            object result = await _policy.ExecuteAsync(async (context) =>
+            object result = await Policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to delete image from the database.");
                 return await _repository.DeleteImageAsync(repositoryId);
@@ -108,11 +108,11 @@ namespace Clutch.API.Providers.Image
                 : default;
         }
 
-        public async Task<bool> DeleteFromDatabaseAsync(int imageId)
+        public async Task<bool> DeleteImageAsync(int imageId)
         {
             if (imageId < 1) return false;
 
-            object result = await _policy.ExecuteAsync(async (context) =>
+            object result = await Policy.ExecuteAsync(async (context) =>
             {
                 _logger.LogDebug("Attempting to delete image from the database.");
                 return await _repository.DeleteImageAsync(imageId);
@@ -124,19 +124,23 @@ namespace Clutch.API.Providers.Image
         }
 
         // CacheProvider method
-        public async Task<ContainerImageModel?> GetAsync(string key) => await GetImageAsync(key);
+        public async Task<ContainerImageModel?> GetFromSourceAsync(string key) => await GetImageAsync(key);
 
         // CacheProvider method
-        public async Task<bool> SetAsync(ContainerImageModel data) => await SetImageAsync(data);
+        public async Task<bool> SetInSourceAsync(ContainerImageModel data) => await SetImageAsync(data);
 
         // CacheProvider method
-        public async Task<bool> DeleteAsync(string key) => await DeleteFromDatabaseAsync(key);
+        public async Task<bool> DeleteFromSourceAsync(string key) => await DeleteImageAsync(key);
 
         // CacheProvider method
-        public async Task<Dictionary<string, ContainerImageModel?>> GetBatchAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
+        public Task<IDictionary<string, ContainerImageModel>> GetBatchFromSourceAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
+
+        public Task<IDictionary<string, bool>> SetBatchInSourceAsync(IDictionary<string, ContainerImageModel> data, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
+
+        public Task<IDictionary<string, bool>> RemoveBatchFromSourceAsync(IEnumerable<string> keys, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
 
         private string ExtractIdFromKey(string key)
         {
@@ -154,46 +158,21 @@ namespace Clutch.API.Providers.Image
             }
         }
 
-        private AsyncPolicyWrap<object> CreatePolicy()
+        private static AsyncPolicyWrap<object> GetDefaultPattern()
         {
-            // Retry Policy Settings:
-            // + RetryCount: The number of times to retry a cache operation.
-            // + RetryInterval: The interval between cache operation retries.
-            // + UseExponentialBackoff: Set to true to use exponential backoff for cache operation retries.
-            var retryPolicy = Policy<object>
-                .Handle<Exception>()
-                .WaitAndRetryAsync(
-                    retryCount: _settings.ProviderRetryCount,
-                    // Jitter and either exponential backoff or fixed interval
-                    sleepDurationProvider: retryAttempt => _settings.ProviderUseExponentialBackoff
-                        ? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
-                        : TimeSpan.FromSeconds(_settings.ProviderRetryInterval)
-                            + TimeSpan.FromMilliseconds(new Random().Next(0, 100)),
-                    onRetry: (exception, timeSpan, retryCount, context) =>
-                    {
-                        if (retryCount == _settings.ProviderRetryCount)
-                        {
-                            _logger.LogError($"Retry limit of {_settings.ProviderRetryCount} reached. Exception: {exception}");
-                        }
-                        else
-                        {
-                            _logger.LogInformation($"Retry {retryCount} of {_settings.ProviderRetryCount} after {timeSpan.TotalSeconds} seconds delay due to: {exception}");
-                        }
-                    });
+            var timeoutPolicy = Polly.Policy.TimeoutAsync(
+                TimeSpan.FromSeconds(30));
 
-            // Fallback Policy Settings:
-            // + FallbackValue: The value to return if the fallback action is executed.
             var fallbackPolicy = Policy<object>
                 .Handle<Exception>()
                 .FallbackAsync(
-                    fallbackValue: ContainerImageModel.Null,
+                    fallbackValue: string.Empty,
                     onFallbackAsync: (exception, context) =>
                     {
-                        _logger.LogError("Fallback executed due to: {exception}", exception);
                         return Task.CompletedTask;
                     });
 
-            return fallbackPolicy.WrapAsync(retryPolicy);
+            return fallbackPolicy.WrapAsync(timeoutPolicy);
         }
     }
 }

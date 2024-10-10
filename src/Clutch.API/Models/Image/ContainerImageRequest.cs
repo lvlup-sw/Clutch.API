@@ -2,12 +2,12 @@
 
 namespace Clutch.API.Models.Image
 {
-    public class ContainerImageRequest
+    public record ContainerImageRequest
     {
-        public required string Repository { get; set; }
+        public required string Repository { get; init; }
 
-        public required string Tag { get; set; }
+        public required string Tag { get; init; }
 
-        public required RegistryType RegistryType { get; set; }
+        public required RegistryType RegistryType { get; init; }
     }
 }

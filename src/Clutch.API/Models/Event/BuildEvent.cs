@@ -1,6 +1,6 @@
-﻿namespace Clutch.API.Providers.Event
+﻿namespace Clutch.API.Models.Event
 {
-    public class Event
+    public class BuildEvent
     {
         public required string EventName { get; set; }
         public required ContainerImageModel EventData { get; set; }

@@ -8,10 +8,10 @@ namespace Clutch.API.Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var builder = modelBuilder.Entity<ContainerImageModel>();
-
-            builder.ToTable("container_images");
-            builder.HasIndex(c => new { c.ImageID, c.RepositoryId }).IsUnique();
+            modelBuilder.Entity<ContainerImageModel>()
+                .ToTable("container_images")
+                .HasIndex(c => new { c.ImageID, c.RepositoryId })
+                .IsUnique();
         }
     }
 }

@@ -6,7 +6,7 @@
         Task<ContainerImageModel?> GetImageAsync(string key);
         Task<IEnumerable<ContainerImageModel>?> GetLatestImagesAsync();
         Task<bool> SetImageAsync(ContainerImageModel image);
-        Task<bool> DeleteFromDatabaseAsync(int imageId);
-        Task<bool> DeleteFromDatabaseAsync(string key);
+        Task<bool> DeleteImageAsync(int imageId);
+        Task<bool> DeleteImageAsync(string key);
     }
 }

@@ -2,21 +2,21 @@
 
 namespace Clutch.API.Models.Registry
 {
-    public class RegistryManifest
+    public record RegistryManifest
     {
         [Required]
-        public int SchemaVersion { get; set; }
+        public int SchemaVersion { get; init; }
 
         [Required]
         [StringLength(255)]
-        public required string MediaType { get; set; }
+        public required string MediaType { get; init; }
 
         [Required]
-        public required ManifestConfig Config { get; set; }
+        public required ManifestConfig Config { get; init; }
 
         [Required]
-        public required List<ManifestConfig> Layers { get; set; }
+        public required List<ManifestConfig> Layers { get; init; }
 
-        public Dictionary<string, string>? Labels { get; set; }
+        public Dictionary<string, string>? Labels { get; init; }
     }
 }

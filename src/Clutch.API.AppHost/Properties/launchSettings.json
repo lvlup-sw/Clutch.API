@@ -4,8 +4,8 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production",
-        "DOTNET_ENVIRONMENT": "Production",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21072",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22242"
       },
@@ -16,8 +16,8 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production",
-        "DOTNET_ENVIRONMENT": "Production",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19089",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20111"
       },

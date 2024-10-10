@@ -89,7 +89,7 @@ namespace Clutch.API.Tests
         public async Task GetImageByIdAsync_NotFoundInvalid(int nonExistentImageId)
         {
             // Act & Arrange
-            var result = await _provider.DeleteFromDatabaseAsync(nonExistentImageId);
+            var result = await _provider.DeleteFromSourceAsync(nonExistentImageId.ToString());
 
             // Assert
             Assert.IsFalse(result);
@@ -244,7 +244,7 @@ namespace Clutch.API.Tests
                 .Returns(Task.FromResult(true));
 
             // Act
-            var result = await _provider.DeleteFromDatabaseAsync(testImageId);
+            var result = await _provider.DeleteFromSourceAsync(testImageId.ToString());
 
             // Assert
             Assert.IsTrue(result);
@@ -263,7 +263,7 @@ namespace Clutch.API.Tests
                 .Returns(Task.FromResult(false));
 
             // Act
-            var result = await _provider.DeleteFromDatabaseAsync(testImageId);
+            var result = await _provider.DeleteFromSourceAsync(testImageId.ToString());
 
             // Assert
             Assert.IsFalse(result);
@@ -277,7 +277,7 @@ namespace Clutch.API.Tests
         public async Task DeleteImageByIdAsync_NotFoundInvalid(int testImageId)
         {
             // Act & Arrange
-            var result = await _provider.DeleteFromDatabaseAsync(testImageId);
+            var result = await _provider.DeleteFromSourceAsync(testImageId.ToString());
 
             // Assert
             Assert.IsFalse(result);
@@ -296,7 +296,7 @@ namespace Clutch.API.Tests
                 .Returns(Task.FromResult(true));
 
             // Act
-            var result = await _provider.DeleteFromDatabaseAsync($"1.0.0:{repositoryId}:testhash");
+            var result = await _provider.DeleteFromSourceAsync($"1.0.0:{repositoryId}:testhash");
 
             // Assert
             Assert.IsTrue(result);
@@ -315,7 +315,7 @@ namespace Clutch.API.Tests
                 .Returns(Task.FromResult(false));
 
             // Act
-            var result = await _provider.DeleteFromDatabaseAsync($"1.0.0:{repositoryId}:testhash");
+            var result = await _provider.DeleteFromSourceAsync($"1.0.0:{repositoryId}:testhash");
 
             // Assert
             Assert.IsFalse(result);
@@ -330,7 +330,7 @@ namespace Clutch.API.Tests
         public async Task DeleteImageByReferenceAsync_NotFoundInvalid(string repositoryId)
         {
             // Act & Arrange
-            var result = await _provider.DeleteFromDatabaseAsync(repositoryId);
+            var result = await _provider.DeleteFromSourceAsync(repositoryId);
 
             // Assert
             Assert.IsFalse(result);

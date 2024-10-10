@@ -1,7 +1,7 @@
 ﻿using Polly;
 using Polly.Wrap;
-using Polly.CircuitBreaker;
 using Azure.Messaging.ServiceBus;
+using DataFerry.Properties;
 
 // TODO:
 // - Unit Tests
@@ -18,12 +18,12 @@ namespace Clutch.API.Providers.Event
         private readonly EventPublisherSettings _settings;
         private readonly ILogger _logger;
         private readonly TimeSpan _messageTimeToLive;
-        private readonly AsyncPolicyWrap<HttpResponseMessage> _policy;
+        private readonly AsyncPolicyWrap<object> _policy;
 
-        public ServiceBusEventPublisher(ServiceBusClient client, string queueName, string dlqName, IOptions<EventPublisherSettings> settings, ILogger logger)
+        public ServiceBusEventPublisher(ServiceBusClient client, string queueName, string dlqName, IOptions<EventPublisherSettings> settings, IOptions<CacheSettings> cacheSettings, ILogger logger)
         {
             ArgumentNullException.ThrowIfNull(client);
-            ArgumentNullException.ThrowIfNullOrEmpty(queueName);
+            ArgumentException.ThrowIfNullOrEmpty(queueName);
             //ArgumentNullException.ThrowIfNullOrEmpty(dlqName);
             ArgumentNullException.ThrowIfNull(settings);
             ArgumentNullException.ThrowIfNull(logger);
@@ -34,7 +34,7 @@ namespace Clutch.API.Providers.Event
             _settings = settings.Value;
             _logger = logger;
             _messageTimeToLive = TimeSpan.FromHours(_settings.TimeToLive);
-            _policy = CreatePolicy();
+            _policy = PollyPolicyGenerator.GeneratePolicy(logger, cacheSettings.Value);
         }
 
         public async Task<bool> PublishEventAsync(string eventName, ContainerImageModel image)
@@ -76,9 +76,11 @@ namespace Clutch.API.Providers.Event
                         // Re-throw to let Polly handle retries/fallback
                         throw;
                     }
-                }, new Context("ServiceBus.PublishEventAsync"){{ "EventName", eventName }});
+                }, new Context("ServiceBus.PublishEventAsync") { { "EventName", eventName } });
 
-                return result.IsSuccessStatusCode;
+                return result is HttpResponseMessage http
+                    ? http.IsSuccessStatusCode
+                    : default;
             }
             catch (Exception ex)
             {
@@ -114,7 +116,7 @@ namespace Clutch.API.Providers.Event
                         // Check for Transient Error and Retry
                         if (IsTransientError(deadLetterReason))
                         {
-                            var eventData = JsonSerializer.Deserialize<Event>(messageBody);
+                            var eventData = JsonSerializer.Deserialize<BuildEvent>(messageBody);
 
                             if (eventData is null)
                             {
@@ -166,67 +168,6 @@ namespace Clutch.API.Providers.Event
             // to be verified after the Service Bus is provisioned
             var transientReasons = new[] { "Timeout", "ServerBusy", "ConnectionLost" };
             return transientReasons.Contains(deadLetterReason);
-        }
-
-        // Polly retry, circuitbreaker, and fallback for resiliency
-        private AsyncPolicyWrap<HttpResponseMessage> CreatePolicy()
-        {
-            // Retry Policy
-            var retryPolicy = Policy<HttpResponseMessage>
-                .Handle<ServiceBusException>(ex => ex.Reason is ServiceBusFailureReason.ServiceCommunicationProblem)
-                .OrResult(r => !r.IsSuccessStatusCode) // Retry on non-success HTTP status codes from Azure Service Bus
-                .WaitAndRetryAsync(
-                    retryCount: _settings.RetryCount,
-                    // Exponential backoff or fixed interval with jitter
-                    sleepDurationProvider: retryAttempt => _settings.UseExponentialBackoff
-                        ? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
-                        : TimeSpan.FromSeconds(_settings.RetryInterval)
-                            + TimeSpan.FromMilliseconds(new Random().Next(0, 100)),
-                    onRetry: (outcome, timespan, retryCount, context) =>
-                    {
-                        _logger.LogInformation($"Retry {retryCount} of {_settings.RetryCount} after {timespan.TotalSeconds} seconds due to: {outcome.Exception?.Message ?? outcome.Result.ReasonPhrase}");
-                    });
-
-            // Circuit Breaker Policy with Exponential Backoff
-            var circuitBreakerPolicy = Policy
-                .Handle<ServiceBusException>()
-                .Or<TimeoutException>()
-                .Or<TaskCanceledException>()
-                .AdvancedCircuitBreakerAsync(
-                    failureThreshold: 0.5, // 50% failure rate
-                    samplingDuration: TimeSpan.FromSeconds(30), // Evaluate failures over 30 seconds
-                    minimumThroughput: 10, // Minimum 10 calls before tripping
-                    durationOfBreak: TimeSpan.FromMinutes(1),
-                    onBreak: (outcome, breakDelay) =>
-                    {
-                        try
-                        {
-                            _logger.LogError(
-                                "Circuit breaker opened for {breakDelay} seconds due to: {exceptionMessage}",
-                                breakDelay.TotalSeconds,
-                                outcome.Message
-                            );
-                        }
-                        catch (Exception unexpectedException)
-                        {
-                            _logger.LogError(unexpectedException, "An error occurred during circuit breaker 'onBreak' handling.");
-                        }
-                    },
-                    onReset: () => _logger.LogInformation("Circuit Reset"),
-                    onHalfOpen: () => _logger.LogInformation("Circuit Half-Open"));
-
-            // Fallback Policy
-            var fallbackPolicy = Policy<HttpResponseMessage>
-                .Handle<BrokenCircuitException>()
-                .FallbackAsync(
-                    fallbackAction: _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)),
-                    onFallbackAsync: (outcome) =>
-                    {
-                        _logger.LogError("Fallback executed due to broken circuit.");
-                        return Task.CompletedTask;
-                    });
-
-            return fallbackPolicy.WrapAsync(circuitBreakerPolicy.WrapAsync(retryPolicy));
         }
     }
 }

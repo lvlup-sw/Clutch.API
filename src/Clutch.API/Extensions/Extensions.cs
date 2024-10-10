@@ -4,8 +4,9 @@ using Microsoft.OpenApi.Models;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using Newtonsoft.Json.Converters;
 using System.Text.Json.Serialization;
+using DataFerry.Properties;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Clutch.API.Extensions
 {
@@ -110,6 +111,7 @@ namespace Clutch.API.Extensions
                     builder.Configuration["Azure:AzureQueueName"] ?? string.Empty,
                     builder.Configuration["Azure:AzureDLQueueName"] ?? string.Empty,
                     serviceProvider.GetRequiredService<IOptions<EventPublisherSettings>>(),
+                    serviceProvider.GetRequiredService<IOptions<CacheSettings>>(),
                     serviceProvider.GetRequiredService<ILogger<ServiceBusEventPublisher>>()
                 ));
 

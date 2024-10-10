@@ -7,6 +7,7 @@ using Clutch.API.Providers.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using DataFerry.Providers.Interfaces;
 
 // TODO:
 // - Update unit tests to include new EventPublisher class
@@ -19,7 +20,7 @@ namespace Clutch.API.Tests
         private Mock<IContainerImageProvider> _mockImageProvider;
         private Mock<IRegistryProviderFactory> _mockRegistryProviderFactory;
         private Mock<IEventPublisher> _mockEventPublisher;
-        private Mock<ILogger> _mockLogger;
+        private Mock<ILogger<ContainerImageService>> _mockLogger;
         private IOptions<AppSettings> _settings;
         private ContainerImageService _service;
 
@@ -30,7 +31,7 @@ namespace Clutch.API.Tests
             _mockImageProvider = new Mock<IContainerImageProvider>();
             _mockRegistryProviderFactory = new Mock<IRegistryProviderFactory>();
             _mockEventPublisher = new Mock<IEventPublisher>();
-            _mockLogger = new Mock<ILogger>();
+            _mockLogger = new Mock<ILogger<ContainerImageService>>();
             _settings = Options.Create(new AppSettings
             {
                 ProviderRetryCount = 1,
@@ -75,7 +76,7 @@ namespace Clutch.API.Tests
             _mockRegistryProviderFactory
                 .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Docker)))
                 .Returns(mockRegistryProvider.Object);
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(expectedImage);
 
             // Act
@@ -104,7 +105,7 @@ namespace Clutch.API.Tests
             _mockRegistryProviderFactory
                 .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Docker)))
                 .Returns(mockRegistryProvider.Object);
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(expectedImage);
 
             // Act
@@ -133,7 +134,7 @@ namespace Clutch.API.Tests
             _mockRegistryProviderFactory
                 .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Local)))
                 .Returns(mockRegistryProvider.Object);
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(expectedImage);
 
             // Act
@@ -154,7 +155,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
             ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
 
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(default(ContainerImageModel));
 
             // Act
@@ -175,7 +176,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
             ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
 
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(default(ContainerImageModel));
 
             // Act
@@ -196,7 +197,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
             ContainerImageResponseData expectedResponse = new(false, ContainerImageModel.Null, RegistryManifestModel.Null);
 
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(default(ContainerImageModel));
 
             // Act
@@ -224,7 +225,7 @@ namespace Clutch.API.Tests
             _mockRegistryProviderFactory
                 .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Docker)))
                 .Returns(mockRegistryProvider.Object);
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(expectedImage);
 
             // Act
@@ -252,7 +253,7 @@ namespace Clutch.API.Tests
             _mockRegistryProviderFactory
                 .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Docker)))
                 .Returns(mockRegistryProvider.Object);
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(expectedImage);
 
             // Act
@@ -280,7 +281,7 @@ namespace Clutch.API.Tests
             _mockRegistryProviderFactory
                 .Setup(f => f.CreateRegistryProvider(It.Is<RegistryType>(t => t == RegistryType.Local)))
                 .Returns(mockRegistryProvider.Object);
-            _mockCacheProvider.Setup(c => c.GetFromCacheAsync(cacheKey, default))
+            _mockCacheProvider.Setup(c => c.GetDataAsync(cacheKey, default))
                 .ReturnsAsync(expectedImage);
 
             // Act
@@ -304,7 +305,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .Setup(c => c.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
                 .ReturnsAsync(true);
 
             // Act
@@ -312,7 +313,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsTrue(result);
-            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -324,7 +325,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .Setup(c => c.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
                 .ReturnsAsync(true);
 
             // Act
@@ -332,7 +333,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsTrue(result);
-            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -344,7 +345,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .Setup(c => c.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
                 .ReturnsAsync(true);
 
             // Act
@@ -352,7 +353,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsTrue(result);
-            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -364,7 +365,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .Setup(c => c.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
                 .ReturnsAsync(false);
 
             // Act
@@ -372,7 +373,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsFalse(result);
-            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -384,7 +385,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .Setup(c => c.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
                 .ReturnsAsync(false);
 
             // Act
@@ -392,7 +393,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsFalse(result);
-            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -404,7 +405,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
+                .Setup(c => c.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default))
                 .ReturnsAsync(false);
 
             // Act
@@ -412,7 +413,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsFalse(result);
-            _mockCacheProvider.Verify(p => p.SetInCacheAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.SetDataAsync(cacheKey, It.IsAny<ContainerImageModel>(), default), Times.Exactly(1));
         }
 
         #endregion
@@ -427,7 +428,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .Setup(c => c.RemoveDataAsync(cacheKey))
                 .ReturnsAsync(true);
 
             // Act
@@ -435,7 +436,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsTrue(result);
-            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.RemoveDataAsync(cacheKey), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -447,7 +448,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .Setup(c => c.RemoveDataAsync(cacheKey))
                 .ReturnsAsync(true);
 
             // Act
@@ -455,7 +456,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsTrue(result);
-            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.RemoveDataAsync(cacheKey), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -467,7 +468,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .Setup(c => c.RemoveDataAsync(cacheKey))
                 .ReturnsAsync(true);
 
             // Act
@@ -475,7 +476,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsTrue(result);
-            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.RemoveDataAsync(cacheKey), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -487,7 +488,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .Setup(c => c.RemoveDataAsync(cacheKey))
                 .ReturnsAsync(false);
 
             // Act
@@ -495,7 +496,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsFalse(result);
-            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.RemoveDataAsync(cacheKey), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -507,7 +508,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .Setup(c => c.RemoveDataAsync(cacheKey))
                 .ReturnsAsync(false);
 
             // Act
@@ -515,7 +516,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsFalse(result);
-            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.RemoveDataAsync(cacheKey), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -527,7 +528,7 @@ namespace Clutch.API.Tests
             var cacheKey = TestUtils.ConstructCacheKey(request, version);
 
             _mockCacheProvider
-                .Setup(c => c.RemoveFromCacheAsync(cacheKey))
+                .Setup(c => c.RemoveDataAsync(cacheKey))
                 .ReturnsAsync(false);
 
             // Act
@@ -535,7 +536,7 @@ namespace Clutch.API.Tests
 
             // Assert
             Assert.IsFalse(result);
-            _mockCacheProvider.Verify(p => p.RemoveFromCacheAsync(cacheKey), Times.Exactly(1));
+            _mockCacheProvider.Verify(p => p.RemoveDataAsync(cacheKey), Times.Exactly(1));
         }
 
         #endregion

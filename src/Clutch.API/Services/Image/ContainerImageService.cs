@@ -6,14 +6,41 @@
 
 namespace Clutch.API.Services.Image
 {
-    public class ContainerImageService(ICacheProvider<ContainerImageModel> cacheProvider, IContainerImageProvider imageProvider,IRegistryProviderFactory registryProviderFactory, IEventPublisher eventPublisher, ILogger logger, IOptions<AppSettings> settings) : IContainerImageService
+    public class ContainerImageService : IContainerImageService
     {
-        private readonly ICacheProvider<ContainerImageModel> _cacheProvider = cacheProvider;
-        private readonly IContainerImageProvider _imageProvider = imageProvider;
-        private readonly IRegistryProviderFactory _registryProviderFactory = registryProviderFactory;
-        private readonly IEventPublisher _eventPublisher = eventPublisher;
-        private readonly ILogger _logger = logger;
-        private readonly AppSettings _settings = settings.Value;
+        private readonly ICacheProvider<ContainerImageModel> _cacheProvider;
+        private readonly IContainerImageProvider _imageProvider;
+        private readonly IRegistryProviderFactory _registryProviderFactory;
+        private readonly IEventPublisher _eventPublisher;
+        private readonly ILogger _logger;
+        private readonly AppSettings _settings;
+
+        public ContainerImageService(
+            ICacheProvider<ContainerImageModel> cacheProvider,
+            IContainerImageProvider imageProvider,
+            IRegistryProviderFactory registryProviderFactory,
+            IEventPublisher eventPublisher,
+            ILogger<ContainerImageService> logger, 
+            IOptions<AppSettings> settings)
+        {
+            ArgumentNullException.ThrowIfNull(cacheProvider, nameof(cacheProvider));
+            ArgumentNullException.ThrowIfNull(imageProvider, nameof(imageProvider));
+            ArgumentNullException.ThrowIfNull(registryProviderFactory, nameof(registryProviderFactory));
+            ArgumentNullException.ThrowIfNull(eventPublisher, nameof(eventPublisher));
+            ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+            ArgumentNullException.ThrowIfNull(settings, nameof(settings));
+
+            _cacheProvider = cacheProvider;
+            _imageProvider = imageProvider;
+            _registryProviderFactory = registryProviderFactory;
+            _eventPublisher = eventPublisher;
+            _logger = logger;
+            _settings = settings.Value;
+
+            // Configure caching policies
+            _cacheProvider.Cache.SetFallbackValue(ContainerImageModel.Null);
+            _cacheProvider.RealProvider.Policy = _cacheProvider.Cache.GetPollyPolicy();
+        }
 
         public async Task<ContainerImageResponseData> GetImageAsync(ContainerImageRequest request, string version)
         {
@@ -26,7 +53,7 @@ namespace Clutch.API.Services.Image
             }
 
             // Retrieve from cacheProvider (which will call the imageProvider if not found)
-            ContainerImageModel? image = await _cacheProvider.GetFromCacheAsync(cacheKey);
+            ContainerImageModel? image = await _cacheProvider.GetDataAsync(cacheKey);
             if (image is null || !image.HasValue)
             {
                 _logger.LogError("Image not found in database.");
@@ -85,7 +112,7 @@ namespace Clutch.API.Services.Image
             }
 
             // If we have a valid model, try to set in the database
-            bool success = await _cacheProvider.SetInCacheAsync(cacheKey, image);
+            bool success = await _cacheProvider.SetDataAsync(cacheKey, image);
 
             if (!success)
             {
@@ -117,7 +144,7 @@ namespace Clutch.API.Services.Image
             }
 
             // If we have a valid model, try to delete from the database
-            bool success = await _cacheProvider.RemoveFromCacheAsync(cacheKey);
+            bool success = await _cacheProvider.RemoveDataAsync(cacheKey);
 
             if (!success)
             {
